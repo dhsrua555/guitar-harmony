@@ -85,7 +85,7 @@
     ]))));
 
     const base = 48 + rootPc; const midis = sc.intervals.map(iv => base + N.ivSemi(iv)).concat([base + 12]);
-    const staff = GH.render.scaleStaff(midis, { pref });
+    const staff = GH.render.scaleStaff(midis, { pref, names: notes.map(note => note.name).concat([notes[0].name]) });
     const on = {}; notes.forEach(note => { on[note.pc] = { label: note.label, cls: note.cls }; });
     el.appendChild(section('오선 · 건반 · 기타 지판',
       staff ? h('div', null, h('h3', null, '오선'), staff) : null,

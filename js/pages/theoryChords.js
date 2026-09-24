@@ -43,7 +43,7 @@
     const midis = chord.notes.map(n => base + N.mod(n.pc - chord.rootPc, 12) + (N.ivSemi(n.iv) >= 12 ? 12 : 0));
     const onMidi = {}; midis.forEach((m, i) => { onMidi[m] = { label: chord.notes[i].iv, cls: chord.notes[i].cls }; });
     const pcMap = {}; chord.notes.forEach(n => { pcMap[n.pc] = { label: n.iv, cls: n.cls }; });
-    const st = GH.render.chordStaff(midis, { pref, width: 220 });
+    const st = GH.render.chordStaff(midis, { pref, width: 220, names: chord.notes.map(n => n.name) });
     el.appendChild(section('세 가지 시각으로 보기',
       h('div', { class: 'split' }, h('div', null, h('h3', null, '피아노'), GH.render.piano({ from: 48, to: 76, onMidi })), h('div', null, h('h3', null, '오선'), st || h('p', { class: 'muted' }, 'VexFlow 로딩 중이거나 오프라인입니다.'))),
       h('h3', null, '기타 지판 (코드톤 전체)'), GH.render.fretboard({ pcMap, pref, to: 22 }).el, h('div', { style: 'margin-top:6px' }, A.ivLegend())));
