@@ -25,15 +25,25 @@
       links: [['#/theory/modes', '모드'], ['#/theory/reharm', '리하모니제이션'], ['#/guitar/voicings/advanced?q=7&types=drop2', '드롭 2 보이싱'], ['#/ear?tab=mode', '모드 퀴즈']] }
   ];
 
+  const I = (name, o) => GH.icon(name, o);
+  /* 허브 머리: 큰 영문 글자 + 한글 제목 + 섹션 아이콘 원 */
+  function hubHead(sec, title, desc) {
+    return h('header', { class: 'hub-head hub-' + sec.color },
+      h('div', { class: 'hub-head-copy' }, h('span', { class: 'hub-en', 'aria-hidden': 'true' }, sec.en), h('h1', null, title), h('p', null, desc)),
+      h('span', { class: 'hub-head-ic', 'aria-hidden': 'true' }, I(sec.icon, { stroke: 1.5 })));
+  }
+  const goArrow = () => h('span', { class: 'path-go', 'aria-hidden': 'true' }, I('arrow'));
+
   GH.pages['/learn'] = {
     title: '배우기',
     render(el) {
-      const A = GH.app;
-      el.appendChild(h('div', { class: 'page-head' }, h('span', { class: 'eyebrow' }, 'ROADMAP'), h('h1', null, '배우기: 처음부터 차근차근'), h('p', { class: 'muted' }, '위에서 아래로 따라가면 됩니다. 각 단계는 "보기 → 듣기 → 기타로 쳐 보기 → 퀴즈"로 이어집니다. 어려운 내용은 6단계에 모아 두었으니 처음엔 건너뛰어도 좋습니다.')));
+      const A = GH.app; const sec = A.SECTIONS.find(x => x.id === 'learn');
+      el.appendChild(hubHead(sec, '배우기: 처음부터 차근차근', '위에서 아래로 따라가면 됩니다. 각 단계는 "보기 → 듣기 → 기타로 쳐 보기 → 퀴즈"로 이어집니다. 어려운 내용은 6단계에 모아 두었으니 처음엔 건너뛰어도 좋습니다.'));
       if (GH.guide) el.appendChild(GH.guide.planSection());
+      el.appendChild(h('div', { class: 'display-head compact' }, h('span', { class: 'en' }, 'ROADMAP'), h('h2', null, '6단계 로드맵')));
       const list = h('ol', { class: 'roadmap' });
-      STEPS.forEach(s => list.appendChild(h('li', { class: 'step lv' + s.level },
-        h('div', { class: 'step-num', 'aria-hidden': 'true' }, s.n),
+      STEPS.forEach((s, i) => list.appendChild(h('li', { class: 'step lv' + s.level, style: '--i:' + i },
+        h('div', { class: 'step-num', 'aria-hidden': 'true' }, String(s.n).padStart(2, '0')),
         h('div', { class: 'step-body' },
           h('div', { class: 'row', style: 'gap:8px' }, h('h2', null, s.title), A.levelBadge(s.level)),
           h('p', null, s.what),
@@ -49,11 +59,15 @@
       title: { guitar: '기타', theory: '화성학', practice: '연습' }[id],
       render(el) {
         const A = GH.app; const sec = A.SECTIONS.find(x => x.id === id);
-        el.appendChild(h('div', { class: 'page-head' }, h('span', { class: 'eyebrow' }, sec.id.toUpperCase()), h('h1', null, sec.label), h('p', { class: 'muted' }, sec.desc)));
+        el.appendChild(hubHead(sec, sec.label, sec.desc));
         const basic = sec.items.filter(it => it[2] === 1), more = sec.items.filter(it => it[2] > 1);
-        const card = ([p, label, level, desc]) => h('a', { href: '#' + p, class: 'card link hub-card' }, h('div', { class: 'row', style: 'justify-content:space-between;align-items:flex-start' }, h('div', { class: 'title' }, label), A.levelBadge(level)), h('p', null, desc), h('span', { class: 'feature-arrow', 'aria-hidden': 'true' }, '→'));
-        el.appendChild(section('기초부터', h('div', { class: 'grid cols-3' }, basic.map(card))));
-        if (more.length) el.appendChild(section('더 깊이', h('div', { class: 'grid cols-3' }, more.map(card))));
+        let n = 0;
+        const card = ([p, label, level, desc]) => { n++; return h('a', { href: '#' + p, class: 'card link hub-card' },
+          h('div', { class: 'hub-card-top' }, h('span', { class: 'hub-ic', 'aria-hidden': 'true' }, I(GH.icon.forRoute(p))), h('span', { class: 'hub-num', 'aria-hidden': 'true' }, String(n).padStart(2, '0'))),
+          h('div', { class: 'title' }, label), h('p', null, desc),
+          h('div', { class: 'hub-card-foot' }, A.levelBadge(level), goArrow())); };
+        el.appendChild(h('section', { class: 'section reveal' }, h('div', { class: 'display-head compact' }, h('span', { class: 'en' }, 'BASICS'), h('h2', null, '기초부터')), h('div', { class: 'grid cols-3 hub-grid' }, basic.map(card))));
+        if (more.length) el.appendChild(h('section', { class: 'section reveal' }, h('div', { class: 'display-head compact' }, h('span', { class: 'en' }, 'GO DEEPER'), h('h2', null, '더 깊이')), h('div', { class: 'grid cols-3 hub-grid' }, more.map(card))));
         if (extra) extra(el);
       }
     };

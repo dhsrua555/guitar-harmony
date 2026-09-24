@@ -4,7 +4,7 @@
   const GH = window.GH = window.GH || {};
   const { h } = GH.ui;
   GH.render = GH.render || {};
-  const vf = () => (window.Vex && window.Vex.Flow ? window.Vex.Flow : null);
+  const vf = () => (GH.render.vexflow ? GH.render.vexflow() : (window.Vex && window.Vex.Flow ? window.Vex.Flow : null));
 
   /* events: GH.rhythm.parse 결과. opts: {width, time(박자표 표시), height}. 반환 {el, setCurrent(i)} 또는 null */
   function rhythmStaff(events, opts) {
@@ -17,7 +17,7 @@
       const r = new Renderer(div, Renderer.Backends.SVG); r.resize(W, H);
       const ctx = r.getContext();
       const stave = new Stave(4, Math.max(0, (H - 90) / 2), W - 8);
-      if (opts.time !== false) { stave.addClef('percussion'); stave.addTimeSignature('4/4'); }
+      if (opts.time !== false) { stave.addClef('percussion'); if (GH.render.addTime) GH.render.addTime(VF, stave); else stave.addTimeSignature('4/4'); }
       stave.setContext(ctx).draw();
       const notes = events.map(e => {
         const n = new StaveNote({ keys: ['b/4'], duration: e.vf + (e.rest ? 'r' : ''), clef: 'percussion', auto_stem: false, stem_direction: 1 });

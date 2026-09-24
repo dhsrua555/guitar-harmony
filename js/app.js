@@ -6,22 +6,22 @@
 
   /* 메뉴 구조: 섹션(허브) → 페이지. level: 1 기초, 2 중급, 3 고급 */
   const SECTIONS = [
-    { id: 'learn', label: '배우기', path: '/learn', desc: '처음이라면 여기서부터. 순서대로 따라가는 로드맵.', items: [] },
-    { id: 'guitar', label: '기타', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾습니다.', items: [
+    { id: 'learn', label: '배우기', en: 'LEARN', icon: 'learn', color: 'pink', path: '/learn', desc: '처음이라면 여기서부터. 순서대로 따라가는 로드맵.', items: [] },
+    { id: 'guitar', label: '기타', en: 'GUITAR', icon: 'guitar', color: 'sun', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾습니다.', items: [
       ['/guitar/voicings', '코드 보이싱', 1, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
       ['/guitar/scales', '스케일 포지션', 1, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
       ['/guitar/triads', '트라이어드 · 아르페지오', 2, '현 세트별 3화음 인버전과 코드톤 아르페지오'],
       ['/guitar/doublestops', '더블스탑', 2, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
       ['/guitar/phrasing', '솔로 프레이즈 만들기', 2, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
       ['/guitar/licks', '릭', 2, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
-    { id: 'theory', label: '화성학', path: '/theory', desc: '코드와 스케일이 왜 그렇게 들리는지 이해합니다.', items: [
+    { id: 'theory', label: '화성학', en: 'THEORY', icon: 'piano', color: 'sky', path: '/theory', desc: '코드와 스케일이 왜 그렇게 들리는지 이해합니다.', items: [
       ['/theory/intervals', '인터벌', 1, '두 음 사이의 거리. 모든 이론의 출발점'],
       ['/theory/chords', '코드', 1, '코드 빌더, 코드 퀄리티, 다이어토닉 코드, 표기법'],
       ['/theory/scales', '스케일', 1, '스케일 구조, 5도권, 코드 스케일, 하모나이제이션'],
       ['/theory/progressions', '코드 진행', 2, '장르별 필수 진행을 듣고 기능을 분석'],
       ['/theory/modes', '모드', 3, '7모드의 밝기와 특징음, 멜로딕/하모닉 마이너 모드'],
       ['/theory/reharm', '리하모니제이션', 3, '멜로디는 두고 코드를 바꾸는 기법']] },
-    { id: 'practice', label: '연습', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
+    { id: 'practice', label: '연습', en: 'PRACTICE', icon: 'headphones', color: 'olive', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
       ['/ear', '이어 트레이닝', 1, '계이름, 음정, 코드, 진행을 듣고 맞히는 퀴즈'],
       ['/backing', '백킹 트랙', 1, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
       ['/rhythm', '리듬 연습', 1, '메트로놈, 리듬 따라 치기, 스트럼 패턴'],
@@ -54,7 +54,7 @@
   function renderNav(route) {
     const main = document.getElementById('mainnav'); clear(main);
     const sec = route ? sectionOf(route.path) : null;
-    SECTIONS.forEach(s => main.appendChild(h('a', { href: '#' + s.path, class: sec === s.id ? 'active' : '', 'aria-current': sec === s.id ? 'page' : null }, s.label)));
+    SECTIONS.forEach(s => main.appendChild(h('a', { href: '#' + s.path, class: sec === s.id ? 'active' : '', 'aria-current': sec === s.id ? 'page' : null }, GH.icon(s.icon), h('span', null, s.label))));
     const sub = document.getElementById('subnav'); clear(sub);
     const S = SECTIONS.find(s => s.id === sec);
     if (S && S.items.length) {
@@ -64,13 +64,79 @@
     const back = document.getElementById('back-btn');
     if (back) back.hidden = !route || route.path === '/';
     document.body.classList.toggle('is-home', !route || route.path === '/');
+    document.body.classList.toggle('is-hub', !!route && SECTIONS.some(s => s.path === route.path));
+    document.body.dataset.section = sec || '';
+    renderHangTab();
+    if (menuOpen) closeMenu(false);
+    document.body.classList.remove('tools-open');
+    const tb = document.getElementById('tools-btn'); if (tb) tb.setAttribute('aria-expanded', 'false');
   }
+  /* 오늘의 연습: 맞춤 가이드의 다음 미션 */
+  function todayHref() { const G = GH.guide; const n = G && G.next(); return n ? G.missionHref(n) : '#/practice'; }
+  function renderHangTab() {
+    const a = document.getElementById('hang-tab'); if (!a) return;
+    const n = GH.guide && GH.guide.next();
+    a.href = todayHref(); a.title = n ? '다음 미션: ' + n.title : '연습 도구 모음';
+  }
+
+  /* ---- 모바일 전체 화면 메뉴 ---- */
+  let menuOpen = false, menuTimer = null;
+  function renderMenu() {
+    const panel = document.getElementById('menu-panel'); clear(panel);
+    const route = GH.router.current(); const sec = route ? sectionOf(route.path) : null;
+    const inner = h('div', { class: 'menu-inner' });
+    SECTIONS.forEach((s, i) => inner.appendChild(h('div', { class: 'menu-sec' + (sec === s.id ? ' active' : ''), style: '--i:' + i },
+      h('a', { class: 'menu-big', href: '#' + s.path }, h('span', { class: 'menu-ic menu-' + s.color }, GH.icon(s.icon)), h('span', { class: 'menu-label' }, s.label), h('span', { class: 'menu-en', 'aria-hidden': 'true' }, s.en)),
+      s.items.length ? h('div', { class: 'menu-items' }, s.items.map(([p, label]) => h('a', { href: '#' + p, class: route && (route.path === p || route.path.startsWith(p + '/')) ? 'active' : '' }, label))) : null)));
+    const cur = GH.state.get().key; const pref = GH.state.pref(cur);
+    const keySel = h('select', { 'aria-label': '전체 키', onchange: e => GH.state.set({ key: e.target.value }) }, N.rootList(pref).map(r => h('option', { value: r, selected: r === cur || N.pcOf(r) === N.pcOf(cur) }, N.pretty(r))));
+    inner.appendChild(h('div', { class: 'menu-foot', style: '--i:' + SECTIONS.length },
+      h('a', { class: 'btn primary', href: todayHref() }, GH.icon('metronome'), '오늘의 연습'),
+      h('label', { class: 'keysel' }, h('span', null, '키'), keySel),
+      h('button', { class: 'btn', type: 'button', onclick: () => { closeMenu(false); openSettings(); } }, GH.icon('settings'), '설정')));
+    panel.appendChild(inner);
+  }
+  function setMenuBtn(open) {
+    const b = document.getElementById('menu-btn'); if (!b) return;
+    b.setAttribute('aria-expanded', open ? 'true' : 'false'); b.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    const l = b.querySelector('.menu-label'); if (l) l.textContent = open ? 'CLOSE' : 'MENU';
+  }
+  function openMenu() {
+    const panel = document.getElementById('menu-panel'); if (!panel) return;
+    if (menuTimer) { clearTimeout(menuTimer); menuTimer = null; }
+    renderMenu(); panel.hidden = false; void panel.offsetWidth;
+    panel.classList.add('open'); document.body.classList.add('menu-open'); menuOpen = true; setMenuBtn(true);
+    const first = panel.querySelector('a'); if (first) first.focus({ preventScroll: true });
+  }
+  function closeMenu(focusBack) {
+    const panel = document.getElementById('menu-panel'); if (!panel || !menuOpen) return;
+    panel.classList.remove('open'); document.body.classList.remove('menu-open'); menuOpen = false; setMenuBtn(false);
+    menuTimer = setTimeout(() => { panel.hidden = true; menuTimer = null; }, 420);
+    if (focusBack !== false) { const b = document.getElementById('menu-btn'); if (b) b.focus({ preventScroll: true }); }
+  }
+
+  /* ---- 스크롤 등장 · 시차 (움직임 줄이기 설정이면 끔) ---- */
+  const reduceMotion = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let revealIO = null, pxEls = [], pxRaf = 0;
+  function revealScan() {
+    const els = document.querySelectorAll('#app .reveal:not(.in)');
+    if (!revealIO) { els.forEach(e => e.classList.add('in')); return; }
+    els.forEach(e => revealIO.observe(e));
+  }
+  function onScroll() {
+    document.body.classList.toggle('scrolled', window.scrollY > 8);
+    if (!pxEls.length || pxRaf) return;
+    pxRaf = requestAnimationFrame(() => { pxRaf = 0; const y = window.scrollY; pxEls.forEach(e => { e.style.transform = 'translateY(' + (y * Number(e.dataset.speed)).toFixed(1) + 'px)'; }); });
+  }
+  function motionScan() { revealScan(); pxEls = reduceMotion() ? [] : Array.from(document.querySelectorAll('#app [data-speed]')); onScroll(); }
   const LEVEL_KO = { 1: '기초', 2: '중급', 3: '고급' };
+  /* 난이도는 셈여림 기호로: p 여리게 → ff 아주 세게 */
+  const LEVEL_DYN = { 1: 'p', 2: 'mf', 3: 'ff' };
 
   /* ---- 공용 헬퍼 ---- */
   const app = {
     SECTIONS, LEVEL_KO, sectionOf, parentOf,
-    levelBadge(level) { return h('span', { class: 'lvl lv' + level }, LEVEL_KO[level] || ''); },
+    levelBadge(level) { return h('span', { class: 'lvl lv' + level, title: '난이도: ' + (LEVEL_KO[level] || '') }, h('i', { class: 'dyn', 'aria-hidden': 'true' }, LEVEL_DYN[level] || ''), LEVEL_KO[level] || ''); },
     key() { return GH.state.get().key; },
     pref(root) { return GH.state.pref(root); },
     chordHref(root, qId) { return '#/chord/' + encodeURIComponent(root) + '/' + qId; },
@@ -124,7 +190,7 @@
     fnClass(fn) { return 'fn-' + (fn || 'X'); },
     /* 심화 내용 접기: 기본은 접힌 상태 */
     deep(title, ...content) {
-      return h('details', { class: 'deep' }, h('summary', null, h('span', { class: 'deep-mark', 'aria-hidden': 'true' }, '＋'), title, h('span', { class: 'deep-hint' }, '심화')), h('div', { class: 'deep-body' }, content));
+      return h('details', { class: 'deep' }, h('summary', null, h('span', { class: 'deep-mark', 'aria-hidden': 'true' }, GH.icon('sharp', { cls: 'when-closed' }), GH.icon('natural', { cls: 'when-open' })), title, h('span', { class: 'deep-hint' }, '심화')), h('div', { class: 'deep-body' }, content));
     },
     /* 진행 정의 → 실제 코드 목록 (key: 루트 이름) */
     progressionChords(p, key) {
@@ -179,7 +245,7 @@
     const panel = document.getElementById('settings-panel'); clear(panel);
     const s = GH.state.get();
     const field = (label, ctl) => h('div', { class: 'field' }, h('label', null, label), ctl);
-    panel.appendChild(h('div', { class: 'row', style: 'justify-content:space-between' }, h('h2', { id: 'settings-title' }, '설정'), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '설정 닫기', onclick: closeSettings }, '✕')));
+    panel.appendChild(h('div', { class: 'row', style: 'justify-content:space-between' }, h('h2', { id: 'settings-title' }, '설정'), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '설정 닫기', onclick: closeSettings }, GH.icon('close'))));
     if (GH.guide) {
       const G = GH.guide; const gp = G.profile();
       panel.appendChild(h('h3', { class: 'settings-group' }, '나의 학습'));
@@ -205,7 +271,7 @@
     const lefty = h('input', { type: 'checkbox', checked: s.lefty, onchange: e => GH.state.set({ lefty: e.target.checked }) });
     panel.appendChild(h('div', { class: 'field' }, h('label', null, '왼손잡이'), h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, lefty, '지판과 코드 다이어그램을 좌우 반전')));
     panel.appendChild(h('h3', { class: 'settings-group' }, '화면'));
-    panel.appendChild(field('테마', select({ options: [{ value: 'auto', label: '화이트 (기본)' }, { value: 'light', label: '화이트' }, { value: 'dark', label: '다크' }], value: s.theme, onChange: v => GH.state.set({ theme: v }) })));
+    panel.appendChild(field('테마', select({ options: [{ value: 'auto', label: '크림 페이퍼 (기본)' }, { value: 'light', label: '크림 페이퍼' }, { value: 'dark', label: '다크' }], value: s.theme, onChange: v => GH.state.set({ theme: v }) })));
     panel.appendChild(h('div', { class: 'field' }, h('button', { class: 'btn small', onclick: () => { GH.state.reset(); renderSettings(); } }, '기본값으로 초기화')));
     panel.appendChild(h('p', { class: 'muted', style: 'font-size:.8rem' }, '설정은 이 브라우저에 저장됩니다.'));
   }
@@ -241,6 +307,19 @@
   }
 
   function init() {
+    document.querySelectorAll('[data-icon]').forEach(el => { if (!el.querySelector('svg')) el.insertBefore(GH.icon(el.dataset.icon), el.firstChild); });
+    if ('IntersectionObserver' in window && !reduceMotion()) {
+      document.documentElement.classList.add('can-reveal');
+      revealIO = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const menuBtn = document.getElementById('menu-btn');
+    if (menuBtn) menuBtn.addEventListener('click', () => { if (menuOpen) closeMenu(); else openMenu(); });
+    const menuPanel = document.getElementById('menu-panel');
+    if (menuPanel) menuPanel.addEventListener('click', e => { const a = e.target.closest('a'); if (a && location.hash === a.getAttribute('href')) closeMenu(false); });
+    const toolsBtn = document.getElementById('tools-btn');
+    if (toolsBtn) toolsBtn.addEventListener('click', () => { const on = document.body.classList.toggle('tools-open'); toolsBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); if (on) document.getElementById('search-input').focus(); });
+    GH.events.on('guide', renderHangTab);
     document.getElementById('settings-btn').addEventListener('click', openSettings);
     document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
     const back = document.getElementById('back-btn');
@@ -249,14 +328,16 @@
     renderKeySelect();
     GH.events.on('settings', () => { renderKeySelect(); GH.router.rerender(); });
     GH.events.on('route', renderNav);
-    GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); });
+    GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); motionScan(); });
     GH.events.on('vexflow', () => { const r = GH.router.current(); if (r && r.page && r.page.staff) GH.router.rerender(); });
     const fl = document.getElementById('footer-links');
-    [['#/learn', '배우기'], ['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p, style: 'margin-left:12px' }, l)); });
+    SECTIONS.forEach(s => fl.appendChild(h('a', { href: '#' + s.path }, s.label)));
+    [['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙'], ['#/rhythm', '메트로놈']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p }, l)); });
     document.addEventListener('keydown', e => {
       const tag = document.activeElement && document.activeElement.tagName;
       const settingsPanel = document.getElementById('settings-panel');
       if (e.key === 'Escape' && !settingsPanel.hidden) { closeSettings(); return; }
+      if (e.key === 'Escape' && menuOpen) { closeMenu(); return; }
       if (e.key === 'Tab' && !settingsPanel.hidden) {
         const focusable = Array.from(settingsPanel.querySelectorAll('button, select, input, a[href], [tabindex]:not([tabindex="-1"])')).filter(x => !x.disabled && !x.hidden);
         if (focusable.length) {

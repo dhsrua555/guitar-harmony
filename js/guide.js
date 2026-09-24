@@ -6,18 +6,18 @@
   const KEY = 'gh.guide.v1';
 
   const LEVELS = [
-    { id: 'new', ko: '완전히 처음이에요', desc: '코드 이름이나 악보가 아직 낯설어요.' },
-    { id: 'chords', ko: '코드 몇 개는 잡아요', desc: 'C, G, Am 같은 오픈 코드로 간단히 반주할 수 있어요.' },
-    { id: 'theory', ko: '기초 이론은 알아요', desc: '메이저 스케일, 음정 이름, 다이어토닉 코드를 알아요.' },
-    { id: 'advanced', ko: '꽤 공부했어요', desc: '모드, 텐션, 세컨더리 도미넌트, 재즈 진행이 익숙해요.' }
+    { id: 'new', dyn: 'pp', ko: '완전히 처음이에요', desc: '코드 이름이나 악보가 아직 낯설어요.' },
+    { id: 'chords', dyn: 'p', ko: '코드 몇 개는 잡아요', desc: 'C, G, Am 같은 오픈 코드로 간단히 반주할 수 있어요.' },
+    { id: 'theory', dyn: 'mf', ko: '기초 이론은 알아요', desc: '메이저 스케일, 음정 이름, 다이어토닉 코드를 알아요.' },
+    { id: 'advanced', dyn: 'ff', ko: '꽤 공부했어요', desc: '모드, 텐션, 세컨더리 도미넌트, 재즈 진행이 익숙해요.' }
   ];
   const GOALS = [
-    { id: 'theory', ko: '화성학 이해', icon: '◎', desc: '코드와 스케일이 왜 그렇게 들리는지' },
-    { id: 'guitar', ko: '기타 연주 실력', icon: '♪', desc: '코드 폼, 스케일 포지션, 운지' },
-    { id: 'ear', ko: '음감 훈련', icon: '◉', desc: '음정, 코드, 진행을 귀로 구분' },
-    { id: 'solo', ko: '즉흥 솔로', icon: '↝', desc: '코드 위에서 멜로디 만들기' },
-    { id: 'compose', ko: '작곡 · 편곡', icon: '✎', desc: '멜로디에 코드와 화음 붙이기' },
-    { id: 'rhythm', ko: '리듬감', icon: '♩', desc: '박 유지, 스트럼, 싱코페이션' }
+    { id: 'theory', ko: '화성학 이해', icon: 'piano', desc: '코드와 스케일이 왜 그렇게 들리는지' },
+    { id: 'guitar', ko: '기타 연주 실력', icon: 'guitar', desc: '코드 폼, 스케일 포지션, 운지' },
+    { id: 'ear', ko: '음감 훈련', icon: 'ear', desc: '음정, 코드, 진행을 귀로 구분' },
+    { id: 'solo', ko: '즉흥 솔로', icon: 'melody', desc: '코드 위에서 멜로디 만들기' },
+    { id: 'compose', ko: '작곡 · 편곡', icon: 'staff', desc: '멜로디에 코드와 화음 붙이기' },
+    { id: 'rhythm', ko: '리듬감', icon: 'metronome', desc: '박 유지, 스트럼, 싱코페이션' }
   ];
   /* lv: [가장 쉬운 수준, 가장 어려운 수준] (LEVELS 인덱스) */
   const MISSIONS = [
@@ -110,16 +110,16 @@
     const skip = () => { if (!data.profile.onboarded) setProfile({ skipped: true }); closeModal(); };
     const draw = () => {
       GH.ui.clear(box);
-      box.appendChild(h('div', { class: 'onboard-top' }, h('span', { class: 'eyebrow' }, 'STEP ' + step + ' / 2'), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '닫기', onclick: skip }, '✕')));
+      box.appendChild(h('div', { class: 'onboard-top' }, h('span', { class: 'eyebrow' }, 'STEP ' + step + ' / 2'), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '닫기', onclick: skip }, GH.icon('close'))));
       if (step === 1) {
         box.appendChild(h('h2', { id: 'onboard-title' }, '음악을 얼마나 알고 계세요?'));
         box.appendChild(h('p', { class: 'muted' }, '수준에 맞춰 쉬운 것부터 순서대로 추천해 드립니다. 나중에 설정에서 언제든 바꿀 수 있어요.'));
-        box.appendChild(h('div', { class: 'onboard-options', role: 'radiogroup' }, LEVELS.map(l => h('button', { class: 'onboard-option' + (draft.level === l.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': draft.level === l.id ? 'true' : 'false', onclick: () => { draft.level = l.id; draw(); } }, h('b', null, l.ko), h('small', null, l.desc)))));
+        box.appendChild(h('div', { class: 'onboard-options', role: 'radiogroup' }, LEVELS.map(l => h('button', { class: 'onboard-option' + (draft.level === l.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': draft.level === l.id ? 'true' : 'false', onclick: () => { draft.level = l.id; draw(); } }, h('i', { class: 'dyn-tag', 'aria-hidden': 'true' }, l.dyn), h('b', null, l.ko), h('small', null, l.desc)))));
         box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: skip }, '나중에 할게요'), h('button', { class: 'btn primary', type: 'button', onclick: () => { step = 2; draw(); } }, '다음 →')));
       } else {
         box.appendChild(h('h2', { id: 'onboard-title' }, '이 사이트에서 무엇을 얻고 싶으세요?'));
         box.appendChild(h('p', { class: 'muted' }, '여러 개를 골라도 됩니다. 고른 순서대로 우선해서 추천합니다.'));
-        box.appendChild(h('div', { class: 'onboard-options goals' }, GOALS.map(g => { const k = draft.goals.indexOf(g.id); return h('button', { class: 'onboard-option' + (k >= 0 ? ' active' : ''), type: 'button', 'aria-pressed': k >= 0 ? 'true' : 'false', onclick: () => { if (k >= 0) draft.goals.splice(k, 1); else draft.goals.push(g.id); draw(); } }, h('span', { class: 'onboard-icon', 'aria-hidden': 'true' }, k >= 0 ? String(k + 1) : g.icon), h('b', null, g.ko), h('small', null, g.desc)); })));
+        box.appendChild(h('div', { class: 'onboard-options goals' }, GOALS.map(g => { const k = draft.goals.indexOf(g.id); return h('button', { class: 'onboard-option' + (k >= 0 ? ' active' : ''), type: 'button', 'aria-pressed': k >= 0 ? 'true' : 'false', onclick: () => { if (k >= 0) draft.goals.splice(k, 1); else draft.goals.push(g.id); draw(); } }, h('span', { class: 'onboard-icon', 'aria-hidden': 'true' }, k >= 0 ? String(k + 1) : GH.icon(g.icon)), h('b', null, g.ko), h('small', null, g.desc)); })));
         const preview = plan({ level: draft.level, goals: draft.goals }).slice(0, 3);
         if (draft.goals.length) box.appendChild(h('div', { class: 'onboard-preview' }, h('span', { class: 'muted' }, '먼저 해 볼 것: '), preview.map((m, i) => h('span', { class: 'badge' }, (i + 1) + '. ' + m.title))));
         box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: () => { step = 1; draw(); } }, '← 이전'),
@@ -138,7 +138,7 @@
 
   /* ---- 화면 조각 ---- */
   const levelKo = () => (LEVELS.find(l => l.id === data.profile.level) || {}).ko || '수준 미선택';
-  const goalChips = () => (data.profile.goals || []).map(id => { const g = GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, g.icon + ' ' + g.ko) : null; });
+  const goalChips = () => (data.profile.goals || []).map(id => { const g = GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, GH.icon(g.icon, { cls: 'badge-ic' }), g.ko) : null; });
   function progressBar(list) { const done = list.filter(m => isDone(m.id)).length; return h('div', { class: 'guide-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': list.length, 'aria-valuenow': done }, h('span', { style: 'width:' + (list.length ? Math.round(100 * done / list.length) : 0) + '%' }), h('small', null, done + ' / ' + list.length + ' 완료')); }
 
   /* 홈 카드: 설문 전에는 시작 안내, 후에는 다음 미션 */
@@ -153,7 +153,7 @@
     return h('section', { class: 'guide-card' },
       h('div', { class: 'guide-card-head' }, h('div', null, h('span', { class: 'eyebrow' }, 'MY GUIDE'), h('h2', null, n ? '다음에 할 일' : '추천 미션을 모두 마쳤어요')),
         h('div', { class: 'row', style: 'gap:6px' }, h('span', { class: 'badge accent' }, levelKo()), goalChips(), h('button', { class: 'btn small', type: 'button', onclick: () => openOnboarding({ onDone: rerender }) }, '수정'))),
-      n ? h('a', { class: 'guide-next', href: missionHref(n) }, h('b', null, n.title), h('span', { class: 'muted' }, n.desc), h('span', { class: 'guide-go', 'aria-hidden': 'true' }, '→'))
+      n ? h('a', { class: 'guide-next', href: missionHref(n) }, h('b', null, n.title), h('span', { class: 'muted' }, n.desc), h('span', { class: 'guide-go', 'aria-hidden': 'true' }, GH.icon('arrow')))
         : h('p', null, '수준을 한 단계 올리거나 목표를 추가하면 새 미션이 나옵니다.'),
       progressBar(list),
       h('a', { class: 'guide-all', href: '#/learn' }, '전체 추천 경로 보기 →'));
@@ -167,7 +167,7 @@
       h('div', { class: 'row', style: 'justify-content:space-between' }, h('h2', { style: 'margin:0' }, '나를 위한 경로'), h('div', { class: 'row', style: 'gap:6px' }, h('span', { class: 'badge accent' }, levelKo()), goalChips(), h('button', { class: 'btn small', type: 'button', onclick: () => openOnboarding({ onDone: rerender }) }, '수정'))),
       progressBar(list),
       h('ol', { class: 'mission-list' }, list.map((m, i) => h('li', { class: 'mission' + (isDone(m.id) ? ' done' : '') },
-        h('button', { class: 'mission-check', type: 'button', 'aria-pressed': isDone(m.id) ? 'true' : 'false', 'aria-label': m.title + (isDone(m.id) ? ' 완료 취소' : ' 완료로 표시'), onclick: () => { toggleDone(m.id); rerender(); } }, isDone(m.id) ? '✓' : String(i + 1).padStart(2, '0')),
+        h('button', { class: 'mission-check', type: 'button', 'aria-pressed': isDone(m.id) ? 'true' : 'false', 'aria-label': m.title + (isDone(m.id) ? ' 완료 취소' : ' 완료로 표시'), onclick: () => { toggleDone(m.id); rerender(); } }, isDone(m.id) ? GH.icon('check') : String(i + 1).padStart(2, '0')),
         h('a', { href: missionHref(m) }, h('b', null, m.title), h('small', null, m.desc))))));
   }
   /* 페이지 위 가이드 막대 */
@@ -185,13 +185,13 @@
     const open = openState[route.path] != null ? openState[route.path] : beginner;
     const n = next();
     const box = h('details', { class: 'page-guide', open: open ? true : null, ontoggle: e => { openState[route.path] = e.currentTarget.open; } },
-      h('summary', null, h('span', { class: 'guide-dot', 'aria-hidden': 'true' }), mission ? '미션 · ' + mission.title : '이 페이지 사용법', mission && isDone(mission.id) ? h('span', { class: 'badge accent' }, '완료') : null),
+      h('summary', null, h('span', { class: 'guide-dot', 'aria-hidden': 'true' }, GH.icon('note')), h('span', null, mission ? '미션 · ' + mission.title : '이 페이지 사용법'), mission && isDone(mission.id) ? h('span', { class: 'badge accent' }, '완료') : null, h('span', { class: 'pg-toggle', 'aria-hidden': 'true' }, GH.icon('sharp', { cls: 'when-closed' }), GH.icon('natural', { cls: 'when-open' }))),
       h('div', { class: 'page-guide-body' },
         info ? h('p', null, info[1]) : null,
         info ? h('ol', null, info[2].map(t => h('li', null, t))) : null,
         mission ? h('p', { class: 'muted' }, mission.desc) : null,
         h('div', { class: 'row', style: 'gap:6px' },
-          mission ? h('button', { class: 'btn small' + (isDone(mission.id) ? '' : ' primary'), type: 'button', onclick: () => { toggleDone(mission.id); decorate(GH.router.current()); } }, isDone(mission.id) ? '완료 취소' : '✓ 미션 완료') : null,
+          mission ? h('button', { class: 'btn small' + (isDone(mission.id) ? '' : ' primary'), type: 'button', onclick: () => { toggleDone(mission.id); decorate(GH.router.current()); } }, isDone(mission.id) ? '완료 취소' : [GH.icon('check'), '미션 완료']) : null,
           n && (!mission || n.id !== mission.id) ? h('a', { class: 'btn small', href: missionHref(n) }, '다음 미션: ' + n.title + ' →') : null,
           !data.profile.onboarded ? h('button', { class: 'btn small', type: 'button', onclick: () => openOnboarding({ onDone: () => GH.router.rerender() }) }, '맞춤 추천 받기') : null,
           h('button', { class: 'btn small ghost', type: 'button', onclick: () => { setProfile({ showGuides: false }); decorate(GH.router.current()); } }, '가이드 숨기기'))));
@@ -199,5 +199,5 @@
   }
   function resetProgress() { data.done = {}; data.visits = {}; save(); GH.events.emit('guide', data); }
 
-  GH.guide = { LEVELS, GOALS, MISSIONS, PAGES, profile, setProfile, plan, next, isDone, toggleDone, missionFor, openOnboarding, shouldOnboard, homeCard, planSection, decorate, resetProgress, levelKo };
+  GH.guide = { LEVELS, GOALS, MISSIONS, PAGES, missionHref, profile, setProfile, plan, next, isDone, toggleDone, missionFor, openOnboarding, shouldOnboard, homeCard, planSection, decorate, resetProgress, levelKo };
 })();

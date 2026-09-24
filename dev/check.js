@@ -267,6 +267,24 @@
       ok(counts.every(c => c >= 5), 'guide plan per level ' + counts.join(','));
       ok(G.GOALS.every(g => G.plan({ level: 'chords', goals: [g.id] }).length >= 2), 'guide plan per goal');
     })();
+    /* 음악 아이콘 · 리얼북 코드 심볼 */
+    (function () {
+      const names = GH.icon.names;
+      const routes = [].concat(...GH.app.SECTIONS.map(sec => [sec.path].concat(sec.items.map(it => it[0]))));
+      const missing = routes.map(r => GH.icon.forRoute(r)).filter(n => !names.includes(n));
+      ok(!missing.length, 'route icons exist ' + missing.join(','));
+      ok(GH.app.SECTIONS.every(sec => names.includes(sec.icon) && sec.en && sec.color), 'section icon/en/color');
+      ok(GH.guide.GOALS.every(g => names.includes(g.icon)), 'goal icons are music icons');
+      const el = GH.icon('metronome'); ok(el.tagName.toLowerCase() === 'svg' && el.querySelectorAll('path').length >= 3, 'GH.icon builds svg');
+      if (GH.render.chordText) {
+        const t = GH.render.chordText('Bbm7b5', 0, 0); const txt = t.textContent;
+        ok(txt === 'B♭m7♭5', 'chord symbol Bbm7b5 → ' + txt);
+        const t2 = GH.render.chordText('F#7#9/C#', 0, 0).textContent;
+        ok(t2 === 'F♯7♯9/C♯', 'chord symbol F#7#9/C# → ' + t2);
+        ok(GH.render.chordText('Cmaj7', 0, 0).textContent === 'Cmaj7', 'chord symbol Cmaj7');
+      }
+      ok(GH.render.feelMark(90, 'shuffle').indexOf('Med. Shuffle') > 0 && GH.render.feelMark(200, 'swing').indexOf('Up Swing') > 0, 'feel mark');
+    })();
     /* search */
     const sr = GH.search.query('Cmaj7');
     ok(sr.length && sr[0].type === '코드', 'search Cmaj7 → chord hub');

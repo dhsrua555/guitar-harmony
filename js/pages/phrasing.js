@@ -110,7 +110,7 @@
       builder.appendChild(A.chordStrip(ctx.chords, { link: true }));
       builder.appendChild(h('h3', null, 'TAB'));
       builder.appendChild(h('div', { style: 'overflow-x:auto' }, tab.el));
-      const staff = GH.render.staff(out.lick, { pref, tuning: out.tuning, width: Math.min(1100, el.clientWidth || 1000) });
+      const staff = GH.render.staff(out.lick, { pref, tuning: out.tuning, width: Math.min(1100, el.clientWidth || 1000), style: GH.render.feelMark(state.tempo, state.swing ? 'swing' : 'straight') });
       if (staff) { builder.appendChild(h('h3', null, '오선')); builder.appendChild(staff); }
       builder.appendChild(h('h3', null, '지판'));
       builder.appendChild(fb.el);

@@ -122,7 +122,8 @@
     /* notes: [{label, cls, title}] */
     return h('div', { class: 'note-list' }, notes.map(n => h('span', { class: 'pill ' + (n.cls || 'iv-s') + (n.dim ? ' dim' : ''), title: n.title || '' }, n.label)));
   }
-  function difficulty(n) { return h('span', { class: 'difficulty', title: '난이도 ' + n + '/5' }, '★'.repeat(n) + '☆'.repeat(5 - n)); }
+  /* 난이도: 음표 다섯 개 중 채워진 수 */
+  function difficulty(n) { return h('span', { class: 'difficulty', title: '난이도 ' + n + '/5', 'aria-label': '난이도 ' + n + '/5' }, [1, 2, 3, 4, 5].map(i => GH.icon('note', { cls: i <= n ? 'on' : 'off' }))); }
 
   /* ---- 유틸 ---- */
   const util = {

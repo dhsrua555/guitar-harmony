@@ -28,7 +28,7 @@
       el.appendChild(h('p', { class: 'muted' }, '장르, 코드 상황, 난이도로 찾습니다. 모든 릭은 TAB과 오선, 느린 재생, 지판 애니메이션, 음마다 코드에 대한 도수 분석을 제공합니다. 릭은 전부 이 사이트를 위해 만든 예제입니다.'));
       const gChips = chips({ options: [{ value: 'all', label: '모든 장르' }].concat(Object.entries(GH.data.lickGenres).map(([k, v]) => ({ value: k, label: v }))), value: filter.genre, onChange: v => setFilter('genre', v) });
       const cChips = chips({ options: [{ value: 'all', label: '모든 상황' }].concat(Object.entries(GH.data.lickContexts).map(([k, v]) => ({ value: k, label: v }))), value: filter.context, onChange: v => setFilter('context', v) });
-      const lSel = select({ options: [{ value: 'all', label: '모든 난이도' }, { value: '1', label: '★1' }, { value: '2', label: '★2' }, { value: '3', label: '★3' }, { value: '4', label: '★4' }, { value: '5', label: '★5' }], value: filter.level, onChange: v => setFilter('level', v) });
+      const lSel = select({ options: [{ value: 'all', label: '모든 난이도' }, { value: '1', label: '♪ 1' }, { value: '2', label: '♪♪ 2' }, { value: '3', label: '♪♪♪ 3' }, { value: '4', label: '♪♪♪♪ 4' }, { value: '5', label: '♪♪♪♪♪ 5' }], value: filter.level, onChange: v => setFilter('level', v) });
       el.appendChild(h('div', { class: 'toolbar', style: 'flex-direction:column;align-items:flex-start;gap:8px' }, gChips, cChips, h('label', null, '난이도', lSel)));
       let list = GH.data.licks.slice();
       if (filter.genre !== 'all') list = list.filter(l => l.genre === filter.genre);
@@ -101,7 +101,7 @@
       /* TAB */
       el.appendChild(section('TAB', h('div', { style: 'overflow-x:auto' }, tabR.el), h('p', { class: 'muted', style: 'font-size:.8rem' }, 'H 해머온, P 풀오프, sl. 슬라이드, full/½ 벤딩, 물결은 비브라토. 아래 스템은 리듬 (꼬리 1개 8분음표, 2개 16분음표).')));
       /* 오선 */
-      const staff = GH.render.staff(lick, { transpose: tr, pref, width: Math.min(1100, el.clientWidth || 1000) });
+      const staff = GH.render.staff(displayLick, { transpose: tr, pref, width: Math.min(1100, el.clientWidth || 1000), title: lick.ko, style: GH.render.feelMark(lick.tempo, lick.feel) });
       el.appendChild(section('오선', staff || h('p', { class: 'muted' }, GH.render.hasVexFlow() ? '오선을 그릴 수 없습니다.' : '오선 표기는 VexFlow 라이브러리를 인터넷에서 불러와야 합니다. 온라인 상태에서 다시 열어 주세요.')));
       /* 지판 */
       const noteEntries = [];
