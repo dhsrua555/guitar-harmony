@@ -71,7 +71,7 @@
         ['chords', 'melody'].forEach(n => { if (buses[n]) { try { buses[n].disconnect(); } catch (e) { /* ignore */ } buses[n].connect(chainFor(preset())); } });
       });
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running' && ctx.state !== 'closed') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } /* iOS 는 'interrupted' 상태도 있다 */
     return ctx;
   }
   /* 프리셋의 바디 공명 + 톤 체인 (한 번만 생성) */
@@ -419,5 +419,40 @@
     active.length = 0;
   }
   function now() { const c = context(); return c ? c.currentTime : 0; }
-  GH.audio = { context, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, available: () => !!(window.AudioContext || window.webkitAudioContext) };
+  /* ---- 아이폰 · 아이패드에서 소리가 안 나는 문제 ----
+     iOS 는 웹 오디오를 벨소리처럼 다뤄서, 옆면의 무음 스위치가 켜져 있으면 소리를 꺼 버린다.
+     그래서 처음 화면을 누를 때 (1) 오디오 세션을 '재생'으로 바꾸고 (iOS 17 이상), (2) 예전 iOS 를 위해
+     들리지 않는 무음 오디오를 반복 재생해 두며, (3) 멈춰 있는 오디오 엔진을 깨운다 */
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let silentEl = null;
+  function silentWavUrl(rate) {
+    const n = Math.round(rate * 0.5), buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+  }
+  function unlock() {
+    try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) { /* 지원하지 않는 브라우저 */ }
+    const c = context(); if (!c) return false;
+    if (c.state !== 'running' && c.state !== 'closed') { const p = c.resume(); if (p && p.catch) p.catch(() => {}); }
+    try { const s = c.createBufferSource(); s.buffer = c.createBuffer(1, 1, c.sampleRate); s.connect(c.destination); s.start(0); } catch (e) { /* ignore */ }
+    if (IOS && !silentEl) {
+      try {
+        silentEl = document.createElement('audio');
+        silentEl.setAttribute('x-webkit-airplay', 'deny'); silentEl.setAttribute('playsinline', '');
+        silentEl.preload = 'auto'; silentEl.loop = true; silentEl.src = silentWavUrl(c.sampleRate);
+        const p = silentEl.play(); if (p && p.catch) p.catch(() => { silentEl = null; });
+      } catch (e) { silentEl = null; }
+    }
+    return c.state === 'running';
+  }
+  const GESTURES = ['touchend', 'pointerup', 'mousedown', 'keydown'];
+  function onGesture() { const ok = unlock(); if (ok && (!IOS || silentEl)) GESTURES.forEach(ev => window.removeEventListener(ev, onGesture, true)); }
+  GESTURES.forEach(ev => window.addEventListener(ev, onGesture, { capture: true, passive: true }));
+  /* 전화 · 잠금 · 앱 전환 뒤에 돌아오면 다시 깨운다 */
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running' && ctx.state !== 'closed') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } });
+
+  GH.audio = { context, unlock, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, available: () => !!(window.AudioContext || window.webkitAudioContext) };
 })();
