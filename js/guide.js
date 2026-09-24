@@ -98,19 +98,28 @@
   function plan(p) {
     p = p || data.profile; const li = Math.max(0, LEVELS.findIndex(l => l.id === p.level));
     const goals = p.goals && p.goals.length ? p.goals : GOALS.map(g => g.id);
-    /* 고른 목표마다 줄을 세우고, 첫 번째 목표부터 한 개씩 번갈아 꺼낸다 (목표에 따라 추천이 달라지게)
-       한 줄 안에서는: 처음이면 기초 코스 장 순서대로 → 수준에 가장 맞는 것 → 그 목표가 주된 목표인 것 → 쉬운 것 */
+    const n = goals.length;
     const pool = MISSIONS.filter(m => m.lv[0] <= li + 1 && m.lv[1] >= li && m.goals.some(g => goals.includes(g)));
-    const groups = goals.map(() => []);
-    pool.forEach(m => { const k = Math.min(...m.goals.map(g => { const i = goals.indexOf(g); return i < 0 ? 99 : i; })); groups[k].push(m); });
     const isCourse = m => /^course-/.test(m.id);
-    const key = (m, g) => li === 0 && isCourse(m) ? [0, 0, 0, 0, MISSIONS.indexOf(m)] : [1, m.lv[0] > li ? 1.5 * (m.lv[0] - li) : li - m.lv[0], m.goals[0] === g ? 0 : 1, m.lv[0], MISSIONS.indexOf(m)]; /* 내 수준에서 시작하는 것 → 복습 → 한 단계 위 */
-    const cmp = g => (a, b) => { const x = key(a, g), y = key(b, g); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
-    groups.forEach((list, i) => list.sort(cmp(goals[i])));
-    const out = [];
+    const idx = m => MISSIONS.indexOf(m);
+    const gap = m => m.lv[0] > li ? 1.5 * (m.lv[0] - li) : li - m.lv[0]; /* 내 수준에서 시작하는 것 → 복습 → 한 단계 위 */
+    const hits = m => m.goals.filter(g => goals.includes(g));
+    const weight = m => hits(m).reduce((a, g) => a + (n - goals.indexOf(g)), 0); /* 먼저 고른 목표일수록 무겁게 */
+    const order = keyOf => (a, b) => { const x = keyOf(a), y = keyOf(b); for (let k = 0; k < x.length; k++) if (x[k] !== y[k]) return x[k] - y[k]; return 0; };
+    /* 1) 여러 목표를 골랐으면, 고른 목표를 두 개 이상 함께 채우는 미션부터 (많이 채울수록, 먼저 고른 목표일수록 앞) */
+    const combo = n > 1 ? pool.filter(m => hits(m).length >= 2 && (gap(m) <= 1 || (li === 0 && isCourse(m)))) : []; /* 한 단계 넘게 위인 것은 앞당기지 않는다 */
+    combo.sort(order(m => li === 0 && isCourse(m) ? [0, -hits(m).length, -weight(m), idx(m)] : [1, gap(m), -hits(m).length, -weight(m), m.lv[0], idx(m)]));
+    /* 2) 나머지는 목표마다 줄을 세우고, 첫 번째 목표부터 한 개씩 번갈아 꺼낸다
+       한 줄 안에서는: 처음이면 기초 코스 장 순서대로 → 수준에 가장 맞는 것 → 그 목표가 주된 목표인 것 → 쉬운 것 */
+    const rest = pool.filter(m => !combo.includes(m));
+    const groups = goals.map(() => []);
+    rest.forEach(m => { const k = Math.min(...m.goals.map(g => { const i = goals.indexOf(g); return i < 0 ? 99 : i; })); groups[k].push(m); });
+    groups.forEach((list, i) => list.sort(order(m => li === 0 && isCourse(m) ? [0, 0, 0, 0, idx(m)] : [1, gap(m), m.goals[0] === goals[i] ? 0 : 1, m.lv[0], idx(m)])));
+    const out = combo.slice();
     for (let round = 0; out.length < pool.length; round++) groups.forEach(list => { if (list[round]) out.push(list[round]); });
     return out.slice(0, 12);
   }
+
   const isDone = id => !!data.done[id];
   function toggleDone(id, on) { if (on == null) on = !isDone(id); if (on) data.done[id] = Date.now(); else delete data.done[id]; save(); GH.events.emit('guide', data); }
   const next = () => plan().find(m => !isDone(m.id)) || null;
