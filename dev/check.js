@@ -204,6 +204,69 @@
       ok(eb.map(n => n.name).join(' ') === 'G Ab', 'Eb major spelled (' + eb.map(n => n.name).join(' ') + ')');
       ok(GH.melodyInput.parseText('C D E5 F').midis.join(',') === '60,62,76,77' && GH.melodyInput.parseText('X1').bad.length === 1, 'melodyInput.parseText');
     })();
+    /* 운지 · 더블스탑 */
+    (function () {
+      const F = GH.fingering;
+      const tunings = { std: [40, 45, 50, 55, 59, 64], dropD: [38, 45, 50, 55, 59, 64], openG: [38, 43, 50, 55, 59, 62] };
+      const thirds = GH.harmony.build([60, 62, 64, 65, 67, 69, 71, 72], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }]);
+      const list = thirds.melody.map((m, i) => [m.midi, thirds.voices[0][i].midi, 3]);
+      Object.entries(tunings).forEach(([name, tun]) => [0, 2].forEach(capo => {
+        const path = F.pairs(list, { tuning: tun, capo, maxFret: 17 });
+        const bad = path.map((p, i) => {
+          if (!p) return 'null@' + i;
+          const [[sH, fH], [sL, fL]] = p.ns;
+          if (tun[6 - sH] + fH !== list[i][1] || tun[6 - sL] + fL !== list[i][0]) return 'pitch@' + i;
+          if (fH < capo || fL < capo) return 'capo@' + i;
+          if (fH > capo && fL > capo && Math.abs(fH - fL) > 3) return 'span@' + i;
+          if (sL - sH !== 1) return 'gap@' + i;
+          return null;
+        }).filter(Boolean);
+        ok(!bad.length, 'double-stop 3rds ' + name + ' capo ' + capo + ' ' + (bad.join(',') || path.map(p => p.ns.map(n => n.join('/')).join('+')).slice(0, 3).join(' ')));
+      }));
+      const sixths = F.pairs([[60, 69, 6], [62, 71, 6]], { tuning: tunings.std, capo: 0 });
+      ok(sixths.every(p => p && p.ns[1][0] - p.ns[0][0] === 2), 'double-stop 6ths skip one string');
+      const single = F.single([60, 62, 64, 65, 67], { tuning: tunings.std, window: [5, 9] });
+      ok(single.every((c, i) => c && tunings.std[6 - c.s] + c.f === [60, 62, 64, 65, 67][i]), 'single-note fingering pitch');
+      const pat = GH.doublestops.scalePattern('C', 'ionian', '3', 3, 2, { maxFret: 15, allowOpen: true });
+      ok(pat.length >= 7 && pat.every(s => ['M3', 'm3'].includes(s.iv.en) && GH.state.tuningMidi()[3] + s.fixed[1][1] === s.lo && GH.state.tuningMidi()[4] + s.fixed[0][1] === s.hi), 'C major 3rds on strings 3-2: ' + pat.length + ' steps (' + pat.slice(0, 4).map(s => s.loName + s.hiName + ':' + s.iv.en).join(' ') + ')');
+    })();
+    /* 솔로 프레이즈 */
+    (function () {
+      const chords = GH.app.progressionChords(GH.data.progressions.find(p => p.id === 'ii-V-I'), 'C');
+      const beats = chords.reduce((a, c) => a + c.beats, 0);
+      ['none', 'below', 'above', 'scaleAbove', 'enclosure', 'enclosureChrom', 'doubleBelow'].forEach(ap => ['arpeggio', 'scale', 'passing', 'neighbor'].forEach(fl => {
+        const line = GH.phrase.build(chords, { key: 'C', approach: ap, filler: fl, lo: 50, hi: 74, start: 64 });
+        const total = line.reduce((a, n) => a + n.d, 0);
+        const firsts = chords.map((c, ci) => line.find(n => n.ci === ci));
+        const targetsOk = firsts.every((n, ci) => n && n.role === 'target' && chords[ci].pcs.includes(n.midi % 12));
+        let apOk = true;
+        firsts.slice(1).forEach(t => { const k = line.indexOf(t); const prev = line[k - 1];
+          if (ap === 'below' && prev.midi !== t.midi - 1) apOk = false;
+          if (ap === 'enclosure' && !(prev.midi === t.midi - 1 && line[k - 2].midi > t.midi)) apOk = false;
+          if (ap === 'doubleBelow' && !(prev.midi === t.midi - 1 && line[k - 2].midi === t.midi - 2)) apOk = false; });
+        if (Math.abs(total - beats) > 1e-6 || !targetsOk || !apOk) { fails++; log('FAIL phrase ' + ap + '/' + fl + ' total=' + total + ' targets=' + targetsOk + ' approach=' + apOk); }
+      }));
+      const demo = GH.phrase.build(chords, { key: 'C', approach: 'enclosure', filler: 'scale', lo: 50, hi: 74, start: 64 });
+      log('     phrase ii-V-I enclosure: ' + demo.map(n => N.noteName(n.midi % 12) + ':' + GH.phrase.ROLES[n.role].en).join(' '));
+    })();
+    /* 리듬 */
+    (function () {
+      const badR = GH.data.rhythms.filter(r => { try { return GH.rhythm.parse(r.p).total !== 4; } catch (e) { return true; } });
+      ok(!badR.length, 'rhythm patterns total 4 beats (' + GH.data.rhythms.length + ') ' + badR.map(r => r.id).join(','));
+      const badS = GH.data.strums.filter(s => s.p.trim().split(/\s+/).length !== s.grid);
+      ok(!badS.length, 'strum patterns match grid ' + badS.map(s => s.id).join(','));
+      const sc = GH.rhythm.score([{ time: 0, i: 0 }, { time: 0.5, i: 1 }, { time: 1, i: 2 }], [0.01, 0.62, 1.3]);
+      ok(sc.items.map(x => x.grade).join(',') === 'good,veryLate,miss' && sc.extra === 1, 'rhythm score grades ' + sc.items.map(x => x.grade).join(',') + ' extra ' + sc.extra);
+    })();
+    /* 가이드 */
+    (function () {
+      const G = GH.guide;
+      const routesOk = G.MISSIONS.every(m => GH.pages[m.route]);
+      ok(routesOk, 'guide mission routes exist ' + G.MISSIONS.filter(m => !GH.pages[m.route]).map(m => m.route).join(','));
+      const counts = G.LEVELS.map(l => G.plan({ level: l.id, goals: ['theory', 'guitar', 'ear', 'solo', 'compose', 'rhythm'] }).length);
+      ok(counts.every(c => c >= 5), 'guide plan per level ' + counts.join(','));
+      ok(G.GOALS.every(g => G.plan({ level: 'chords', goals: [g.id] }).length >= 2), 'guide plan per goal');
+    })();
     /* search */
     const sr = GH.search.query('Cmaj7');
     ok(sr.length && sr[0].type === '코드', 'search Cmaj7 → chord hub');
@@ -230,7 +293,7 @@
     const variants = [['/theory/chords', { query: { tab: 'types' } }], ['/theory/chords', { query: { tab: 'diatonic' } }], ['/theory/chords', { query: { tab: 'tension' } }], ['/theory/chords', { query: { tab: 'notation' } }], ['/theory/chords', { query: { tab: 'inversion' } }],
       ['/theory/scales', { query: { tab: 'circle' } }], ['/theory/scales', { query: { tab: 'chordscale' } }], ['/theory/scales', { query: { tab: 'compare' } }], ['/theory/scales', { query: { tab: 'list' } }],
       ['/theory/modes', { query: { tab: 'parallel' } }], ['/theory/modes', { query: { tab: 'relative' } }], ['/theory/modes', { query: { tab: 'mm' } }], ['/theory/modes', { query: { tab: 'hm' } }], ['/theory/modes', { query: { tab: 'modal' } }],
-      ['/guitar/scales', { query: { scale: 'ionian' } }], ['/guitar/scales', { query: { scale: 'hw_dim' } }], ['/guitar/voicings', { query: { q: '13', types: 'jazz,drop24,quartal' } }], ['/theory/progressions', { query: { id: 'coltrane' } }], ['/theory/reharm', { query: { id: 'coltrane' } }], ['/songs', { query: { id: 'fbluesjazz' } }], ['/ear', { query: { tab: 'degree' } }], ['/ear', { query: { tab: 'interval' } }], ['/ear', { query: { tab: 'root' } }], ['/ear', { query: { tab: 'chord' } }], ['/ear', { query: { tab: 'mode' } }], ['/ear', { query: { tab: 'prog' } }], ['/backing', { query: { id: 'blues12', key: 'A' } }], ['/backing', { query: { chords: 'Dm7 G7 | Cmaj7 | Xyz' } }], ['/backing', { query: { chords: 'C Am F G' } }], ['/tools/melody', { query: { notes: 'E D C D E E E' } }], ['/tools/harmony', { query: { notes: 'C4 D4 E4 F4 G4 C#4', key: 'C' } }], ['/tools/harmony', { query: { notes: 'A3 B3 C4 G#4', key: 'A', scale: 'harmonic_minor' } }], ['/tools/melody', { query: { notes: 'A4 C5 E5 D5', key: 'C' } }], ['/theory/chords', { query: { tab: 'types', group: 'level' } }], ['/theory/reharm', { query: { id: 'tritone_sub' } }]];
+      ['/guitar/scales', { query: { scale: 'ionian' } }], ['/guitar/scales', { query: { scale: 'hw_dim' } }], ['/guitar/voicings', { query: { q: '13', types: 'jazz,drop24,quartal' } }], ['/theory/progressions', { query: { id: 'coltrane' } }], ['/theory/reharm', { query: { id: 'coltrane' } }], ['/songs', { query: { id: 'fbluesjazz' } }], ['/ear', { query: { tab: 'degree' } }], ['/ear', { query: { tab: 'interval' } }], ['/ear', { query: { tab: 'root' } }], ['/ear', { query: { tab: 'chord' } }], ['/ear', { query: { tab: 'mode' } }], ['/ear', { query: { tab: 'prog' } }], ['/backing', { query: { id: 'blues12', key: 'A' } }], ['/backing', { query: { chords: 'Dm7 G7 | Cmaj7 | Xyz' } }], ['/backing', { query: { chords: 'C Am F G' } }], ['/tools/melody', { query: { notes: 'E D C D E E E' } }], ['/tools/harmony', { query: { notes: 'C4 D4 E4 F4 G4 C#4', key: 'C' } }], ['/tools/harmony', { query: { notes: 'A3 B3 C4 G#4', key: 'A', scale: 'harmonic_minor' } }], ['/rhythm', { query: { tab: 'tap' } }], ['/rhythm', { query: { tab: 'strum' } }], ['/ear', { query: { tab: 'rhythm' } }], ['/guitar/phrasing', { query: {} }], ['/guitar/doublestops', { query: {} }], ['/tools/melody', { query: { notes: 'A4 C5 E5 D5', key: 'C' } }], ['/theory/chords', { query: { tab: 'types', group: 'level' } }], ['/theory/reharm', { query: { id: 'tritone_sub' } }]];
     GH.data.licks.forEach(l => variants.push(['/guitar/licks/:id', { id: l.id, query: {} }]));
     variants.forEach(([path, params]) => { const div = document.createElement('div'); try { GH.pages[path].render(div, params); ok(true, 'render ' + path + ' ' + JSON.stringify(params)); } catch (e) { fails++; log('FAIL render ' + path + ' ' + JSON.stringify(params) + ': ' + e.message + '\n' + (e.stack || '').split('\n').slice(0, 3).join('\n')); } });
     /* 12 키로 허브 렌더 */

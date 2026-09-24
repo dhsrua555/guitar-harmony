@@ -23,6 +23,11 @@
       let root = key, q = 'maj';
       const rootSel = A.rootSelect(root, v => { root = v; });
       const qSel = A.qualitySelect(q, v => { q = v; }, x => x.level <= 2);
+      /* 맞춤 가이드 (처음 방문이면 설문 창) */
+      if (GH.guide) {
+        el.appendChild(GH.guide.homeCard());
+        if (GH.guide.shouldOnboard() && document.getElementById('app') === el) setTimeout(() => { if (document.body.contains(el)) GH.guide.openOnboarding({ onDone: () => GH.router.rerender() }); }, 450);
+      }
       el.appendChild(h('section', { class: 'home-paths' },
         h('a', { href: '#/learn', class: 'card link path-card path-learn' },
           h('span', { class: 'path-icon', 'aria-hidden': 'true' }, '1'), h('div', { class: 'title' }, '처음이라면, 배우기'), h('p', null, '음정 → 코드 → 스케일 → 진행 순서의 6단계 로드맵. 보고, 듣고, 쳐 보고, 퀴즈로 확인합니다.'), h('span', { class: 'feature-arrow', 'aria-hidden': 'true' }, '→')),

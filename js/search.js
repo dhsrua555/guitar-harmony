@@ -14,6 +14,10 @@
     add('페이지', '화성학 홈', '화성학 섹션', ['theory', '이론'], '#/theory');
     add('페이지', '연습 홈', '연습 · 도구 섹션', ['practice', '도구'], '#/practice');
     add('페이지', '백킹 트랙', '연습', ['backing', 'backing track', '반주', '드럼', '베이스', '잼', 'jam', '메트로놈'], '#/backing');
+    add('페이지', '더블스탑', '기타', ['double stop', 'doublestop', '3도', '6도', '옥타브', '두 줄', '화음 연주'], '#/guitar/doublestops');
+    add('페이지', '솔로 프레이즈 만들기', '기타', ['phrase', 'phrasing', '솔로', '즉흥', '코드톤', '어프로치', 'approach', '인클로저', 'enclosure', '패싱', 'passing', '이웃음', '가이드 톤', 'bebop', '비밥'], '#/guitar/phrasing');
+    add('페이지', '리듬 연습', '연습', ['rhythm', '리듬', '메트로놈', 'metronome', '박자', '스트럼', 'strum', '싱코페이션', '셋잇단', '16분', '탭', '갭 트레이닝'], '#/rhythm');
+    add('퀴즈', '리듬 듣고 맞히기', '이어 트레이닝', ['rhythm', '리듬 청음', '리듬 받아쓰기'], '#/ear?tab=rhythm');
     add('페이지', '멜로디 화음 쌓기', '연습 · 도구', ['harmony', 'harmonize', '화음', '성부', '3도 화음', '6도', '하모니 라인', '코러스', '더블링', 'voice'], '#/tools/harmony');
     add('페이지', '멜로디 → 코드 찾기', '연습 · 도구', ['melody', '멜로디', '코드 붙이기', '하모나이즈', '반주 만들기', '작곡'], '#/tools/melody');
     add('페이지', '기본 코드 폼', '기타 · 보이싱', ['voicing', 'chord', '오픈 포지션', 'caged', '이동형', '바레', '파워 코드'], '#/guitar/voicings/basic');

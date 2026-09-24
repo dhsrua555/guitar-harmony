@@ -11,6 +11,8 @@
       ['/guitar/voicings', '코드 보이싱', 1, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
       ['/guitar/scales', '스케일 포지션', 1, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
       ['/guitar/triads', '트라이어드 · 아르페지오', 2, '현 세트별 3화음 인버전과 코드톤 아르페지오'],
+      ['/guitar/doublestops', '더블스탑', 2, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
+      ['/guitar/phrasing', '솔로 프레이즈 만들기', 2, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
       ['/guitar/licks', '릭', 2, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
     { id: 'theory', label: '화성학', path: '/theory', desc: '코드와 스케일이 왜 그렇게 들리는지 이해합니다.', items: [
       ['/theory/intervals', '인터벌', 1, '두 음 사이의 거리. 모든 이론의 출발점'],
@@ -22,6 +24,7 @@
     { id: 'practice', label: '연습', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
       ['/ear', '이어 트레이닝', 1, '계이름, 음정, 코드, 진행을 듣고 맞히는 퀴즈'],
       ['/backing', '백킹 트랙', 1, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
+      ['/rhythm', '리듬 연습', 1, '메트로놈, 리듬 따라 치기, 스트럼 패턴'],
       ['/tools/finder', '코드 파인더', 1, '지판을 눌러 잡은 모양의 코드 이름 찾기'],
       ['/tools/melody', '멜로디 → 코드', 2, '멜로디를 넣으면 어울리는 코드를 제안'],
       ['/tools/harmony', '멜로디 화음 쌓기', 2, '멜로디 위아래에 3도·5도·6도 성부를 쌓아 듣기'],
@@ -32,7 +35,7 @@
     if (path === '/learn') return 'learn';
     if (path.startsWith('/guitar')) return 'guitar';
     if (path.startsWith('/theory') || path.startsWith('/chord/')) return 'theory';
-    if (/^\/(songs|tools|ear|glossary|backing|practice)/.test(path)) return 'practice';
+    if (/^\/(songs|tools|ear|glossary|backing|practice|rhythm)/.test(path)) return 'practice';
     return null;
   }
   function parentOf(path) {
@@ -177,6 +180,16 @@
     const s = GH.state.get();
     const field = (label, ctl) => h('div', { class: 'field' }, h('label', null, label), ctl);
     panel.appendChild(h('div', { class: 'row', style: 'justify-content:space-between' }, h('h2', { id: 'settings-title' }, '설정'), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '설정 닫기', onclick: closeSettings }, '✕')));
+    if (GH.guide) {
+      const G = GH.guide; const gp = G.profile();
+      panel.appendChild(h('h3', { class: 'settings-group' }, '나의 학습'));
+      panel.appendChild(h('div', { class: 'field' }, h('label', null, '수준 · 목표'),
+        h('div', { class: 'row', style: 'gap:6px' }, h('span', { class: 'badge accent' }, G.levelKo()), (gp.goals || []).map(id => { const g = G.GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, g.ko) : null; })),
+        h('div', { class: 'row', style: 'gap:6px;margin-top:8px' },
+          h('button', { class: 'btn small', type: 'button', onclick: () => { closeSettings(); G.openOnboarding({ onDone: () => GH.router.rerender() }); } }, gp.onboarded ? '다시 고르기' : '수준 · 목표 고르기'),
+          h('button', { class: 'btn small', type: 'button', onclick: () => { if (confirm('완료한 미션 기록을 모두 지울까요?')) { G.resetProgress(); renderSettings(); GH.router.rerender(); } } }, '진행 기록 초기화'))));
+      panel.appendChild(h('div', { class: 'field' }, h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, h('input', { type: 'checkbox', checked: gp.showGuides !== false, onchange: e => { G.setProfile({ showGuides: e.target.checked }); GH.router.rerender(); } }), '페이지마다 사용법 가이드 보이기')));
+    }
     panel.appendChild(h('h3', { class: 'settings-group' }, '소리'));
     panel.appendChild(field('재생 음색', select({ options: GH.audio.PRESET_ORDER.map(id => ({ value: id, label: GH.audio.PRESETS[id].ko })), value: s.instrument, onChange: v => GH.state.set({ instrument: v }) })));
     panel.appendChild(field('볼륨', h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.volume, style: 'width:100%', oninput: e => GH.state.set({ volume: Number(e.target.value) }) })));
@@ -236,6 +249,7 @@
     renderKeySelect();
     GH.events.on('settings', () => { renderKeySelect(); GH.router.rerender(); });
     GH.events.on('route', renderNav);
+    GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); });
     GH.events.on('vexflow', () => { const r = GH.router.current(); if (r && r.page && r.page.staff) GH.router.rerender(); });
     const fl = document.getElementById('footer-links');
     [['#/learn', '배우기'], ['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p, style: 'margin-left:12px' }, l)); });

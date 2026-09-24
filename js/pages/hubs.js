@@ -30,6 +30,7 @@
     render(el) {
       const A = GH.app;
       el.appendChild(h('div', { class: 'page-head' }, h('span', { class: 'eyebrow' }, 'ROADMAP'), h('h1', null, '배우기: 처음부터 차근차근'), h('p', { class: 'muted' }, '위에서 아래로 따라가면 됩니다. 각 단계는 "보기 → 듣기 → 기타로 쳐 보기 → 퀴즈"로 이어집니다. 어려운 내용은 6단계에 모아 두었으니 처음엔 건너뛰어도 좋습니다.')));
+      if (GH.guide) el.appendChild(GH.guide.planSection());
       const list = h('ol', { class: 'roadmap' });
       STEPS.forEach(s => list.appendChild(h('li', { class: 'step lv' + s.level },
         h('div', { class: 'step-num', 'aria-hidden': 'true' }, s.n),

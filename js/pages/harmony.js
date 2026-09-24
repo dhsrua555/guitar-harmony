@@ -11,7 +11,8 @@
     notes: [60, 62, 64, 65, 67, 69, 71, 72], names: [], input: 'piano', text: '', fromParam: null, keyParam: null, scaleParam: null,
     key: null, scale: 'ionian', tempo: 92, loop: false,
     melody: { pan: 0, mute: false, solo: false },
-    voices: [newVoice(0)]
+    voices: [newVoice(0)],
+    ds: { voice: 0, gap: 'auto', allowOpen: true, maxFret: 15, octave: 0 }
   };
   const PRESETS = [
     ['3도 위', [{ size: '3', dir: 1 }]],
@@ -153,6 +154,27 @@
         summary.length ? h('ul', { class: 'plain harm-summary' }, summary) : null,
         h('p', { class: 'muted', style: 'font-size:.86rem' }, '음정 표기: M 장, m 단, P 완전, d 감, A 증. 멜로디가 스케일 밖 음이면 기준 스케일 음에서 변한 반음만큼 화음도 함께 옮겨, 멜로디와 화음 사이의 음정이 유지됩니다.')));
 
+      /* ---- 기타 더블스탑: 멜로디 + 성부 하나 ---- */
+      if (res.voices.length) {
+        const ds = state.ds; if (ds.voice >= res.voices.length) ds.voice = 0;
+        const vNotes = res.voices[ds.voice];
+        const steps = res.melody.map((m, i) => {
+          const v = vNotes[i]; const up = v.midi > m.midi;
+          const lo = (up ? m.midi : v.midi) + ds.octave, hi = (up ? v.midi : m.midi) + ds.octave;
+          return { lo, hi, num: v.iv ? v.iv.num : 3, labels: up ? [N.pretty(v.name), N.pretty(m.name)] : [N.pretty(m.name), N.pretty(v.name)] };
+        });
+        const dsBox = GH.doublestops.view(steps, { gap: ds.gap, allowOpen: ds.allowOpen, maxFret: ds.maxFret, tempo: () => state.tempo, pref });
+        el.appendChild(section('기타 더블스탑으로 치기',
+          h('p', { class: 'muted' }, '멜로디와 성부 하나를 두 줄에 나눠 동시에 누르는 운지로 바꿉니다. 두 음의 프렛 차이는 3칸 이하로 제한하고, 앞 운지에서 손이 가장 적게 움직이는 자리를 골라 이어 줍니다. 튜닝과 카포는 설정을 따릅니다.'),
+          h('div', { class: 'toolbar' },
+            h('label', null, '성부', select({ options: res.voices.map((v, i) => ({ value: i, label: '성부 ' + (i + 1) + ' · ' + HM.cfgLabel(state.voices[i]) })), value: ds.voice, onChange: v => { ds.voice = Number(v); rerender(); } })),
+            h('label', null, '줄 규칙', select({ options: GH.doublestops.GAP_OPTIONS, value: ds.gap, onChange: v => { ds.gap = v; rerender(); } })),
+            h('label', null, '최대', select({ options: GH.doublestops.FRET_OPTIONS, value: ds.maxFret, onChange: v => { ds.maxFret = Number(v); rerender(); } })),
+            h('label', null, '옥타브', select({ options: [{ value: 0, label: '입력한 높이' }, { value: 12, label: '한 옥타브 위' }, { value: -12, label: '한 옥타브 아래' }], value: ds.octave, onChange: v => { ds.octave = Number(v); rerender(); } })),
+            h('label', null, h('input', { type: 'checkbox', checked: ds.allowOpen, onchange: e => { ds.allowOpen = e.target.checked; rerender(); } }), '개방현 허용')),
+          dsBox,
+          h('div', { class: 'toc' }, h('a', { href: '#/guitar/doublestops' }, '스케일 더블스탑 패턴 연습 →'))));
+      }
       el.appendChild(callout(h('b', null, '듣는 요령. '), '다이어토닉 3도 위는 가장 무난한 화음입니다. 장3도와 단3도가 섞이며 키 안에서 자연스럽게 움직입니다. 6도 아래는 3도 위를 한 옥타브 내린 것과 같은 음이라 더 넓게 들립니다. 5도 위에서 7번째 음 위에 감5도가 생기는 곳은 긴장이 큰 자리라 짧게 지나가는 편이 좋습니다.'));
       el.appendChild(h('div', { class: 'toc' },
         h('a', { href: GH.router.href('/tools/melody', { notes: GH.melodyInput.toText(state.notes, pref, state.names), key }) }, '이 멜로디에 코드 붙이기 →'),

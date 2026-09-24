@@ -21,11 +21,11 @@
   const PROGS = ['I-IV-V', 'I-V-vi-IV', 'ii-V-I', 'I-vi-IV-V', 'i-VII-VI-VII', 'andalusian', 'I-bVII-IV', 'blues12'];
   const ROOT_POOLS = { basic: { ko: 'I · IV · V (기본 3코드)', degs: [0, 3, 4] }, main: { ko: 'I · ii · IV · V · vi', degs: [0, 1, 3, 4, 5] }, all: { ko: '다이어토닉 7개 전부', degs: [0, 1, 2, 3, 4, 5, 6] } };
   const DIR_KO = { asc: '상행', desc: '하행', harm: '동시' };
-  const TAB_LIST = [{ id: 'degree', label: '계이름' }, { id: 'interval', label: '음정' }, { id: 'root', label: '진행 근음' }, { id: 'chord', label: '코드 퀄리티' }, { id: 'mode', label: '모드' }, { id: 'prog', label: '코드 진행' }];
+  const TAB_LIST = [{ id: 'degree', label: '계이름' }, { id: 'interval', label: '음정' }, { id: 'root', label: '진행 근음' }, { id: 'chord', label: '코드 퀄리티' }, { id: 'mode', label: '모드' }, { id: 'prog', label: '코드 진행' }, { id: 'rhythm', label: '리듬' }];
 
   const state = {
     tab: 'degree',
-    settings: { degree: { keyMode: 'fixed', ref: 'scale', range: '1' }, interval: { dir: 'asc', set: 'scale' }, root: { len: '1', pool: 'basic', ref: 'cadence', sevenths: '0' }, chord: { set: 'triads' }, mode: {}, prog: {} },
+    settings: { degree: { keyMode: 'fixed', ref: 'scale', range: '1' }, interval: { dir: 'asc', set: 'scale' }, root: { len: '1', pool: 'basic', ref: 'cadence', sevenths: '0' }, chord: { set: 'triads' }, mode: {}, prog: {}, rhythm: { level: '1', tempo: 80 } },
     scores: {}, key: null, refDone: false, current: null, answered: false, lastPick: null, lastOk: false, picks: []
   };
   const score = tab => state.scores[tab] || (state.scores[tab] = { ok: 0, total: 0, streak: 0, best: 0 });
@@ -221,6 +221,29 @@
         h('a', { class: 'btn small', href: GH.app.progHref(c.answer, c.key) }, '진행 페이지 →'), h('a', { class: 'btn small', href: GH.app.backingHref(c.answer, c.key) }, '백킹 트랙 →')],
       tips: ['첫 코드가 메이저인지 마이너인지, 그리고 몇 번째 코드에서 마이너로 떨어지는지를 들으면 절반은 맞힐 수 있습니다.'],
       links: [['#/theory/progressions', '코드 진행 목록 →']]
+    },
+    rhythm: {
+      title: '리듬 듣고 맞히기',
+      prompt: '한 마디 카운트 뒤에 리듬 한 마디를 들려줍니다. 들은 리듬과 같은 악보를 고르세요. 작은 클릭이 박을 알려 줍니다.',
+      optsClass: 'rhythm-opts',
+      make() {
+        const s = state.settings.rhythm; const pool = GH.data.rhythms.filter(r => String(r.level) === String(s.level));
+        const ans = pick(pool); const others = pool.filter(r => r.id !== ans.id).sort(() => Math.random() - 0.5).slice(0, 3);
+        const options = [ans].concat(others).sort(() => Math.random() - 0.5).map(r => r.id);
+        return { answer: ans.id, options, label: v => GH.render.rhythmMini(GH.data.rhythms.find(r => r.id === v).p) };
+      },
+      play(c) { const r = GH.data.rhythms.find(x => x.id === c.answer); GH.rhythm.playPattern(GH.rhythm.parse(r.p), { tempo: state.settings.rhythm.tempo, countIn: 1, click: true }); },
+      settings: box => [
+        h('label', null, '단계', select({ options: Object.entries(GH.data.rhythmLevels).map(([v, l]) => ({ value: v, label: v + '. ' + l })), value: state.settings.rhythm.level, onChange: v => { state.settings.rhythm.level = v; refresh(box); } })),
+        h('label', null, '템포', select({ options: [60, 70, 80, 90, 100, 110].map(n => ({ value: n, label: n + ' BPM' })), value: state.settings.rhythm.tempo, onChange: v => { state.settings.rhythm.tempo = Number(v); } }))
+      ],
+      explain: c => {
+        const find = id => GH.data.rhythms.find(r => r.id === id);
+        const playR = id => GH.rhythm.playPattern(GH.rhythm.parse(find(id).p), { tempo: state.settings.rhythm.tempo, countIn: 1, click: true });
+        return [h('span', null, '정답은 초록으로 표시된 악보입니다.'), btn('▶ 정답 다시 듣기', () => playR(c.answer)), state.lastOk ? null : btn('▶ 내가 고른 리듬', () => playR(state.lastPick)), h('a', { class: 'btn small', href: '#/rhythm?tab=tap' }, '따라 치기 연습 →')];
+      },
+      tips: ['박마다 "하나 둘 셋 넷"을 속으로 세면서, 소리가 박 위에 있는지 박 사이에 있는지를 먼저 구분하세요.', '쉼표가 있는 리듬은 소리가 비는 자리를 찾는 문제입니다. 16분음표와 셋잇단은 한 박을 몇 개로 나눴는지 들어 보세요.'],
+      links: [['#/rhythm?tab=tap', '리듬 따라 치기 →'], ['#/rhythm', '메트로놈 →']]
     }
   };
 
@@ -283,7 +306,7 @@
     if (state.answered) feedback.appendChild(h('div', { class: 'row' }, h('b', { style: 'font-size:1.02rem' }, state.lastOk ? '정답!' : '아쉽다.'), Q.explain(c)));
     else feedback.appendChild(h('span', { class: 'muted' }, c.multi > 1 ? '▶ 문제 듣기를 누른 뒤 코드 순서대로 근음의 계이름을 고르세요. 키보드: 숫자 = 답, Space = 다시 듣기, Enter = 다음 문제.' : '▶ 문제 듣기를 누른 뒤 답을 고르세요. 키보드: 숫자 = 답 고르기, Space = 다시 듣기, Enter = 다음 문제.'));
     card.appendChild(feedback);
-    const opts = h('div', { class: 'quiz-opts' });
+    const opts = h('div', { class: 'quiz-opts' + (Q.optsClass ? ' ' + Q.optsClass : '') });
     const answerSet = state.answered ? new Set(c.answer.split('-')) : null; const pickSet = state.answered ? new Set(state.lastPick.split('-')) : null;
     c.options.forEach((v, i) => {
       const cls = 'btn' + (state.answered ? (answerSet.has(v) ? ' correct' : (pickSet.has(v) ? ' wrong' : '')) : '');
@@ -316,6 +339,7 @@
 
   GH.pages['/ear'] = {
     title: '이어 트레이닝',
+    staff: true,
     render(el, params) {
       const qy = params.query || {};
       if (qy.tab && QUIZZES[qy.tab]) state.tab = qy.tab;

@@ -104,16 +104,17 @@
     pass();
     return ctl;
   }
-  /* 릭 재생. lick.notes 이벤트, opts: {tempo, feel, onNote(i), transpose} */
+  /* 릭 재생. lick.notes 이벤트, opts: {tempo, feel, onNote(i), transpose, tuning(기본 스탠다드), onStart(t0)} */
   function playLick(lick, opts) {
     opts = opts || {};
     const tempo = opts.tempo || lick.tempo || 100, beat = 60 / tempo;
     const feel = opts.feel || lick.feel;
     const tr = opts.transpose || 0;
-    const tun = GH.voicings.STD;
+    const tun = opts.tuning || GH.voicings.STD;
     const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
     ctl.loop = !!opts.loop;
     let passStart = A.now() + 0.1;
+    if (opts.onStart) opts.onStart(passStart, beat);
     const swingPos = pos => { const fl = Math.floor(pos), fr = pos - fl; return feel === 'swing' || feel === 'shuffle' ? (Math.abs(fr - 0.5) < 0.01 ? fl + 2 / 3 : fl + fr) : pos; };
     function pass() {
       let pos = 0; let prevMidi = null;

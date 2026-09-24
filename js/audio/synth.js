@@ -401,6 +401,12 @@
     } else if (type === 'shaker') {
       noiseHit(out, t0, .12 * v, .078, 'bandpass', 5150 + Math.random() * 400, .85, .2);
       noiseHit(out, t0 + .009, .045 * v, .045, 'highpass', 7800, .35, .26);
+    } else if (type === 'tick') { /* 메트로놈 분할음: 작고 짧게 */
+      oscHit(master, t0, 'sine', 880, 840, .05 * Math.min(1.6, v), .02, 0);
+    } else if (type === 'wood') { /* 리듬 패턴용 우드블록 */
+      oscHit(out, t0, 'sine', 1180, 1050, .2 * v, .06, 0);
+      oscHit(out, t0, 'triangle', 2350, 2100, .05 * v, .03, 0);
+      noiseHit(out, t0, .05 * v, .012, 'bandpass', 3000, 2, 0);
     } else if (type === 'click') {
       const f = v > 1 ? 1560 : 1120;
       oscHit(master, t0, 'sine', f, f * .92, v > 1 ? .16 : .105, .038, 0);
