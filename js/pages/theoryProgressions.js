@@ -25,7 +25,7 @@
       value: genre,
       onChange: v => GH.router.go('/theory/progressions', { genre: v === 'all' ? null : v, key: qy.key || null })
     })));
-    const list = GH.data.progressions.filter(p => genre === 'all' || p.genres.includes(genre));
+    const list = GH.data.progressions.filter(p => genre === 'all' || p.genres.includes(genre)).sort((a, b) => a.level - b.level); /* 쉬운 것부터 */
     const grid = h('div', { class: 'grid cols-4' });
     list.forEach(p => grid.appendChild(h('a', {
       class: 'card link',

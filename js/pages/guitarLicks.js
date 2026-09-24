@@ -28,7 +28,7 @@
       el.appendChild(h('p', { class: 'muted' }, '장르, 코드 상황, 난이도로 찾습니다. 모든 릭은 TAB과 오선, 느린 재생, 지판 애니메이션, 음마다 코드에 대한 도수 분석을 제공합니다. 릭은 전부 이 사이트를 위해 만든 예제입니다.'));
       const gChips = chips({ options: [{ value: 'all', label: '모든 장르' }].concat(Object.entries(GH.data.lickGenres).map(([k, v]) => ({ value: k, label: v }))), value: filter.genre, onChange: v => setFilter('genre', v) });
       const cChips = chips({ options: [{ value: 'all', label: '모든 상황' }].concat(Object.entries(GH.data.lickContexts).map(([k, v]) => ({ value: k, label: v }))), value: filter.context, onChange: v => setFilter('context', v) });
-      const lSel = select({ options: [{ value: 'all', label: '모든 난이도' }, { value: '1', label: '♪ 1' }, { value: '2', label: '♪♪ 2' }, { value: '3', label: '♪♪♪ 3' }, { value: '4', label: '♪♪♪♪ 4' }, { value: '5', label: '♪♪♪♪♪ 5' }], value: filter.level, onChange: v => setFilter('level', v) });
+      const lSel = select({ options: [{ value: 'all', label: '모든 난이도' }, { value: '1', label: 'p 입문' }, { value: '2', label: 'mp 기초' }, { value: '3', label: 'mf 중급' }, { value: '4', label: 'f 중상급' }, { value: '5', label: 'ff 고급' }], value: filter.level, onChange: v => setFilter('level', v) });
       el.appendChild(h('div', { class: 'toolbar', style: 'flex-direction:column;align-items:flex-start;gap:8px' }, gChips, cChips, h('label', null, '난이도', lSel)));
       let list = GH.data.licks.slice();
       if (filter.genre !== 'all') list = list.filter(l => l.genre === filter.genre);
@@ -36,6 +36,7 @@
       if (filter.level !== 'all') list = list.filter(l => String(l.difficulty) === filter.level);
       if (filter.q) list = list.filter(l => (l.qIds || []).includes(filter.q));
       if (!list.length) { el.appendChild(GH.ui.empty('조건에 맞는 릭이 없습니다.')); return; }
+      list.sort((a, b) => a.difficulty - b.difficulty); /* 쉬운 것부터 */
       const wrap = h('div', { class: 'list' });
       list.forEach(l => wrap.appendChild(h('a', { class: 'list-item', href: A.lickHref(l.id), style: 'color:inherit' },
         h('div', { style: 'min-width:70px' }, GH.ui.difficulty(l.difficulty)),

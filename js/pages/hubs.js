@@ -8,19 +8,19 @@
     { n: 1, level: 1, title: '음과 인터벌: 소리의 거리 재기', what: '기타 지판에서 음을 찾고, 두 음 사이의 거리(인터벌)를 귀와 눈으로 익힙니다.',
       todo: ['지판을 눌러 소리를 들으며 같은 음이 어디에 또 있는지 찾아보세요.', '퍼펙트 5도(스타워즈), 메이저 3도(나비야)처럼 노래로 인터벌을 기억하세요.'],
       links: [['#/learn/notes', '기초 코스 1 · 2장'], ['#/theory/intervals', '인터벌 표'], ['#/tools/finder', '지판 눌러 보기'], ['#/ear?tab=interval', '인터벌 퀴즈']] },
-    { n: 2, level: 1, title: '코드: 음을 쌓아 화음 만들기', what: '메이저 · 마이너 트라이어드에서 세븐 코드까지, 코드가 어떻게 만들어지는지 보고 듣습니다.',
+    { n: 2, level: 2, title: '코드: 음을 쌓아 화음 만들기', what: '메이저 · 마이너 트라이어드에서 세븐 코드까지, 코드가 어떻게 만들어지는지 보고 듣습니다.',
       todo: ['코드 빌더에서 C, Am, F, G 를 차례로 듣고 밝음/어두움을 비교하세요.', '오픈 코드 폼으로 같은 코드를 기타에서 잡아 보세요.'],
       links: [['#/learn/triad', '기초 코스 3장'], ['#/theory/chords', '코드 빌더'], ['#/guitar/voicings/basic?types=open,caged', '기본 코드 폼'], ['#/ear?tab=chord', '코드 퀄리티 퀴즈']] },
-    { n: 3, level: 1, title: '키와 스케일: 어떤 음을 쓸까', what: '메이저 스케일과 펜타토닉으로 키 안의 음을 익히고, 계이름(도레미)으로 듣는 상대음감을 시작합니다.',
+    { n: 3, level: 2, title: '키와 스케일: 어떤 음을 쓸까', what: '메이저 스케일과 펜타토닉으로 키 안의 음을 익히고, 계이름(도레미)으로 듣는 상대음감을 시작합니다.',
       todo: ['마이너 펜타토닉 박스 1을 외우고 연습 패턴을 따라 치세요.', '계이름 퀴즈로 스케일 안에서 음의 위치를 듣는 연습을 하세요.'],
       links: [['#/learn/majorscale', '기초 코스 5장'], ['#/guitar/scales?scale=minor_pent', '펜타토닉 박스'], ['#/theory/scales', '스케일 이론'], ['#/ear?tab=degree', '계이름 퀴즈']] },
-    { n: 4, level: 2, title: '코드 진행: 코드가 움직이는 이유', what: '토닉 · 프리도미넌트 · 도미넌트 기능과 장르별 필수 진행을 익히고, 백킹 트랙 위에서 연주합니다.',
+    { n: 4, level: 3, title: '코드 진행: 코드가 움직이는 이유', what: '토닉 · 프리도미넌트 · 도미넌트 기능과 장르별 필수 진행을 익히고, 백킹 트랙 위에서 연주합니다.',
       todo: ['I – V – vi – IV 와 ii – V – I 을 듣고 토닉으로 해결되는 느낌을 비교해 보세요.', '백킹 트랙을 틀고 코드톤만으로 솔로해 보세요.'],
       links: [['#/learn/function', '기초 코스 6장'], ['#/theory/progressions', '코드 진행'], ['#/backing', '백킹 트랙'], ['#/ear?tab=root', '루트 진행 퀴즈'], ['#/ear?tab=prog', '진행 맞히기']] },
-    { n: 5, level: 2, title: '곡으로 연결하기', what: '실제 곡 형태의 진행을 마디별로 분석하고, 릭을 배워 진행 위에 얹습니다. 멜로디에 코드를 붙여 보기도 합니다.',
+    { n: 5, level: 4, title: '곡으로 연결하기', what: '실제 곡 형태의 진행을 마디별로 분석하고, 릭을 배워 진행 위에 얹습니다. 멜로디에 코드를 붙여 보기도 합니다.',
       todo: ['곡 분석에서 마디를 하나씩 눌러 스케일과 보이싱을 확인하세요.', '멜로디 → 코드 도구에 좋아하는 멜로디를 넣어 반주를 만들어 보세요.'],
       links: [['#/songs', '곡 분석'], ['#/guitar/licks', '릭'], ['#/tools/melody', '멜로디 → 코드']] },
-    { n: 6, level: 3, title: '심화: 모드, 리하모니제이션, 재즈 보이싱', what: '같은 음으로 다른 색을 내는 모드, 코드를 바꾸는 리하모니제이션, 드롭 2 보이싱과 보이스 리딩까지.',
+    { n: 6, level: 5, title: '심화: 모드, 리하모니제이션, 재즈 보이싱', what: '같은 음으로 다른 색을 내는 모드, 코드를 바꾸는 리하모니제이션, 드롭 2 보이싱과 보이스 리딩까지.',
       todo: ['도리안과 에올리안을 같은 루트에서 번갈아 듣고 특징음을 찾으세요.', 'ii – V – I 을 드롭 2 보이싱으로 한 현 세트 안에서 연결해 보세요.'],
       links: [['#/theory/modes', '모드'], ['#/theory/reharm', '리하모니제이션'], ['#/guitar/voicings/advanced?q=7&types=drop2', '드롭 2 보이싱'], ['#/ear?tab=mode', '모드 퀴즈']] }
   ];
@@ -61,7 +61,7 @@
       render(el) {
         const A = GH.app; const sec = A.SECTIONS.find(x => x.id === id);
         el.appendChild(hubHead(sec, sec.label, sec.desc));
-        const basic = sec.items.filter(it => it[2] === 1), more = sec.items.filter(it => it[2] > 1);
+        const basic = sec.items.filter(it => it[2] <= 2), more = sec.items.filter(it => it[2] > 2);
         let n = 0;
         const card = ([p, label, level, desc]) => { n++; return h('a', { href: '#' + p, class: 'card link hub-card' },
           h('div', { class: 'hub-card-top' }, h('span', { class: 'hub-ic', 'aria-hidden': 'true' }, I(GH.icon.forRoute(p))), h('span', { class: 'hub-num', 'aria-hidden': 'true' }, String(n).padStart(2, '0'))),

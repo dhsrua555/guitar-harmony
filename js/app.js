@@ -8,27 +8,27 @@
   const SECTIONS = [
     { id: 'learn', label: '배우기', en: 'LEARN', icon: 'learn', color: 'pink', path: '/learn', desc: '처음이라면 여기서부터. 레슨 한 장에 개념 하나씩 배우는 기초 코스와 로드맵.', items: [] },
     { id: 'guitar', label: '기타', en: 'GUITAR', icon: 'guitar', color: 'sun', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾습니다.', items: [
-      ['/guitar/voicings', '코드 보이싱', 1, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
-      ['/guitar/scales', '스케일 포지션', 1, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
-      ['/guitar/triads', '트라이어드 · 아르페지오', 2, '현 세트별 트라이어드 인버전과 코드톤 아르페지오'],
-      ['/guitar/doublestops', '더블스탑', 2, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
-      ['/guitar/phrasing', '솔로 프레이즈 만들기', 2, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
-      ['/guitar/licks', '릭', 2, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
+      ['/guitar/voicings', '코드 보이싱', 2, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
+      ['/guitar/scales', '스케일 포지션', 2, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
+      ['/guitar/triads', '트라이어드 · 아르페지오', 3, '현 세트별 트라이어드 인버전과 코드톤 아르페지오'],
+      ['/guitar/doublestops', '더블스탑', 4, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
+      ['/guitar/phrasing', '솔로 프레이즈 만들기', 4, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
+      ['/guitar/licks', '릭', 3, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
     { id: 'theory', label: '화성학', en: 'THEORY', icon: 'piano', color: 'sky', path: '/theory', desc: '코드와 스케일이 왜 그렇게 들리는지 이해합니다.', items: [
       ['/theory/intervals', '인터벌', 1, '두 음 사이의 거리. 모든 이론의 출발점'],
-      ['/theory/chords', '코드', 1, '코드 빌더, 코드 퀄리티, 다이어토닉 코드, 표기법'],
-      ['/theory/scales', '스케일', 1, '스케일 구조, 5도권, 코드 스케일, 하모나이제이션'],
-      ['/theory/progressions', '코드 진행', 2, '장르별 필수 진행을 듣고 기능을 분석'],
-      ['/theory/modes', '모드', 3, '7모드의 밝기와 특징음, 멜로딕/하모닉 마이너 모드'],
-      ['/theory/reharm', '리하모니제이션', 3, '멜로디는 두고 코드를 바꾸는 기법']] },
+      ['/theory/chords', '코드', 2, '코드 빌더, 코드 퀄리티, 다이어토닉 코드, 표기법'],
+      ['/theory/scales', '스케일', 2, '스케일 구조, 5도권, 코드 스케일, 하모나이제이션'],
+      ['/theory/progressions', '코드 진행', 3, '장르별 필수 진행을 듣고 기능을 분석'],
+      ['/theory/modes', '모드', 5, '7모드의 밝기와 특징음, 멜로딕/하모닉 마이너 모드'],
+      ['/theory/reharm', '리하모니제이션', 5, '멜로디는 두고 코드를 바꾸는 기법']] },
     { id: 'practice', label: '연습', en: 'PRACTICE', icon: 'headphones', color: 'olive', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
       ['/ear', '이어 트레이닝', 1, '계이름, 인터벌, 코드, 진행을 듣고 맞히는 퀴즈'],
-      ['/backing', '백킹 트랙', 1, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
+      ['/backing', '백킹 트랙', 2, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
       ['/rhythm', '리듬 연습', 1, '메트로놈, 리듬 따라 치기, 스트럼 패턴'],
       ['/tools/finder', '코드 파인더', 1, '지판을 눌러 잡은 모양의 코드 이름 찾기'],
-      ['/tools/melody', '멜로디 → 코드', 2, '멜로디를 넣으면 어울리는 코드를 제안'],
-      ['/tools/harmony', '멜로디 화음 쌓기', 2, '멜로디 위아래에 3도·5도·6도 하모니 라인을 쌓아 듣기'],
-      ['/songs', '곡 분석', 2, '마디별 코드에 스케일, 보이싱, 릭을 연결'],
+      ['/tools/melody', '멜로디 → 코드', 3, '멜로디를 넣으면 어울리는 코드를 제안'],
+      ['/tools/harmony', '멜로디 화음 쌓기', 4, '멜로디 위아래에 3도·5도·6도 하모니 라인을 쌓아 듣기'],
+      ['/songs', '곡 분석', 4, '마디별 코드에 스케일, 보이싱, 릭을 연결'],
       ['/glossary', '용어집', 1, '한글 · 영어 음악 용어 사전']] }
   ];
   function sectionOf(path) {
@@ -129,14 +129,13 @@
     pxRaf = requestAnimationFrame(() => { pxRaf = 0; const y = window.scrollY; pxEls.forEach(e => { e.style.transform = 'translateY(' + (y * Number(e.dataset.speed)).toFixed(1) + 'px)'; }); });
   }
   function motionScan() { revealScan(); pxEls = reduceMotion() ? [] : Array.from(document.querySelectorAll('#app [data-speed]')); onScroll(); }
-  const LEVEL_KO = { 1: '기초', 2: '중급', 3: '고급' };
-  /* 난이도는 셈여림 기호로: p 여리게 → ff 아주 세게 */
-  const LEVEL_DYN = { 1: 'p', 2: 'mf', 3: 'ff' };
+  /* 난이도는 셈여림 기호 다섯 단계 (ui.js 의 LEVELS): p 입문 · mp 기초 · mf 중급 · f 중상급 · ff 고급 */
+  const LEVEL_KO = {}; Object.keys(GH.ui.LEVELS).forEach(k => { LEVEL_KO[k] = GH.ui.LEVELS[k].dyn + ' ' + GH.ui.LEVELS[k].ko; });
 
   /* ---- 공용 헬퍼 ---- */
   const app = {
     SECTIONS, LEVEL_KO, sectionOf, parentOf,
-    levelBadge(level) { return h('span', { class: 'lvl lv' + level, title: '난이도: ' + (LEVEL_KO[level] || '') }, h('i', { class: 'dyn', 'aria-hidden': 'true' }, LEVEL_DYN[level] || ''), LEVEL_KO[level] || ''); },
+    levelBadge(level) { return GH.ui.level(level); },
     key() { return GH.state.get().key; },
     pref(root) { return GH.state.pref(root); },
     chordHref(root, qId) { return '#/chord/' + encodeURIComponent(root) + '/' + qId; },

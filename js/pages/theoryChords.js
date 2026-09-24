@@ -56,13 +56,13 @@
   function renderTypes(el, root, pref) {
     const A = GH.app; const C = GH.chords;
     const by = state.group;
-    el.appendChild(h('div', { class: 'toolbar' }, h('label', null, '분류', select({ options: [{ value: 'category', label: '구성별 (트라이어드 · sus · 7th · 텐션 …)' }, { value: 'family', label: '계열별 (메이저 · 마이너 · 도미넌트 …)' }, { value: 'level', label: '난이도별 (기초 → 고급)' }], value: by, onChange: v => { state.group = v; GH.router.go('/theory/chords', { root, q: state.q, tab: 'types', group: v }); } })), h('span', { class: 'muted' }, '코드 퀄리티 ' + C.QUALITIES.length + '개. 행을 누르면 코드 빌더로 이동합니다.')));
+    el.appendChild(h('div', { class: 'toolbar' }, h('label', null, '분류', select({ options: [{ value: 'category', label: '구성별 (트라이어드 · sus · 7th · 텐션 …)' }, { value: 'family', label: '계열별 (메이저 · 마이너 · 도미넌트 …)' }, { value: 'level', label: '난이도별 (p 입문 → ff 고급)' }], value: by, onChange: v => { state.group = v; GH.router.go('/theory/chords', { root, q: state.q, tab: 'types', group: v }); } })), h('span', { class: 'muted' }, '코드 퀄리티 ' + C.QUALITIES.length + '개. 행을 누르면 코드 빌더로 이동합니다.')));
     const rows = list => table(['심벌', '이름', '난이도', '구성음(도수)', '텐션', '어보이드 노트', '주요 스케일 후보'], list.map(q => ({ onClick: () => GH.router.go('/theory/chords', { root, q: q.id, tab: 'builder' }), cells: [h('b', null, N.pretty(root) + (q.sym || '')), q.ko, A.levelBadge(q.level), h('span', null, q.intervals.map(iv => h('span', { class: 'pill ' + N.ivClass(iv) }, iv))), q.tensions.join(' ') || '–', q.avoid.join(' ') || '–', (q.scales || []).slice(0, 2).map(s => GH.scales.get(s) ? GH.scales.get(s).ko : s).join(', ')] })));
     if (by === 'family') {
       const groups = GH.util.groupBy(C.QUALITIES, q => q.family);
       Object.keys(FAMILY_KO).forEach(fam => { const list = groups[fam]; if (!list) return; el.appendChild(section(FAMILY_KO[fam] + ' (' + list.length + ')', rows(list))); });
     } else if (by === 'level') {
-      [1, 2, 3].forEach(lv => { const list = C.QUALITIES.filter(q => q.level === lv); if (!list.length) return; el.appendChild(section(C.LEVEL_KO[lv] + ' (' + list.length + ')', h('p', { class: 'muted' }, lv === 1 ? '팝과 록의 기본 진행에 자주 쓰이는 코드입니다.' : lv === 2 ? '재즈 · 네오소울 · 보사노바에서 자주 쓰이는 확장 코드입니다.' : '변화 텐션과 특수한 구조를 포함한 고급 코드입니다.'), rows(list))); });
+      [1, 2, 3, 4, 5].forEach(lv => { const list = C.QUALITIES.filter(q => q.level === lv); if (!list.length) return; el.appendChild(section(C.LEVEL_KO[lv] + ' (' + list.length + ')', h('p', { class: 'muted' }, ['', '팝 · 록 반주에서 가장 먼저 쓰는 코드입니다.', '발라드 · 포크에 자주 나오고, 재즈 코드로 넘어가는 다리가 되는 코드입니다.', '재즈 · 네오소울 · 보사노바에서 자주 쓰는 확장 코드입니다.', '변화 텐션이 들어간 도미넌트와 색이 짙은 확장 코드입니다.', '텐션을 여러 개 겹친, 보이싱을 신경 써야 하는 코드입니다.'][lv]), rows(list))); });
     } else {
       C.CATEGORY_ORDER.forEach(cat => { const list = C.QUALITIES.filter(q => q.category === cat); if (!list.length) return; const sec = section(C.CATEGORY_KO[cat] + ' (' + list.length + ')', h('p', { class: 'muted' }, C.CATEGORY_DESC[cat]), rows(list)); sec.id = 'cat-' + cat; el.appendChild(sec); });
     }

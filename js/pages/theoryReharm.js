@@ -12,7 +12,7 @@
     el.appendChild(h('h1', null, '리하모니제이션'));
     el.appendChild(h('p', { class: 'muted' }, '멜로디를 유지한 채 하모니와 베이스의 움직임을 다시 설계하는 기법입니다. 다이어토닉 대리 코드부터 트라이톤 서브, 모달 인터체인지, 콜트레인 체인지까지 분류별로 정리했습니다.'));
     Object.entries(GH.data.reharmCategories).forEach(([category, label]) => {
-      const items = GH.data.reharm.filter(r => r.category === category);
+      const items = GH.data.reharm.filter(r => r.category === category).sort((a, b) => a.level - b.level);
       if (!items.length) return;
       const grid = h('div', { class: 'grid cols-3' });
       items.forEach(r => grid.appendChild(h('a', { class: 'card link', href: GH.router.href(detailPath(r.id)), style: 'color:inherit' },

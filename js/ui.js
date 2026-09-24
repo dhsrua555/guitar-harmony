@@ -122,8 +122,14 @@
     /* notes: [{label, cls, title}] */
     return h('div', { class: 'note-list' }, notes.map(n => h('span', { class: 'pill ' + (n.cls || 'iv-s') + (n.dim ? ' dim' : ''), title: n.title || '' }, n.label)));
   }
-  /* 난이도: 음표 다섯 개 중 채워진 수 */
-  function difficulty(n) { return h('span', { class: 'difficulty', title: '난이도 ' + n + '/5', 'aria-label': '난이도 ' + n + '/5' }, [1, 2, 3, 4, 5].map(i => GH.icon('note', { cls: i <= n ? 'on' : 'off' }))); }
+  /* 난이도: 셈여림 기호 다섯 단계. p 여리게(입문) → ff 아주 세게(고급). 사이트 전체가 같은 배지를 쓴다 */
+  const LEVELS = { 1: { dyn: 'p', ko: '입문' }, 2: { dyn: 'mp', ko: '기초' }, 3: { dyn: 'mf', ko: '중급' }, 4: { dyn: 'f', ko: '중상급' }, 5: { dyn: 'ff', ko: '고급' } };
+  function level(n) {
+    const L = LEVELS[n]; if (!L) return null;
+    return h('span', { class: 'lvl lv' + n, title: '난이도 ' + L.dyn + ' · ' + L.ko + ' (5단계 중 ' + n + '단계)' }, h('i', { class: 'dyn', 'aria-hidden': 'true' }, L.dyn), L.ko);
+  }
+  function difficulty(n) { return level(n); }
+  function noteDifficulty(n) { return h('span', { class: 'difficulty', title: '난이도 ' + n + '/5', 'aria-label': '난이도 ' + n + '/5' }, [1, 2, 3, 4, 5].map(i => GH.icon('note', { cls: i <= n ? 'on' : 'off' }))); }
 
   /* ---- 유틸 ---- */
   const util = {
@@ -183,7 +189,7 @@
     return wrap;
   }
 
-  GH.ui = { h, svg, clear, select, chips, button, section, table, badge, empty, notice, callout, kv, link, tabs, legend, pills, difficulty, numberInput, rangeNumber };
+  GH.ui = { h, svg, clear, select, chips, button, section, table, badge, empty, notice, callout, kv, link, tabs, legend, pills, difficulty, level, LEVELS, noteDifficulty, numberInput, rangeNumber };
   GH.events = events;
   GH.util = util;
 })();

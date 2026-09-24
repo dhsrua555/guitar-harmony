@@ -152,7 +152,7 @@
       const secs = A.SECTIONS.filter(s => s.items.length);
       el.appendChild(h('section', { class: 'band band-pink curve-top home-more' },
         h('div', { class: 'wrap reveal' },
-          displayHead('더 깊이 들어가기', 'DEEP DIVE', '기초는 앞에, 심화는 뒤에 있습니다. 옆의 p · mf · ff 는 난이도입니다.'),
+          displayHead('더 깊이 들어가기', 'DEEP DIVE', '기초는 앞에, 심화는 뒤에 있습니다. 옆의 p · mp · mf · f · ff 는 난이도예요 (p 입문 → ff 고급).'),
           h('div', { class: 'home-more-grid' }, secs.map(s => h('div', { class: 'home-more-col' },
             h('a', { class: 'home-more-head', href: '#' + s.path }, h('span', { class: 'hm-ic', 'aria-hidden': 'true' }, I(s.icon)), h('span', null, s.label, h('small', null, s.en))),
             h('ul', { class: 'plain home-more-list' }, s.items.map(([p, label, level]) => h('li', null, h('a', { href: '#' + p }, I(GH.icon.forRoute(p), { cls: 'li-ic' }), label), A.levelBadge(level))))))))));
