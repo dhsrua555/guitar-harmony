@@ -24,6 +24,7 @@
     theme: 'auto',       // auto | light | dark
     volume: 0.8,
     instrument: 'steel', // steel | nylon | electric | piano
+    sound: 'sample',     // sample (실제 악기 녹음) | synth (합성음)
     reverb: 0.3,
     level: 'basic'       // basic | all : 메뉴에 심화 항목 표시 여부
   };

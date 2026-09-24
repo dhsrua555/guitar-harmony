@@ -116,7 +116,70 @@
     else g.connect(chainFor(preset()));
     return g;
   }
-  function setBusGain(name, v) { const g = bus(name); if (g) g.gain.setTargetAtTime(v, context().currentTime, 0.02); }
+  function setBusGain(name, v) { const g = bus(name); if (g) g.gain.setTargetAtTime(v, context().currentTime, 0.02); const sg = sbus(name); if (sg) sg.gain.setTargetAtTime(v, context().currentTime, 0.02); }
+
+  /* ---- 실제 악기 녹음 (samples.js) ----
+     녹음에는 이미 몸통 울림이 들어 있으니 합성음용 필터를 거치지 않고 방 울림과 마스터로 바로 보낸다 */
+  const sbuses = {}; let sampleMain = null;
+  const SAMPLE_LEVEL = 0.4;
+  const useSamples = () => !!GH.samples && (!GH.state || GH.state.get().sound !== 'synth');
+  function sampleChain() {
+    if (sampleMain) return sampleMain;
+    const c = context();
+    const input = c.createGain(); input.gain.value = 1;
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 34; hp.Q.value = 0.5;
+    input.connect(hp); hp.connect(master);
+    const send = c.createGain(); send.gain.value = 0.42; hp.connect(send); send.connect(convolver);
+    sampleMain = input; return input;
+  }
+  function sbus(name) {
+    if (sbuses[name]) return sbuses[name];
+    const c = context(); if (!c) return null;
+    const g = c.createGain(); g.gain.value = buses[name] ? buses[name].gain.value : 1;
+    if (name === 'bass') {
+      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 30; hp.Q.value = 0.5;
+      g.connect(hp); hp.connect(master);
+      const snd = c.createGain(); snd.gain.value = 0.05; hp.connect(snd); snd.connect(convolver);
+    } else g.connect(sampleChain());
+    sbuses[name] = g; return g;
+  }
+  function playSample(v, id, midi, when, dur, opts) {
+    const c = context(); const I = GH.samples.INST[id];
+    const t0 = Math.max(when, c.currentTime + 0.01);
+    const end = t0 + Math.max(0.05, dur);
+    const velocity = opts.gain == null ? 1 : opts.gain;
+    const rate = Math.pow(2, (midi - v.midi) / 12);
+    const src = c.createBufferSource(); src.buffer = v.buf;
+    const pr = src.playbackRate;
+    if (opts.slideFrom) { pr.setValueAtTime(rate * Math.pow(2, opts.slideFrom / 12), t0); pr.linearRampToValueAtTime(rate, t0 + Math.min(0.12, dur * 0.5)); }
+    else if (opts.bend) {
+      pr.setValueAtTime(rate, t0); const top = rate * Math.pow(2, opts.bend / 12);
+      pr.linearRampToValueAtTime(top, t0 + Math.min(0.18, dur * 0.4));
+      if (opts.release) { pr.setValueAtTime(top, end - 0.15); pr.linearRampToValueAtTime(rate, end - 0.02); }
+    } else if (opts.vibrato && dur > 0.3) {
+      pr.value = rate;
+      const steps = 40; const curve = new Float32Array(steps);
+      for (let i = 0; i < steps; i++) { const tt = i / steps; curve[i] = rate * Math.pow(2, (Math.sin(tt * dur * 5.5 * Math.PI * 2) * 0.25 * Math.min(1, tt * 4)) / 12); }
+      try { pr.setValueCurveAtTime(curve, t0 + 0.05, Math.max(0.1, dur - 0.06)); } catch (e) { /* ignore */ }
+    } else pr.value = rate;
+    /* 세기: 약하게 칠수록 작고 어둡게, 짧게 끊는 기타 음은 손바닥으로 누른 듯 더 어둡게 */
+    const vel = Math.max(0.05, Math.min(1.3, velocity));
+    const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.5;
+    const muted = id !== 'piano' && id !== 'bass' && dur < 0.3;
+    const bright = I.soft + (I.bright - I.soft) * Math.pow(Math.min(1, vel), 1.6);
+    tone.frequency.value = Math.min(18000, muted ? bright * 0.55 : bright);
+    const g = c.createGain(); const level = I.gain * Math.pow(vel, 1.25) * SAMPLE_LEVEL;
+    g.gain.setValueAtTime(level, t0);
+    g.gain.setValueAtTime(level, end);
+    g.gain.setTargetAtTime(0, end, I.release / 3.5);
+    const pan = opts.pan != null ? Math.max(-1, Math.min(1, opts.pan)) : id === 'bass' ? 0 : Math.max(-0.22, Math.min(0.22, (midi - 60) * 0.008 + (Math.random() - .5) * .035));
+    const p = panNode(c, pan);
+    src.connect(tone); tone.connect(g); g.connect(p); p.connect(opts.bus ? sbus(opts.bus) : sampleChain());
+    const left = (v.buf.duration - v.offset) / rate;
+    src.start(t0, v.offset); src.stop(t0 + Math.min(left + 0.02, (end - t0) + I.release * 2.2 + 0.05));
+    track(src);
+    return src;
+  }
   function noteOut(opts) {
     if (opts && opts.bus && opts.bus !== 'chords' && opts.bus !== 'melody') return bus(opts.bus);
     if (opts && opts.bus) return bus(opts.bus);
@@ -190,6 +253,7 @@
     const c = context(); if (!c) return null;
     opts = opts || {};
     const id = opts.preset || preset();
+    if (useSamples()) { const v = GH.samples.voice(id, midi); if (v) return playSample(v, id, midi, when, dur, opts); }
     if (PRESETS[id].synth === 'piano') return pianoNote(midi, when, dur, opts);
     const P = PRESETS[id];
     const buf = ksBuffer(id, midi, Math.floor(Math.random() * 4)); if (!buf) return null;
@@ -300,6 +364,7 @@
   function bass(midi, when, dur, opts) {
     const c = context(); if (!c) return null;
     opts = opts || {};
+    if (useSamples()) { const v = GH.samples.voice('bass', midi); if (v) return playSample(v, 'bass', midi, when, dur, Object.assign({}, opts, { bus: opts.bus || 'bass' })); }
     const t0 = Math.max(when, c.currentTime + 0.01);
     const end = t0 + Math.max(0.08, dur);
     const velocity = opts.gain == null ? 1 : opts.gain;
@@ -449,8 +514,15 @@
     return c.state === 'running';
   }
   const GESTURES = ['touchend', 'pointerup', 'mousedown', 'keydown'];
-  function onGesture() { const ok = unlock(); if (ok && (!IOS || silentEl)) GESTURES.forEach(ev => window.removeEventListener(ev, onGesture, true)); }
+  function warmSamples() {
+    if (!useSamples() || !ctx) return;
+    GH.samples.ensure(preset()).then(() => GH.samples.ensure('bass'));
+  }
+  function onGesture() { const ok = unlock(); warmSamples(); if (ok && (!IOS || silentEl)) GESTURES.forEach(ev => window.removeEventListener(ev, onGesture, true)); }
   GESTURES.forEach(ev => window.addEventListener(ev, onGesture, { capture: true, passive: true }));
+  /* 소리를 켜기 전에도 파일만 먼저 받아 둔다 (풀기는 오디오가 켜진 뒤) */
+  setTimeout(() => { if (useSamples()) { const pf = GH.samples.prefetch(preset()); if (pf) pf.then(() => GH.samples.prefetch('bass')).catch(() => {}); } }, 1500);
+  if (GH.events) GH.events.on('settings', () => { if (!useSamples()) return; if (ctx) warmSamples(); else GH.samples.prefetch(preset()); });
   /* 전화 · 잠금 · 앱 전환 뒤에 돌아오면 다시 깨운다 */
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running' && ctx.state !== 'closed') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } });
 

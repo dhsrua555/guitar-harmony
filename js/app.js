@@ -258,6 +258,14 @@
     }
     panel.appendChild(h('h3', { class: 'settings-group' }, '소리'));
     panel.appendChild(field('재생 음색', select({ options: GH.audio.PRESET_ORDER.map(id => ({ value: id, label: GH.audio.PRESETS[id].ko })), value: s.instrument, onChange: v => GH.state.set({ instrument: v }) })));
+    if (GH.samples) {
+      const stTxt = h('small', { class: 'muted sample-status' });
+      const upd = () => { const a = GH.samples.status(GH.state.get().instrument); stTxt.textContent = GH.state.get().sound === 'synth' ? '합성음으로 재생합니다.' : a === 'ready' ? '실제 악기 녹음으로 재생합니다.' : a === 'error' ? '녹음을 받지 못해 합성음으로 재생합니다.' : '녹음을 받는 중이에요. 그동안은 합성음으로 재생합니다.'; };
+      upd(); GH.samples.onChange(upd);
+      const soundSel = select({ options: [{ value: 'sample', label: '실제 악기 녹음 (기본)' }, { value: 'synth', label: '합성음 (데이터 절약)' }], value: s.sound || 'sample', onChange: v => { GH.state.set({ sound: v }); upd(); } });
+      const credit = h('small', { class: 'muted', style: 'font-size:.72rem;line-height:1.5' }, '녹음 출처 (CC BY 3.0): 어쿠스틱 University of Iowa MIS · 일렉 · 베이스 Karoryfer Samples · 클래식 Freesound quartertone · 피아노 Salamander Grand Piano (Alexander Holm), tonejs-instruments 모음');
+      panel.appendChild(field('소리 방식', h('div', { style: 'display:grid;gap:6px' }, soundSel, stTxt, credit)));
+    }
     panel.appendChild(field('볼륨', h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.volume, style: 'width:100%', oninput: e => GH.state.set({ volume: Number(e.target.value) }) })));
     panel.appendChild(field('룸 / 리버브', h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.reverb == null ? 0.3 : s.reverb, style: 'width:100%', oninput: e => GH.state.set({ reverb: Number(e.target.value) }) })));
     panel.appendChild(h('div', { class: 'field' }, h('button', { class: 'btn small', type: 'button', onclick: () => { const A = GH.audio; if (!A.context()) return; const t = A.now() + 0.05; [48, 52, 55, 60].forEach((m, i) => A.pluck(m, t + i * 0.03, 1.8, { gain: 0.9 })); } }, '▶ 톤 미리 듣기')));

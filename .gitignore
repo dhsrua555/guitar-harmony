@@ -3,3 +3,6 @@
 NUL
 # 외부 사이트 참고 캡처 (프로젝트에 포함하지 않음)
 reference/
+
+# 샘플 원본 캐시 (dev/build_samples.py)
+dev/.sample-cache/

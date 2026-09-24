@@ -477,7 +477,8 @@ a.list-item:hover { background:var(--bg-soft); text-decoration:none; }
 .hero-title .ln:nth-child(3) { animation-delay:.16s; }
 .hero-title .hot { color:var(--brand); }
 .hero-lead { max-width:520px; margin:0 0 26px; color:var(--fg-soft); font-size:1.05rem; line-height:1.75; animation:gh-rise .8s var(--ease-out) .24s both; }
-.home-search { position:relative; max-width:600px; animation:gh-rise .8s var(--ease-out) .32s both; }
+/* 등장 애니메이션이 쌓임 맥락을 만들어서, z-index 를 주지 않으면 결과 목록이 뒤의 그림 · 띠 아래로 깔린다 */
+.home-search { position:relative; z-index:40; max-width:600px; animation:gh-rise .8s var(--ease-out) .32s both; }
 .home-search .search-icon { left:19px; }
 .home-search .search-icon .ic { width:21px; height:21px; }
 .home-search input[type=search] { width:100%; height:58px; padding:10px 20px 10px 52px; border:1.5px solid var(--fg); border-radius:var(--pill); background:var(--bg-elev); font-size:1rem; transition:box-shadow .16s ease; }

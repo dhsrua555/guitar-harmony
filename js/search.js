@@ -49,7 +49,7 @@
     });
     GH.data.progressions.forEach(p => add('코드 진행', p.ko, p.en, [p.id].concat(p.genres.map(g => GH.data.genres[g])).concat(p.songs || []), '#/theory/progressions/' + encodeURIComponent(p.id)));
     GH.data.licks.forEach(l => add('릭', l.ko, l.over + ' · ' + GH.data.lickGenres[l.genre], [l.id, l.genre, l.key, l.scale].concat(l.qIds || []), '#/guitar/licks/' + l.id));
-    GH.data.reharm.forEach(r => add('리하모니제이션', r.ko, r.en, [r.id, r.summary], '#/theory/reharm/' + encodeURIComponent(r.id)));
+    GH.data.reharm.forEach(r => add('리하모니', r.ko, r.en, [r.id, r.summary], '#/theory/reharm/' + encodeURIComponent(r.id)));
     GH.data.glossary.forEach(g => add('용어', g.ko, g.en, [g.def.slice(0, 40)], '#/glossary?q=' + encodeURIComponent(g.ko)));
     GH.data.songs.forEach(s => add('곡 분석', s.ko, s.key + ' ' + s.form, [s.id], '#/songs/' + encodeURIComponent(s.id)));
     return ix;
