@@ -15,7 +15,8 @@
 
 - 가장 간단한 방법: `index.html` 을 더블클릭해서 브라우저로 엽니다. (Chrome, Edge 권장)
 - 로컬 서버로 열기: `serve.bat` 을 실행하면 `http://localhost:8080` 에서 열립니다. (Python 이 필요합니다.)
-- 온라인으로 열기: https://claude.ai/artifact/SCJ4UAf3f8DcXpEMCz9JRD (비공개 링크. 페이지의 공유 메뉴에서 다른 사람에게 접근 권한을 줄 수 있습니다.)
+- 웹사이트: https://dhsrua555.github.io/guitar-harmony/ (GitHub Pages. main 브랜치에 올리면 1~2분 뒤 자동으로 바뀝니다.)
+- Claude 아티팩트로 열기: https://claude.ai/artifact/SCJ4UAf3f8DcXpEMCz9JRD
 - 오선 표기(VexFlow)는 인터넷에서 불러오므로 오프라인이면 TAB 만 표시됩니다. 나머지 기능은 전부 오프라인에서 동작합니다.
 
 ## 구성
