@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기타 & 화성학</title>
+<meta name="description" content="기타 코드, 스케일, 코드 진행을 보고 듣고 연습하는 화성학 학습 사이트. 음감 퀴즈, 백킹트랙, 멜로디 코드 찾기 포함.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='16' fill='white' stroke='%23d4d5d1' stroke-width='2'/%3E%3Cpath d='M22 17v25.5a8 8 0 1 1-4-6.9V21l27-6v21.5a8 8 0 1 1-4-6.9V17.9z' fill='%23315f73'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#app">본문으로 바로가기</a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-leading">
+      <button id="back-btn" class="iconbtn back-btn" type="button" title="뒤로" aria-label="뒤로 가기" hidden><span aria-hidden="true">←</span></button>
+      <a class="brand" href="#/" aria-label="기타와 화성학 홈">
+        <span class="brand-mark" aria-hidden="true">♬</span>
+        <span class="brand-copy"><strong>기타 &amp; 화성학</strong><small>GUITAR HARMONY</small></span>
+      </a>
+      <nav class="mainnav" id="mainnav" aria-label="주 메뉴"></nav>
+    </div>
+    <div class="topbar-tools">
+      <label class="keysel"><span>키</span><select id="global-key" title="전체 키" aria-label="전체 키"></select></label>
+      <div class="search" role="search">
+        <span class="search-icon" aria-hidden="true"></span>
+        <input id="search-input" type="search" aria-label="사이트 통합 검색" placeholder="코드, 스케일, 진행 검색" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+        <span class="search-shortcut" aria-hidden="true">/</span>
+        <div id="search-results" class="search-results" role="listbox" hidden></div>
+      </div>
+      <button id="settings-btn" class="iconbtn" type="button" title="설정" aria-label="설정 열기" aria-expanded="false" aria-controls="settings-panel">
+        <span aria-hidden="true">⚙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<nav class="subnav" id="subnav" aria-label="하위 메뉴"></nav>
+<main id="app" class="page" tabindex="-1"></main>
+<footer class="footer">
+  <span><b>기타 &amp; 화성학</b> · 연주와 이론을 연결하는 라이브러리</span>
+  <span id="footer-links"></span>
+</footer>
+<aside id="settings-panel" class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" hidden></aside>
+<div id="settings-backdrop" class="backdrop" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js" async onload="window.GH&&GH.events&&GH.events.emit('vexflow')"></script>
+
+<script src="js/ui.js"></script>
+<script src="js/state.js"></script>
+<script src="js/theory/notes.js"></script>
+<script src="js/theory/chords.js"></script>
+<script src="js/theory/scales.js"></script>
+<script src="js/data/intervals.js"></script>
+<script src="js/data/modes.js"></script>
+<script src="js/data/voicingShapes.js"></script>
+<script src="js/data/progressions.js"></script>
+<script src="js/data/licks.js"></script>
+<script src="js/data/reharm.js"></script>
+<script src="js/data/glossary.js"></script>
+<script src="js/data/songs.js"></script>
+<script src="js/theory/voicings.js"></script>
+<script src="js/theory/positions.js"></script>
+<script src="js/audio/synth.js"></script>
+<script src="js/audio/player.js"></script>
+<script src="js/audio/backing.js"></script>
+<script src="js/render/fretboard.js"></script>
+<script src="js/render/chordDiagram.js"></script>
+<script src="js/render/piano.js"></script>
+<script src="js/render/circle.js"></script>
+<script src="js/render/tab.js"></script>
+<script src="js/render/staff.js"></script>
+<script src="js/search.js"></script>
+<script src="js/pages/home.js"></script>
+<script src="js/pages/hubs.js"></script>
+<script src="js/pages/guitarVoicings.js"></script>
+<script src="js/pages/guitarTriads.js"></script>
+<script src="js/pages/guitarScales.js"></script>
+<script src="js/pages/guitarLicks.js"></script>
+<script src="js/pages/theoryIntervals.js"></script>
+<script src="js/pages/theoryChords.js"></script>
+<script src="js/pages/theoryScales.js"></script>
+<script src="js/pages/theoryModes.js"></script>
+<script src="js/pages/theoryProgressions.js"></script>
+<script src="js/pages/theoryReharm.js"></script>
+<script src="js/pages/chordHub.js"></script>
+<script src="js/pages/songs.js"></script>
+<script src="js/pages/earTraining.js"></script>
+<script src="js/pages/backing.js"></script>
+<script src="js/pages/melody.js"></script>
+<script src="js/pages/glossary.js"></script>
+<script src="js/router.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

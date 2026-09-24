@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>자체 점검</title>
+<link rel="stylesheet" href="../css/style.css">
+<script>
+window.__errors = [];
+window.addEventListener('error', function (e) { window.__errors.push((e.filename || '') + ':' + e.lineno + ' ' + e.message); });
+</script>
+</head>
+<body>
+<header class="topbar"><button id="back-btn" hidden>←</button><a class="brand" href="#/">♪</a><nav class="mainnav" id="mainnav"></nav>
+<div class="topbar-tools"><label class="keysel">키 <select id="global-key"></select></label>
+<div class="search"><input id="search-input" type="search"><div id="search-results" class="search-results" hidden></div></div>
+<button id="settings-btn" class="iconbtn">⚙</button></div></header>
+<nav class="subnav" id="subnav"></nav>
+<main id="app" class="page"></main>
+<footer class="footer"><span id="footer-links"></span></footer>
+<aside id="settings-panel" class="settings-panel" hidden></aside>
+<div id="settings-backdrop" class="backdrop" hidden></div>
+<pre id="out" style="white-space:pre-wrap;background:#111;color:#eee;padding:12px;font-size:12px"></pre>
+<script src="../js/ui.js"></script>
+<script src="../js/state.js"></script>
+<script src="../js/theory/notes.js"></script>
+<script src="../js/theory/chords.js"></script>
+<script src="../js/theory/scales.js"></script>
+<script src="../js/data/intervals.js"></script>
+<script src="../js/data/modes.js"></script>
+<script src="../js/data/voicingShapes.js"></script>
+<script src="../js/data/progressions.js"></script>
+<script src="../js/data/licks.js"></script>
+<script src="../js/data/reharm.js"></script>
+<script src="../js/data/glossary.js"></script>
+<script src="../js/data/songs.js"></script>
+<script src="../js/theory/voicings.js"></script>
+<script src="../js/theory/positions.js"></script>
+<script src="../js/audio/synth.js"></script>
+<script src="../js/audio/player.js"></script>
+<script src="../js/audio/backing.js"></script>
+<script src="../js/render/fretboard.js"></script>
+<script src="../js/render/chordDiagram.js"></script>
+<script src="../js/render/piano.js"></script>
+<script src="../js/render/circle.js"></script>
+<script src="../js/render/tab.js"></script>
+<script src="../js/render/staff.js"></script>
+<script src="../js/search.js"></script>
+<script src="../js/pages/home.js"></script>
+<script src="../js/pages/hubs.js"></script>
+<script src="../js/pages/guitarVoicings.js"></script>
+<script src="../js/pages/guitarTriads.js"></script>
+<script src="../js/pages/guitarScales.js"></script>
+<script src="../js/pages/guitarLicks.js"></script>
+<script src="../js/pages/theoryIntervals.js"></script>
+<script src="../js/pages/theoryChords.js"></script>
+<script src="../js/pages/theoryScales.js"></script>
+<script src="../js/pages/theoryModes.js"></script>
+<script src="../js/pages/theoryProgressions.js"></script>
+<script src="../js/pages/theoryReharm.js"></script>
+<script src="../js/pages/chordHub.js"></script>
+<script src="../js/pages/songs.js"></script>
+<script src="../js/pages/earTraining.js"></script>
+<script src="../js/pages/backing.js"></script>
+<script src="../js/pages/melody.js"></script>
+<script src="../js/pages/glossary.js"></script>
+<script src="../js/router.js"></script>
+<script src="../js/app.js"></script>
+<script src="check.js"></script>
+</body>
+</html>
