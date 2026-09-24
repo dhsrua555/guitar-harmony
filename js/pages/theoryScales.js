@@ -5,7 +5,7 @@
   const { h, section, table, kv, select, tabs } = GH.ui; const N = GH.notes;
   const state = { compareA: 'ionian', compareB: 'dorian', circleMode: 'major' };
   const OVERVIEW_TABS = ['list', 'circle', 'chordscale', 'compare'];
-  const DEG_NAMES = ['으뜸음 (Tonic)', '위으뜸음 (Supertonic)', '가온음 (Mediant)', '버금딸림음 (Subdominant)', '딸림음 (Dominant)', '버금가온음 (Submediant)', '이끎음 / 아래으뜸음 (Leading Tone / Subtonic)'];
+  const DEG_NAMES = ['토닉 (Tonic)', '슈퍼토닉 (Supertonic)', '미디언트 (Mediant)', '서브도미넌트 (Subdominant)', '도미넌트 (Dominant)', '서브미디언트 (Submediant)', '리딩 톤 / 서브토닉 (Leading Tone / Subtonic)'];
 
   const detailPath = id => '/theory/scales/' + encodeURIComponent(id);
 
@@ -21,6 +21,7 @@
     if (qy.compare && GH.scales.get(qy.compare)) state.compareB = qy.compare;
 
     el.appendChild(h('h1', null, '스케일'));
+    if (GH.course) { const hint = GH.course.hint('majorscale'); if (hint) el.appendChild(hint); }
     el.appendChild(h('p', { class: 'muted' }, '스케일의 전체 목록과 5도권, 코드–스케일 매칭, 평행 스케일 비교를 모았습니다. 목록에서 스케일을 선택하면 구조와 하모나이즈 결과를 개별 상세 페이지에서 볼 수 있습니다.'));
     el.appendChild(tabs([
       { id: 'list', label: '전체 목록' },
@@ -58,7 +59,7 @@
     el.appendChild(h('h1', null, N.pretty(root) + ' ' + sc.ko));
     el.appendChild(h('p', { class: 'muted' }, sc.en));
     el.appendChild(h('div', { class: 'toolbar' },
-      h('label', null, '으뜸음', A.rootSelect(root, value => GH.router.go(detailPath(sc.id), { root: value }))),
+      h('label', null, '루트', A.rootSelect(root, value => GH.router.go(detailPath(sc.id), { root: value }))),
       h('label', null, '스케일', A.scaleSelect(sc.id, value => GH.router.go(detailPath(value), { root }))),
       A.playBtn('▶ 스케일 듣기', () => { const base = 48 + rootPc; const midi = sc.intervals.map(iv => base + N.ivSemi(iv)).concat([base + 12]); GH.player.playNotes(midi.concat(midi.slice(0, -1).reverse()), { tempo: 150 }); }, 'primary'),
       h('a', { class: 'btn small', href: A.scaleHref(sc.id, root) }, '기타 포지션 →')));
@@ -81,7 +82,7 @@
       note.label,
       DEG_NAMES[index],
       N.pretty(note.name),
-      index === 0 ? '으뜸음과 조성의 중심' : index === 4 ? '으뜸음의 완전5도 위 · 딸림 기능' : index === 6 ? (N.ivSemi(note.iv) === 11 ? '으뜸음으로 반음 해결하는 이끎음' : '으뜸음의 온음 아래인 아래으뜸음') : index === 3 ? '으뜸음의 완전5도 아래 · 버금딸림 기능' : ''
+      index === 0 ? '토닉. 키의 중심' : index === 4 ? '토닉의 퍼펙트 5도 위 · 도미넌트 기능' : index === 6 ? (N.ivSemi(note.iv) === 11 ? '토닉으로 반음 해결하는 리딩 톤' : '토닉의 온음 아래인 서브토닉') : index === 3 ? '토닉의 퍼펙트 5도 아래 · 서브도미넌트 기능' : ''
     ]))));
 
     const base = 48 + rootPc; const midis = sc.intervals.map(iv => base + N.ivSemi(iv)).concat([base + 12]);
@@ -116,9 +117,9 @@
     el.appendChild(h('div', { class: 'split' },
       h('div', null, GH.render.circle({ key: root, mode: state.circleMode, pref, onSelect: (selectedRoot, mode) => { state.circleMode = mode; GH.router.go('/theory/scales', { root: selectedRoot, tab: 'circle' }); if (N.pcOf(A.key()) !== N.pcOf(selectedRoot)) GH.state.set({ key: selectedRoot }); } })),
       h('div', null, h('h3', null, N.pretty(root) + (minor ? ' 마이너' : ' 메이저')),
-        kv([['조표', GH.scales.keySignature(root, minor).text], ['관계조 (나란한조)', minor ? N.pretty(GH.scales.relativeMajor(root)) + ' 메이저' : N.pretty(GH.scales.relativeMinor(root)) + ' 마이너'], ['동주조 (같은 으뜸음)', N.pretty(root) + (minor ? ' 메이저' : ' 마이너')], ['완전5도 위 · 도미넌트 방향', N.pretty(N.spell(root, '5'))], ['완전5도 아래 · 서브도미넌트 방향', N.pretty(N.spell(root, '4'))]]),
+        kv([['조표', GH.scales.keySignature(root, minor).text], ['관계조 (나란한조)', minor ? N.pretty(GH.scales.relativeMajor(root)) + ' 메이저' : N.pretty(GH.scales.relativeMinor(root)) + ' 마이너'], ['패러렐 키 (같은 루트)', N.pretty(root) + (minor ? ' 메이저' : ' 마이너')], ['퍼펙트 5도 위 · 도미넌트 방향', N.pretty(N.spell(root, '5'))], ['퍼펙트 5도 아래 · 서브도미넌트 방향', N.pretty(N.spell(root, '4'))]]),
         h('p', null, '시계 방향으로 갈수록 샵이 하나씩 늘고, 반시계 방향으로 갈수록 플랫이 늘어납니다. 이웃한 키는 음 하나만 달라 자연스럽게 전조할 수 있습니다.'),
-        h('p', null, 'iii–vi–ii–V–I처럼 완전5도 하행으로 움직이는 진행은 강한 기능 진행을 만듭니다.'),
+        h('p', null, 'iii–vi–ii–V–I처럼 퍼펙트 5도 하행으로 움직이는 진행은 강한 기능 진행을 만듭니다.'),
         h('h3', null, '다이어토닉 7th 코드'), A.chordStrip(GH.chords.diatonic(root, minor ? 'aeolian' : 'ionian', true).map(item => Object.assign(item.chord, { roman: item.roman, fn: item.fn })), { link: true }))));
   }
 
@@ -142,11 +143,11 @@
     el.appendChild(h('div', { class: 'toolbar' },
       h('label', null, 'A', A.scaleSelect(a.id, value => GH.router.go('/theory/scales', { root, scale: value, compare: b.id, tab: 'compare' }))),
       h('label', null, 'B', A.scaleSelect(b.id, value => GH.router.go('/theory/scales', { root, scale: a.id, compare: value, tab: 'compare' }))),
-      h('label', null, '으뜸음', A.rootSelect(root, value => GH.router.go('/theory/scales', { root: value, scale: a.id, compare: b.id, tab: 'compare' })))));
+      h('label', null, '루트', A.rootSelect(root, value => GH.router.go('/theory/scales', { root: value, scale: a.id, compare: b.id, tab: 'compare' })))));
     const comparison = GH.scales.compare(a.id, b.id);
     const notesA = GH.scales.notes(root, a.id), notesB = GH.scales.notes(root, b.id);
     const line = (name, notes, only) => h('div', { class: 'row', style: 'margin:6px 0' }, h('b', { style: 'min-width:180px' }, name), GH.ui.pills(notes.map(note => ({ label: N.pretty(note.name) + ' (' + note.label + ')', cls: only.includes(N.mod(note.pc - rootPc, 12)) ? 'iv-1' : 'iv-s' }))));
-    el.appendChild(section('같은 으뜸음에서 평행 비교', line(a.ko, notesA, comparison.onlyA), line(b.ko, notesB, comparison.onlyB), h('p', { class: 'muted' }, '강조색은 한쪽에만 있는 음입니다. 공통음은 ' + comparison.common.length + '개입니다.')));
+    el.appendChild(section('같은 루트에서 나란히 비교', line(a.ko, notesA, comparison.onlyA), line(b.ko, notesB, comparison.onlyB), h('p', { class: 'muted' }, '강조색은 한쪽에만 있는 음입니다. 공통음은 ' + comparison.common.length + '개입니다.')));
     const pcMap = {};
     notesA.forEach(note => { pcMap[note.pc] = { label: note.label, cls: comparison.onlyA.includes(N.mod(note.pc - rootPc, 12)) ? 'iv-1' : 'iv-s' }; });
     notesB.forEach(note => { if (!pcMap[note.pc]) pcMap[note.pc] = { label: note.label, cls: 'iv-3', ghost: true }; });

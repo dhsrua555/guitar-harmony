@@ -18,6 +18,7 @@
     const key = routeKey(qy);
     const genre = qy.genre && validGenre(qy.genre) ? qy.genre : 'all';
     el.appendChild(h('h1', null, '코드 진행'));
+    if (GH.course) { const hint = GH.course.hint('function'); if (hint) el.appendChild(hint); }
     el.appendChild(h('p', { class: 'muted' }, '장르와 상황에 맞는 진행을 고르세요. 상세 페이지에서 코드 차트, 하모닉 펑션, 그루브, 보이스 리딩과 코드–스케일 옵션을 한 화면에 볼 수 있습니다.'));
     el.appendChild(h('div', { style: 'margin:10px 0' }, chips({
       options: [{ value: 'all', label: '전체' }].concat(Object.entries(GH.data.genres).map(([k, v]) => ({ value: k, label: v }))),
@@ -42,11 +43,11 @@
     el.appendChild(A.deep('기초 이론: 하모닉 펑션 · 케이던스 · 로마 숫자 · 전조',
       h('div', { class: 'split' },
         h('div', null, h('h3', null, '세 가지 하모닉 펑션'), h('ul', { class: 'plain' },
-          h('li', null, h('b', { class: 'fn-T' }, '토닉 (T)'), ': I, iii, vi. 안정과 종지의 중심.'),
+          h('li', null, h('b', { class: 'fn-T' }, '토닉 (T)'), ': I, iii, vi. 안정과 마침의 중심.'),
           h('li', null, h('b', { class: 'fn-S' }, '서브도미넌트 (S)'), ': IV, ii. 토닉에서 벗어나 도미넌트를 준비.'),
           h('li', null, h('b', { class: 'fn-D' }, '도미넌트 (D)'), ': V, vii°. 트라이톤의 긴장이 토닉으로 해결.')),
         h('div', { class: 'fn-cycle' }, h('span', { class: 'node', style: 'background:var(--iv-5)' }, 'T'), '→', h('span', { class: 'node', style: 'background:var(--iv-3)' }, 'S'), '→', h('span', { class: 'node', style: 'background:var(--iv-1)' }, 'D'), '→', h('span', { class: 'node', style: 'background:var(--iv-5)' }, 'T'))),
-        h('div', null, h('h3', null, '케이던스 (Cadence)'), table(['이름', '진행', '사운드'], [['정격 종지', 'V → I', '가장 강한 해결'], ['변격 종지', 'IV → I', '부드러운 해결'], ['반종지', '… → V', '도미넌트에서 열린 채 끝남'], ['위종지', 'V → vi', '예상한 토닉을 피하는 해결']]))),
+        h('div', null, h('h3', null, '케이던스 (Cadence)'), table(['이름', '진행', '사운드'], [['오센틱 케이던스 (정격)', 'V → I', '가장 강한 해결'], ['플라갈 케이던스 (변격)', 'IV → I', '부드러운 해결'], ['하프 케이던스 (반종지)', '… → V', '도미넌트에서 열린 채 끝남'], ['디셉티브 케이던스 (위종지)', 'V → vi', '예상한 토닉을 피하는 해결']]))),
       h('h3', null, '로마 숫자와 내슈빌 넘버'),
       h('p', null, '로마 숫자는 대문자를 메이저, 소문자를 마이너로 적습니다. °는 디미니시드, ø는 하프 디미니시드, +는 어그멘티드입니다. V7/ii처럼 슬래시 뒤에 로마 숫자가 오면 일시적으로 토닉화되는 목표를, I/3·C/E처럼 도수나 음이름이 오면 베이스음을 뜻합니다. 내슈빌 넘버는 같은 관계를 1, 4, 5, 6m처럼 적어 세션에서 즉시 트랜스포즈할 때 씁니다.'),
       h('h3', null, '전조 (Modulation)'),

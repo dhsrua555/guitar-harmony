@@ -134,13 +134,13 @@
         nowBox.appendChild(h('div', { class: 'row', style: 'justify-content:space-between' },
           h('div', { class: 'row' }, h('span', { class: 'eyebrow' }, i >= 0 ? '재생 중' : '첫 코드'), h('span', { class: 'symbol-big' }, c.symbol), c.roman ? h('span', { class: 'muted' }, c.roman) : null, h('span', { class: A.fnClass(c.fn) }, GH.chords.FN_KO[c.fn] || '비다이어토닉')),
           h('div', { class: 'row' }, h('a', { class: 'btn small', href: A.chordHref(c.root, c.qId) }, '코드 상세 →'), h('a', { class: 'btn small', href: A.scaleHref(sc.id, c.root) }, '스케일 포지션 →'))));
-        nowBox.appendChild(h('p', { class: 'muted', style: 'margin:6px 0' }, '스케일 후보: ', h('b', null, N.pretty(c.root) + ' ' + sc.ko), fits.length > 1 ? ' · 다른 후보: ' + fits.slice(1, 3).map(f => f.scale.ko).join(', ') : '', ' — 실제 선택은 조성과 앞뒤 진행을 함께 고려하세요. 색 있는 음은 코드톤, 회색은 나머지 스케일 음입니다.'));
+        nowBox.appendChild(h('p', { class: 'muted', style: 'margin:6px 0' }, '스케일 후보: ', h('b', null, N.pretty(c.root) + ' ' + sc.ko), fits.length > 1 ? ' · 다른 후보: ' + fits.slice(1, 3).map(f => f.scale.ko).join(', ') : '', ' — 실제 선택은 키와 앞뒤 진행을 함께 고려하세요. 색 있는 음은 코드톤, 회색은 나머지 스케일 음입니다.'));
         nowBox.appendChild(GH.render.fretboard({ pcMap, pref, to: 15 }).el);
       }
       renderNow(-1);
       el.appendChild(section('현재 코드 위에서 연습하기', nowBox, h('div', { style: 'margin-top:6px' }, A.ivLegend())));
       el.appendChild(callout(h('b', null, '연습 아이디어. '), '처음에는 코드톤만으로 한 마디에 두세 음씩 연주해 보세요. 다음에는 코드가 바뀌기 직전에 다음 코드의 코드톤으로 반음·온음 어프로치를 연결합니다. 익숙해지면 템포를 10 BPM씩 올리고, 그루브를 바꿔 같은 진행을 다른 리듬으로 연습해 보세요.'));
-      if (state.source === 'prog') el.appendChild(h('div', { class: 'toc' }, h('a', { href: A.progHref(P.id, key) }, '진행 분석 · 보이싱 →'), h('a', { href: '#/ear?tab=root' }, '진행 듣고 근음 맞히기 퀴즈 →')));
+      if (state.source === 'prog') el.appendChild(h('div', { class: 'toc' }, h('a', { href: A.progHref(P.id, key) }, '진행 분석 · 보이싱 →'), h('a', { href: '#/ear?tab=root' }, '진행 듣고 루트 맞히기 퀴즈 →')));
     }
   };
 })();

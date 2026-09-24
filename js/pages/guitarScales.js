@@ -34,6 +34,7 @@
       const positions = GH.positions.positions(rootPc, sc.id, state.system, tuning);
       if (state.pos > positions.length) state.pos = 0;
       el.appendChild(h('h1', null, '스케일 포지션'));
+      if (GH.course) { const hint = GH.course.hint('pentatonic'); if (hint) el.appendChild(hint); }
       el.appendChild(h('p', { class: 'muted' }, '키와 스케일을 고르면 지판 전체와 포지션별 박스가 나옵니다. 포지션 시스템은 스케일과 현재 튜닝에 맞게 CAGED, 3NPS, 펜타토닉 박스 중에서 고를 수 있습니다.'));
       const tb = h('div', { class: 'toolbar' },
         h('label', null, '루트', A.rootSelect(root, v => GH.router.go('/guitar/scales', { root: v, scale: state.scale }))),

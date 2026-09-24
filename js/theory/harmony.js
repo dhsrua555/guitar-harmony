@@ -1,4 +1,4 @@
-/* 멜로디 화음 쌓기: 멜로디의 각 음에 다이어토닉(스케일 안) 또는 평행(고정 반음) 성부를 만든다 */
+/* 멜로디 화음 쌓기: 멜로디의 각 음에 다이어토닉(스케일 안) 또는 평행(고정 반음) 보이스를 만든다 */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
@@ -8,7 +8,7 @@
   const SIZES = { 3: { steps: 2, ko: '3도' }, 4: { steps: 3, ko: '4도' }, 5: { steps: 4, ko: '5도' }, 6: { steps: 5, ko: '6도' }, 8: { steps: 7, ko: '옥타브' } };
   const SIZE_ORDER = ['3', '4', '5', '6', '8'];
   /* 평행 간격: 고정 반음 */
-  const PARALLEL = { m3: { num: 3, semis: 3, ko: '단3도' }, M3: { num: 3, semis: 4, ko: '장3도' }, P4: { num: 4, semis: 5, ko: '완전4도' }, P5: { num: 5, semis: 7, ko: '완전5도' }, m6: { num: 6, semis: 8, ko: '단6도' }, M6: { num: 6, semis: 9, ko: '장6도' }, P8: { num: 8, semis: 12, ko: '옥타브' } };
+  const PARALLEL = { m3: { num: 3, semis: 3, ko: '마이너 3도' }, M3: { num: 3, semis: 4, ko: '메이저 3도' }, P4: { num: 4, semis: 5, ko: '퍼펙트 4도' }, P5: { num: 5, semis: 7, ko: '퍼펙트 5도' }, m6: { num: 6, semis: 8, ko: '마이너 6도' }, M6: { num: 6, semis: 9, ko: '메이저 6도' }, P8: { num: 8, semis: 12, ko: '옥타브' } };
   const PARALLEL_ORDER = ['m3', 'M3', 'P4', 'P5', 'm6', 'M6', 'P8'];
 
   const isHeptatonic = scaleId => { const s = GH.scales.get(scaleId); return !!s && s.intervals.length === 7; };
@@ -47,7 +47,7 @@
     return { midi, pc, name, degree: d, alt, tonic, label, outOfScale: alt !== 0 };
   }
 
-  /* 한 음에 대한 성부 음. cfg: {mode: 'diatonic'|'parallel', size: '3', par: 'M3', dir: 1|-1} */
+  /* 한 음에 대한 보이스 음. cfg: {mode: 'diatonic'|'parallel', size: '3', par: 'M3', dir: 1|-1} */
   function voiceNote(m, cfg, info) {
     const dir = cfg.dir < 0 ? -1 : 1;
     let midi, name;
@@ -70,7 +70,7 @@
     return { midi, name, iv, outOfScale: !inScale, shifted: m.alt !== 0 };
   }
 
-  /* midis + 키/스케일 + 성부 설정들 → { info, melody: [locate], voices: [[voiceNote]] }. names: 입력한 철자 (선택) */
+  /* midis + 키/스케일 + 보이스 설정들 → { info, melody: [locate], voices: [[voiceNote]] }. names: 입력한 철자 (선택) */
   function build(midis, keyRoot, scaleId, cfgs, names) {
     const info = scaleInfo(keyRoot, isHeptatonic(scaleId) ? scaleId : 'ionian');
     const melody = midis.map((m, i) => locate(m, info, names && names[i]));

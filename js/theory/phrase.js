@@ -4,7 +4,7 @@
   const GH = window.GH = window.GH || {};
   const N = GH.notes; const mod = N.mod;
 
-  const TARGETS = { auto: '가이드 톤 (3음·7음 중 가까운 쪽)', 3: '3음', 7: '7음', 1: '근음', 5: '5음' };
+  const TARGETS = { auto: '가이드 톤 (3음·7음 중 가까운 쪽)', 3: '3음', 7: '7음', 1: '루트', 5: '5음' };
   const APPROACHES = {
     none: { ko: '없음 (바로 도착)', notes: 0 },
     below: { ko: '반음 아래 어프로치', notes: 1 },

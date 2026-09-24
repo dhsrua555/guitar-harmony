@@ -19,7 +19,7 @@
         { c: 'F#m7b5', r: 'iiø7', fn: 'S', scale: ['F#', 'locrian'], tip: 'C 섹션 시작.', licks: ['minor-251-am'] },
         { c: 'B7b9', r: 'V7b9', fn: 'D', scale: ['B', 'altered'], tip: '알터드로 더 강한 긴장.', licks: ['altered-g7'] },
         { c: 'Em7 A7', r: 'i7 – IV7', fn: 'T', scale: ['E', 'dorian'], tip: 'A7 은 D7 로 가는 세컨더리 도미넌트 (V7/V) 이자 E 도리안 뱀프의 IV7.', licks: ['funk-dm7-dorian'] },
-        { c: 'Dm7 G7', r: 'v7 – I7 (→ C)', fn: 'X', scale: ['D', 'dorian'], tip: 'Cmaj7 로 가는 ii-V. 조성이 잠깐 C 로 기운다.', licks: ['bebop-251-c'] },
+        { c: 'Dm7 G7', r: 'v7 – I7 (→ C)', fn: 'X', scale: ['D', 'dorian'], tip: 'Cmaj7 로 가는 ii-V. 키가 잠깐 C 로 기운다.', licks: ['bebop-251-c'] },
         { c: 'Cmaj7', r: 'IVmaj7', fn: 'S', scale: ['C', 'lydian'], tip: '', licks: [] },
         { c: 'B7b9', r: 'V7b9 (Em)', fn: 'D', scale: ['B', 'phrygian_dom'], tip: '', licks: ['dim-g7b9'] },
         { c: 'Em7', r: 'i7', fn: 'T', scale: ['E', 'minor_pent'], tip: '엔딩. 펜타토닉으로 단순하게 끝내도 좋다.', licks: ['rock-em-pent'] },

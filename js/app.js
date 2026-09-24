@@ -6,11 +6,11 @@
 
   /* 메뉴 구조: 섹션(허브) → 페이지. level: 1 기초, 2 중급, 3 고급 */
   const SECTIONS = [
-    { id: 'learn', label: '배우기', en: 'LEARN', icon: 'learn', color: 'pink', path: '/learn', desc: '처음이라면 여기서부터. 순서대로 따라가는 로드맵.', items: [] },
+    { id: 'learn', label: '배우기', en: 'LEARN', icon: 'learn', color: 'pink', path: '/learn', desc: '처음이라면 여기서부터. 레슨 한 장에 개념 하나씩 배우는 기초 코스와 로드맵.', items: [] },
     { id: 'guitar', label: '기타', en: 'GUITAR', icon: 'guitar', color: 'sun', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾습니다.', items: [
       ['/guitar/voicings', '코드 보이싱', 1, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
       ['/guitar/scales', '스케일 포지션', 1, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
-      ['/guitar/triads', '트라이어드 · 아르페지오', 2, '현 세트별 3화음 인버전과 코드톤 아르페지오'],
+      ['/guitar/triads', '트라이어드 · 아르페지오', 2, '현 세트별 트라이어드 인버전과 코드톤 아르페지오'],
       ['/guitar/doublestops', '더블스탑', 2, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
       ['/guitar/phrasing', '솔로 프레이즈 만들기', 2, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
       ['/guitar/licks', '릭', 2, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
@@ -22,17 +22,17 @@
       ['/theory/modes', '모드', 3, '7모드의 밝기와 특징음, 멜로딕/하모닉 마이너 모드'],
       ['/theory/reharm', '리하모니제이션', 3, '멜로디는 두고 코드를 바꾸는 기법']] },
     { id: 'practice', label: '연습', en: 'PRACTICE', icon: 'headphones', color: 'olive', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
-      ['/ear', '이어 트레이닝', 1, '계이름, 음정, 코드, 진행을 듣고 맞히는 퀴즈'],
+      ['/ear', '이어 트레이닝', 1, '계이름, 인터벌, 코드, 진행을 듣고 맞히는 퀴즈'],
       ['/backing', '백킹 트랙', 1, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
       ['/rhythm', '리듬 연습', 1, '메트로놈, 리듬 따라 치기, 스트럼 패턴'],
       ['/tools/finder', '코드 파인더', 1, '지판을 눌러 잡은 모양의 코드 이름 찾기'],
       ['/tools/melody', '멜로디 → 코드', 2, '멜로디를 넣으면 어울리는 코드를 제안'],
-      ['/tools/harmony', '멜로디 화음 쌓기', 2, '멜로디 위아래에 3도·5도·6도 성부를 쌓아 듣기'],
+      ['/tools/harmony', '멜로디 화음 쌓기', 2, '멜로디 위아래에 3도·5도·6도 하모니 라인을 쌓아 듣기'],
       ['/songs', '곡 분석', 2, '마디별 코드에 스케일, 보이싱, 릭을 연결'],
       ['/glossary', '용어집', 1, '한글 · 영어 음악 용어 사전']] }
   ];
   function sectionOf(path) {
-    if (path === '/learn') return 'learn';
+    if (path === '/learn' || path.startsWith('/learn/')) return 'learn';
     if (path.startsWith('/guitar')) return 'guitar';
     if (path.startsWith('/theory') || path.startsWith('/chord/')) return 'theory';
     if (/^\/(songs|tools|ear|glossary|backing|practice|rhythm)/.test(path)) return 'practice';
@@ -41,7 +41,7 @@
   function parentOf(path) {
     const parents = [
       '/theory/progressions', '/theory/reharm', '/theory/intervals', '/theory/modes', '/theory/scales',
-      '/guitar/voicings', '/guitar/licks', '/songs'
+      '/guitar/voicings', '/guitar/licks', '/songs', '/learn'
     ].filter(p => path.startsWith(p + '/')).sort((a, b) => b.length - a.length);
     if (parents.length) {
       if (/^\/songs\/[^/]+\/bar\//.test(path)) return path.split('/').slice(0, 3).join('/');
@@ -182,7 +182,7 @@
       });
       return el;
     },
-    ivLegend() { return legend([{ cls: 'iv-1', label: '근음 / 토닉' }, { cls: 'iv-3', label: '3음' }, { cls: 'iv-5', label: '5음' }, { cls: 'iv-7', label: '7음' }, { cls: 'iv-t', label: '텐션 (9, 11, 13, 2, 4, 6)' }, { cls: 'iv-s', label: '그 외 스케일 음' }]); },
+    ivLegend() { return legend([{ cls: 'iv-1', label: '루트 / 토닉' }, { cls: 'iv-3', label: '3음' }, { cls: 'iv-5', label: '5음' }, { cls: 'iv-7', label: '7음' }, { cls: 'iv-t', label: '텐션 (9, 11, 13, 2, 4, 6)' }, { cls: 'iv-s', label: '그 외 스케일 음' }]); },
     fnLegend() { return legend([{ cls: 'iv-5', label: 'T 토닉' }, { cls: 'iv-3', label: 'S 서브도미넌트' }, { cls: 'iv-1', label: 'D 도미넌트' }, { cls: 'iv-t', label: 'X 비다이어토닉' }]); },
     chordPills(chord, opts) { return GH.ui.pills(chord.notes.map(n => ({ label: (opts && opts.name ? N.pretty(n.name) : n.iv), cls: n.cls, title: N.pretty(n.name) + ' · ' + n.iv + ' (' + n.ko + ')' }))); },
     playBtn(label, fn, cls) { return h('button', { class: 'btn small ' + (cls || ''), type: 'button', onclick: fn }, label); },

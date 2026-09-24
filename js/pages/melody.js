@@ -32,7 +32,7 @@
     if (avoid) return { w: -0.6, iv: tens, cls: 'iv-x', text: '어보이드 노트' };
     if (c.quality.tensions.includes(tens)) return { w: 0.55, iv: tens, cls: 'iv-t', text: '텐션' };
     const semiAbove = c.pcs.some(p => mod(pc - p, 12) === 1);
-    return { w: semiAbove ? -0.3 : 0.2, iv: tens, cls: semiAbove ? 'iv-x' : 'iv-t', text: semiAbove ? '단9도 마찰 가능' : '경과음' };
+    return { w: semiAbove ? -0.3 : 0.2, iv: tens, cls: semiAbove ? 'iv-x' : 'iv-t', text: semiAbove ? 'b9 마찰 가능' : '경과음' };
   }
   function candidates(keyName, sevenths) {
     const dia = GH.chords.diatonic(keyName, 'ionian', sevenths).map(d => Object.assign(d.chord, { roman: d.roman, fn: d.fn, kind: 'dia' }));
@@ -87,7 +87,7 @@
       const keyName = state.key === 'auto' ? N.niceName(keyPc) : N.normalize(state.key);
       const pref = A.pref(keyName);
       el.appendChild(h('h1', null, '멜로디 → 코드 찾기'));
-      el.appendChild(h('p', { class: 'muted' }, '멜로디 음을 넣으면 가능한 조성을 분석하고 함께 사용할 코드 후보를 제안합니다. 음별 후보를 비교하거나 자동으로 코드를 붙여 들어 볼 수 있습니다.'));
+      el.appendChild(h('p', { class: 'muted' }, '멜로디 음을 넣으면 가능한 키를 분석하고 함께 사용할 코드 후보를 제안합니다. 음별 후보를 비교하거나 자동으로 코드를 붙여 들어 볼 수 있습니다.'));
 
       /* ---- 입력 (공용 모듈) ---- */
       const rerender = () => GH.router.rerender();
@@ -95,7 +95,7 @@
       el.appendChild(h('div', { class: 'toolbar' },
         input.controls[0],
         h('label', null, '키', select({ options: [{ value: 'auto', label: '자동 추정' }].concat(N.rootList(pref).map(r => ({ value: r, label: N.pretty(r) + ' 메이저' }))), value: state.key, onChange: v => { state.key = v; rerender(); } })),
-        h('label', null, h('input', { type: 'checkbox', checked: state.sevenths, onchange: e => { state.sevenths = e.target.checked; rerender(); } }), '7화음으로'),
+        h('label', null, h('input', { type: 'checkbox', checked: state.sevenths, onchange: e => { state.sevenths = e.target.checked; rerender(); } }), '세븐 코드로'),
         A.playBtn('▶ 멜로디 듣기', () => playMelody(state.notes), 'primary'), A.stopBtn(),
         input.controls.slice(1),
         state.notes.length ? h('a', { class: 'btn small', href: GH.router.href('/tools/harmony', { notes: GH.melodyInput.toText(state.notes, pref, state.names), key: keyName }) }, '화음 쌓기 →') : null));
@@ -105,7 +105,7 @@
 
       /* ---- 키 ---- */
       const keyRow = h('div', { class: 'row' }, guesses.slice(0, 4).map((g, i) => h('button', { class: 'btn small' + (g.pc === keyPc ? ' active' : ''), type: 'button', onclick: () => { state.key = N.niceName(g.pc); rerender(); } }, N.pretty(N.niceName(g.pc)) + ' 메이저' + (i === 0 ? ' (분석 1위)' : ''))));
-      el.appendChild(section('가능한 조성', h('p', { class: 'muted' }, '입력한 음을 많이 포함하는 장음계와 그 나란한단조의 후보입니다. 리듬, 강세와 종지를 분석하지 않으므로 실제 조성은 달라질 수 있습니다. 기준으로 사용할 장조를 선택하세요.'), keyRow));
+      el.appendChild(section('가능한 키', h('p', { class: 'muted' }, '입력한 음을 많이 포함하는 메이저 스케일과 그 렐러티브 마이너의 후보입니다. 리듬, 강세와 케이던스를 분석하지 않으므로 실제 키는 달라질 수 있습니다. 기준으로 사용할 메이저 키를 선택하세요.'), keyRow));
 
       /* ---- 전체 코드 순위 ---- */
       const cands = candidates(keyName, state.sevenths);
@@ -128,7 +128,7 @@
       const dia = cands.filter(c => c.kind === 'dia');
       el.appendChild(A.deep('음별 코드 후보 (직접 고르기)', h('p', { class: 'muted' }, '각 멜로디 음을 구성음이나 텐션으로 포함하는 다이어토닉 코드입니다. 버튼을 눌러 코드와 멜로디 음을 함께 비교해 보세요.'),
         table(['멜로디 음', '구성음으로 포함하는 코드', '텐션으로 사용할 수 있는 코드'], state.notes.map(m => { const pc = mod(m, 12); const has = dia.filter(c => c.pcs.includes(pc)); const tens = dia.filter(c => !c.pcs.includes(pc) && judgeNote(c, pc).w > 0.5); return [h('b', null, N.pretty(N.midiName(m, pref))), h('span', { class: 'row', style: 'gap:6px' }, has.map(c => h('button', { class: 'btn small', type: 'button', onclick: () => playMelody([m], [Object.assign({}, c, { beats: 4 })], 1) }, c.symbol, h('span', { class: 'muted', style: 'margin-left:4px' }, c.roman)))), h('span', { class: 'muted' }, tens.map(c => c.symbol).join(', ') || '–')]; }))));
-      el.appendChild(callout(h('b', null, '멜로디와 코드의 관계. '), '멜로디 음이 코드톤이면 안정적으로 들릴 가능성이 높고, 9나 13 같은 텐션은 색채를 더합니다. 구조적인 코드톤과 단9도를 이루는 음은 길게 유지하거나 강박에 둘 때 보이싱을 확인하세요. 어보이드 노트도 짧은 경과음이나 어프로치 노트로 사용할 수 있습니다.'));
+      el.appendChild(callout(h('b', null, '멜로디와 코드의 관계. '), '멜로디 음이 코드톤이면 안정적으로 들릴 가능성이 높고, 9나 13 같은 텐션은 색채를 더합니다. 구조적인 코드톤과 b9를 이루는 음은 길게 유지하거나 강박에 둘 때 보이싱을 확인하세요. 어보이드 노트도 짧은 경과음이나 어프로치 노트로 사용할 수 있습니다.'));
     }
   };
 })();

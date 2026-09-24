@@ -19,7 +19,7 @@
       if (!GH.state.isStandardTuning()) el.appendChild(GH.ui.notice('트라이어드 코드 폼은 스탠다드 튜닝 기준입니다. 아래 아르페지오 지판과 포지션은 현재 튜닝(' + GH.state.TUNINGS[st.tuning].label + ')에 맞춰 표시합니다.'));
       const tb = h('div', { class: 'toolbar' },
         h('label', null, '루트', A.rootSelect(root, v => go({ root: v }))),
-        h('label', null, '3화음', A.qualitySelect(q, v => go({ q: v }), quality => quality.intervals.length === 3)),
+        h('label', null, '트라이어드', A.qualitySelect(q, v => go({ q: v }), quality => quality.intervals.length === 3)),
         h('label', null, '라벨', select({ options: [{ value: 'iv', label: '도수' }, { value: 'name', label: '음이름' }], value: state.labelMode, onChange: v => { state.labelMode = v; GH.router.rerender(); } })));
       el.appendChild(tb);
       const chord = GH.chords.buildChord(root, q);
@@ -60,7 +60,7 @@
       const win = state.pos ? windows[state.pos - 1] : null;
       const fb = GH.render.fretboard({ pcMap, pref, to: 22, window: win ? [win.lo, win.hi] : null, filter: win ? (s, f) => (f >= win.lo && f <= win.hi) ? null : 'dim' : null });
       const arpSec = section('아르페지오 (코드톤 포지션)',
-        h('p', { class: 'muted' }, '7화음의 코드톤을 지판 전체에 표시합니다. ' + (cagedWindows ? 'CAGED 포지션' : '튜닝에 맞춘 3NPS(줄당 3음) 포지션') + '를 고르면 그 포지션의 아르페지오만 남습니다. 코드 위에서 아르페지오만으로 솔로해 보면 코드톤의 위치가 손에 익습니다.'),
+        h('p', { class: 'muted' }, '세븐 코드의 코드톤을 지판 전체에 표시합니다. ' + (cagedWindows ? 'CAGED 포지션' : '튜닝에 맞춘 3NPS(줄당 3음) 포지션') + '를 고르면 그 포지션의 아르페지오만 남습니다. 코드 위에서 아르페지오만으로 솔로해 보면 코드톤의 위치가 손에 익습니다.'),
         h('div', { class: 'toolbar' }, h('label', null, '코드', A.qualitySelect(arpQ, v => { state.pos = 0; go({ arpQ: v }); })), h('span', { class: 'symbol-big', style: 'font-size:1.3rem' }, arp.symbol),
           A.playBtn('▶ 아르페지오 듣기', () => {
             const base = 48 + arp.rootPc;

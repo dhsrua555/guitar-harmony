@@ -237,7 +237,7 @@
     } catch (e) { console.warn('오선 렌더링 실패', e); return null; }
   }
 
-  /* 성부별 화음을 오선에 (실음 그대로, 필요하면 큰보표).
+  /* 보이스별 화음을 오선에 (실음 그대로, 필요하면 큰보표).
      columns: [[{midi, name, voice}], ...] 한 칸 = 한 박. opts: {pref, width, colors: [melody, v1, v2, v3]}
      반환: {el, highlight(i)} */
   function voicesStaff(columns, opts) {

@@ -79,7 +79,7 @@
         return;
       }
       const bassPc = Math.min(...midis) % 12;
-      el.appendChild(section('가능한 이름', table(['코드', '베이스', '구성음', ''], res.map(r => { const c = GH.chords.buildChord(r.root, r.qId); const inv = c.rootPc === bassPc ? '기본위치' : '/' + N.pretty(N.noteName(bassPc, pref)) + ' (전위)'; return [h('a', { href: A.chordHref(r.root, r.qId), style: 'font-weight:700' }, r.symbol), inv, A.chordPills(c, { name: true }), h('a', { class: 'btn small', href: '#/guitar/voicings' }, '보이싱 →')]; }))));
+      el.appendChild(section('가능한 이름', table(['코드', '베이스', '구성음', ''], res.map(r => { const c = GH.chords.buildChord(r.root, r.qId); const inv = c.rootPc === bassPc ? '기본위치' : '/' + N.pretty(N.noteName(bassPc, pref)) + ' (인버전)'; return [h('a', { href: A.chordHref(r.root, r.qId), style: 'font-weight:700' }, r.symbol), inv, A.chordPills(c, { name: true }), h('a', { class: 'btn small', href: '#/guitar/voicings' }, '보이싱 →')]; }))));
     }
   };
 })();

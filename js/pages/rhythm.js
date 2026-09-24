@@ -147,6 +147,7 @@
       const qy = params.query || {};
       if (qy.tab && TAB_LIST.some(t => t.id === qy.tab)) state.tab = qy.tab;
       el.appendChild(h('h1', null, '리듬 연습'));
+      if (GH.course) { const hint = GH.course.hint('beat'); if (hint) el.appendChild(hint); }
       el.appendChild(h('p', { class: 'muted' }, '같은 음을 쳐도 리듬이 흔들리면 음악이 되지 않습니다. 메트로놈으로 박을 몸에 익히고, 리듬 따라 치기로 박 안의 위치를 정확히 맞추고, 스트럼 패턴으로 오른손 리듬을 반주에 적용해 보세요.'));
       el.appendChild(tabs(TAB_LIST, state.tab, id => GH.router.go('/rhythm', { tab: id })));
       const body = h('div'); el.appendChild(body);

@@ -105,7 +105,7 @@
 
     el.appendChild(section('코드 분석',
       h('div', { class: 'row', style: 'margin-bottom:8px' }, A.playBtn('▶ 이 마디 재생', () => GH.player.playProgression(A.toPlayable(bar.chords), { tempo: songTempo[song.id] || song.tempo, style: song.style }), 'primary'), A.stopBtn()),
-      table(['코드', '근음', '코드 퀄리티', '하모닉 펑션', '코드 상세'], bar.chords.map(chord => [
+      table(['코드', '루트', '코드 퀄리티', '하모닉 펑션', '코드 상세'], bar.chords.map(chord => [
         chord.symbol,
         N.pretty(chord.root),
         chord.quality.ko,

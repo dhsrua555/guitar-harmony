@@ -2,8 +2,8 @@
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const DUR = { 2: 2, '4.': 1.5, 4: 1, '8.': 0.75, 8: 0.5, 16: 0.25, '8t': 1 / 3 };
-  const VF_DUR = { 2: 'h', '4.': 'q', 4: 'q', '8.': '8', 8: '8', 16: '16', '8t': '8' };
+  const DUR = { 1: 4, 2: 2, '4.': 1.5, 4: 1, '8.': 0.75, 8: 0.5, 16: 0.25, '8t': 1 / 3 };
+  const VF_DUR = { 1: 'w', 2: 'h', '4.': 'q', 4: 'q', '8.': '8', 8: '8', 16: '16', '8t': '8' };
 
   /* 'p' 문자열 → [{code, d, pos, rest, dot, trip}] */
   function parse(p) {

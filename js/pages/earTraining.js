@@ -10,9 +10,9 @@
   const MAJOR_SEMIS = [0, 2, 4, 5, 7, 9, 11];
   const IVS_ALL = ['b2', '2', 'b3', '3', '4', '#4', '5', 'b6', '6', 'b7', '7', '8'];
   const IV_SETS = {
-    scale: { ko: '스케일 음정 (장2 · 장3 · 완4 · 완5 · 장6 · 장7 · 옥타브)', list: ['2', '3', '4', '5', '6', '7', '8'] },
-    small: { ko: '반음 단위 작은 음정 (단2 · 장2 · 단3 · 장3)', list: ['b2', '2', 'b3', '3'] },
-    perfect: { ko: '완전 음정과 트라이톤 (완4 · 증4 · 완5 · 옥타브)', list: ['4', '#4', '5', '8'] },
+    scale: { ko: '스케일 인터벌 (M2 · M3 · P4 · P5 · M6 · M7 · 옥타브)', list: ['2', '3', '4', '5', '6', '7', '8'] },
+    small: { ko: '반음 단위 작은 인터벌 (m2 · M2 · m3 · M3)', list: ['b2', '2', 'b3', '3'] },
+    perfect: { ko: '퍼펙트 인터벌과 트라이톤 (P4 · #4 · P5 · 옥타브)', list: ['4', '#4', '5', '8'] },
     all: { ko: '반음 포함 전부 (12개)', list: IVS_ALL }
   };
   const TRIADS = ['maj', 'min', 'dim', 'aug', 'sus4'];
@@ -21,7 +21,7 @@
   const PROGS = ['I-IV-V', 'I-V-vi-IV', 'ii-V-I', 'I-vi-IV-V', 'i-VII-VI-VII', 'andalusian', 'I-bVII-IV', 'blues12'];
   const ROOT_POOLS = { basic: { ko: 'I · IV · V (기본 3코드)', degs: [0, 3, 4] }, main: { ko: 'I · ii · IV · V · vi', degs: [0, 1, 3, 4, 5] }, all: { ko: '다이어토닉 7개 전부', degs: [0, 1, 2, 3, 4, 5, 6] } };
   const DIR_KO = { asc: '상행', desc: '하행', harm: '동시' };
-  const TAB_LIST = [{ id: 'degree', label: '계이름' }, { id: 'interval', label: '음정' }, { id: 'root', label: '진행 근음' }, { id: 'chord', label: '코드 퀄리티' }, { id: 'mode', label: '모드' }, { id: 'prog', label: '코드 진행' }, { id: 'rhythm', label: '리듬' }];
+  const TAB_LIST = [{ id: 'degree', label: '계이름' }, { id: 'interval', label: '인터벌' }, { id: 'root', label: '진행 루트' }, { id: 'chord', label: '코드 퀄리티' }, { id: 'mode', label: '모드' }, { id: 'prog', label: '코드 진행' }, { id: 'rhythm', label: '리듬' }];
 
   const state = {
     tab: 'degree',
@@ -30,7 +30,7 @@
   };
   const score = tab => state.scores[tab] || (state.scores[tab] = { ok: 0, total: 0, streak: 0, best: 0 });
   const ivSemi = iv => iv === '8' ? 12 : N.ivSemi(iv);
-  const ivLabel = iv => iv + ' ' + N.intervalKo(iv === '8' ? '1' : iv).replace('완전1도', '옥타브') + ' · ' + ivSemi(iv) + '반음';
+  const ivLabel = iv => iv + ' ' + N.intervalKo(iv === '8' ? '1' : iv).replace('유니즌', '옥타브') + ' · ' + ivSemi(iv) + '반음';
   const pretty = (m, pref) => N.pretty(N.midiName(m, pref || 'sharp'));
   const btn = (label, fn) => h('button', { class: 'btn small', type: 'button', onclick: fn }, label);
   const prog = id => GH.data.progressions.find(p => p.id === id);
@@ -70,7 +70,7 @@
     const chords = GH.app.progressionChords(prog(id), key).slice(0, 8);
     GH.player.playProgression(GH.app.toPlayable(chords), { tempo: 120, style: 'ballad' });
   }
-  /* 계이름/근음 퀴즈의 기준음 이벤트 */
+  /* 계이름/루트 퀴즈의 기준음 이벤트 */
   function refEvents(mode, keyName, tonic) {
     const evs = []; let t = 0;
     if (mode === 'cadence' || mode === 'both' || (mode === 'newkey' && !state.refDone)) { const cad = cadenceEvents(keyName, t); evs.push(...cad.events); t = cad.end + 0.35; }
@@ -120,8 +120,8 @@
       links: [['#/theory/scales/ionian', '메이저 스케일 화성학 →'], ['#/theory/progressions/I-IV-V', 'I – IV – V 진행 →']]
     },
     interval: {
-      title: '음정 맞히기',
-      prompt: '두 음을 들려줍니다. 두 음 사이의 음정을 고르세요. 범위를 "스케일 음정"으로 두면 메이저 스케일 안의 음정만, "반음 포함 전부"로 두면 12개 모두 나옵니다.',
+      title: '인터벌 맞히기',
+      prompt: '두 음을 들려줍니다. 두 음 사이의 인터벌을 고르세요. 범위를 "스케일 인터벌"으로 두면 메이저 스케일 안의 인터벌만, "반음 포함 전부"로 두면 12개 모두 나옵니다.',
       make() {
         const s = state.settings.interval; const set = IV_SETS[s.set] || IV_SETS.scale;
         const iv = pick(set.list); const root = 50 + rand(12); const dir = s.dir === 'random' ? pick(['asc', 'desc', 'harm']) : s.dir;
@@ -141,12 +141,12 @@
           MAJOR_SEMIS.includes(semi % 12) || semi === 12 ? btn('▶ 스케일로 세기', () => playSequence(noteEvents(inScale, 0.3, 0.32))) : null,
           state.lastOk ? null : btn('▶ 내가 고른 ' + ivLabel(state.lastPick).split(' · ')[0], () => playSequence(intervalEvents(c.root, ivSemi(state.lastPick), c.dir)))];
       },
-      tips: ['음정 페이지의 "기억할 곡"을 활용하세요. 완전5도는 Star Wars, 장6도는 My Bonnie, 트라이톤은 The Simpsons, 단2도는 죠스.', '헷갈리면 "반음으로 세기"로 두 음 사이를 반음씩 올라가며 개수를 세고, "스케일로 세기"로 도레미 계단을 밟아 보세요. 상행이 익숙해지면 하행과 동시(화음)로 바꿔 보세요.'],
-      links: [['#/theory/intervals', '음정표 →']]
+      tips: ['인터벌 페이지의 "기억할 곡"을 활용하세요. 퍼펙트 5도는 Star Wars, 메이저 6도는 My Bonnie, 트라이톤은 The Simpsons, 마이너 2도는 죠스.', '헷갈리면 "반음으로 세기"로 두 음 사이를 반음씩 올라가며 개수를 세고, "스케일로 세기"로 도레미 계단을 밟아 보세요. 상행이 익숙해지면 하행과 동시(화음)로 바꿔 보세요.'],
+      links: [['#/theory/intervals', '인터벌 표 →']]
     },
     root: {
-      title: '코드 진행 듣고 근음을 계이름으로',
-      prompt: '키의 기준을 들려준 뒤 코드 진행을 연주합니다. 각 코드의 근음이 몇 번째 계이름인지 순서대로 고르세요. 예: C 키에서 F–G–C면 파–솔–도입니다.',
+      title: '코드 진행 듣고 루트를 계이름으로',
+      prompt: '키의 기준을 들려준 뒤 코드 진행을 연주합니다. 각 코드의 루트가 몇 번째 계이름인지 순서대로 고르세요. 예: C 키에서 F–G–C면 파–솔–도입니다.',
       make() {
         const s = state.settings.root; ensureKey('fixed');
         const keyName = N.niceName(state.key); const tonic = tonicOf(state.key);
@@ -171,14 +171,14 @@
         h('label', null, '코드 수', GH.ui.numberInput({ value: Number(state.settings.root.len) || 1, min: 1, max: 8, suffix: '개', label: '한 문제의 코드 수', onChange: v => { state.settings.root.len = String(v); refresh(box); } })),
         h('label', null, '코드 범위', select({ options: Object.entries(ROOT_POOLS).map(([v, o]) => ({ value: v, label: o.ko })), value: state.settings.root.pool, onChange: v => { state.settings.root.pool = v; refresh(box); } })),
         h('label', null, '기준 듣기', select({ options: REF_OPTIONS, value: state.settings.root.ref, onChange: v => { state.settings.root.ref = v; refresh(box); } })),
-        h('label', null, select({ options: [{ value: '0', label: '3화음' }, { value: '1', label: '7화음' }], value: state.settings.root.sevenths, onChange: v => { state.settings.root.sevenths = v; refresh(box); } })),
+        h('label', null, select({ options: [{ value: '0', label: '트라이어드' }, { value: '1', label: '세븐 코드' }], value: state.settings.root.sevenths, onChange: v => { state.settings.root.sevenths = v; refresh(box); } })),
         h('span', { class: 'muted' }, keyLabel()), btn('키 바꾸기', () => { state.key = N.mod(state.key + 1 + rand(11), 12); state.refDone = false; refresh(box); })
       ],
       explain: c => {
         const picks = (state.lastPick || '').split('-');
         return [h('span', null, '정답: ', h('b', null, c.degs.map(d => DEGREES[d][1]).join(' – ')), ' · ', c.chords.map((ch, i) => [i ? ' – ' : '', h('a', { href: GH.app.chordHref(ch.root, ch.qId) }, ch.symbol), h('span', { class: 'muted' }, ' (' + ch.roman + ')')])),
-          btn('▶ 근음만 (베이스)', () => playSequence(c.degs.map((d, i) => ({ at: i * 0.7, midis: [c.tonic + MAJOR_SEMIS[d]], dur: 0.65, gain: 1 })))),
-          btn('▶ 도 → 각 근음', () => playSequence(c.degs.flatMap((d, i) => [{ at: i * 1.3, midis: [c.tonic], dur: 0.5, gain: 0.8 }, { at: i * 1.3 + 0.55, midis: [c.tonic + MAJOR_SEMIS[d]], dur: 0.7, gain: 1 }]))),
+          btn('▶ 루트만 (베이스)', () => playSequence(c.degs.map((d, i) => ({ at: i * 0.7, midis: [c.tonic + MAJOR_SEMIS[d]], dur: 0.65, gain: 1 })))),
+          btn('▶ 도 → 각 루트', () => playSequence(c.degs.flatMap((d, i) => [{ at: i * 1.3, midis: [c.tonic], dur: 0.5, gain: 0.8 }, { at: i * 1.3 + 0.55, midis: [c.tonic + MAJOR_SEMIS[d]], dur: 0.7, gain: 1 }]))),
           state.lastOk ? null : btn('▶ 내가 고른 ' + picks.map(p => DEGREES[Number(p) - 1] ? DEGREES[Number(p) - 1][1] : '?').join('–'), () => playSequence(picks.map((p, i) => ({ at: i * 0.7, midis: [c.tonic + MAJOR_SEMIS[(Number(p) - 1 + 7) % 7]], dur: 0.65, gain: 1 }))))];
       },
       tips: ['코드가 바뀔 때 베이스(가장 낮은 음)를 따라가며 "도"에서 얼마나 떨어졌는지 들으세요. 도(I)는 집, 파(IV)는 밝게 떠오르는 느낌, 솔(V)은 집으로 돌아가려는 긴장입니다.', '처음엔 코드 1개, I · IV · V 로 시작하고, 맞히는 비율이 80%를 넘으면 코드 수와 범위를 늘리세요. 코드 진행 페이지의 기능(T · S · D) 색깔과 같이 보면 빨리 익숙해집니다.'],
@@ -190,24 +190,24 @@
       make() { const s = state.settings.chord.set; const pool = s === 'triads' ? TRIADS : s === 'sevenths' ? SEVENTHS : TRIADS.concat(SEVENTHS); const qId = pick(pool); const root = 48 + rand(12); return { answer: qId, options: pool, label: v => { const q = GH.chords.getQuality(v); return q.ko + ' (' + (q.sym || 'maj') + ')'; }, root, midis: chordMidis(root, qId), rootName: N.noteName(root % 12, 'sharp') }; },
       play(c) { playSequence([{ at: 0, midis: c.midis, dur: 2.2, gain: 0.9 }]); },
       extra: c => [{ label: '▶ 아르페지오로', fn: () => playSequence(arpThenBlock(c.midis, 0.45)) }],
-      settings: box => [h('label', null, '범위', select({ options: [{ value: 'triads', label: '3화음 (maj · m · dim · aug · sus4)' }, { value: 'sevenths', label: '7화음 (maj7 · 7 · m7 · m7b5 · dim7 · mMaj7)' }, { value: 'all', label: '전부' }], value: state.settings.chord.set, onChange: v => { state.settings.chord.set = v; refresh(box); } }))],
+      settings: box => [h('label', null, '범위', select({ options: [{ value: 'triads', label: '트라이어드 (maj · m · dim · aug · sus4)' }, { value: 'sevenths', label: '세븐 코드 (maj7 · 7 · m7 · m7b5 · dim7 · mMaj7)' }, { value: 'all', label: '전부' }], value: state.settings.chord.set, onChange: v => { state.settings.chord.set = v; refresh(box); } }))],
       explain: c => [h('span', null, '정답: ', h('b', null, GH.chords.getQuality(c.answer).ko), ' · ' + GH.chords.symbol(c.rootName, c.answer)),
         btn('▶ 정답 듣기', () => playSequence([{ at: 0, midis: c.midis, dur: 2.2, gain: 0.9 }])),
         state.lastOk ? null : btn('▶ 내가 고른 ' + GH.chords.symbol(c.rootName, state.lastPick), () => playSequence([{ at: 0, midis: chordMidis(c.root, state.lastPick), dur: 2.2, gain: 0.9 }])),
         h('a', { class: 'btn small', href: GH.app.chordHref(c.rootName, c.answer) }, '코드 상세 →')],
-      tips: ['먼저 메이저와 마이너를 구분하고, 다음으로 7음의 유무와 5도가 감5도 또는 증5도로 변형됐는지 들어 보세요.', '틀렸을 때 "내가 고른 코드"와 정답을 같은 근음에서 번갈아 들으면 차이가 분명해집니다.'],
+      tips: ['먼저 메이저와 마이너를 구분하고, 다음으로 7음의 유무와 5도가 b5 또는 #5로 변형됐는지 들어 보세요.', '틀렸을 때 "내가 고른 코드"와 정답을 같은 루트에서 번갈아 들으면 차이가 분명해집니다.'],
       links: [['#/theory/chords?tab=types', '코드 퀄리티 목록 →']]
     },
     mode: {
       title: '모드 맞추기',
-      prompt: '같은 으뜸음에서 스케일을 상행으로 들려줍니다. 어느 모드인지 고르세요. 3음이 장3도인지 단3도인지 먼저 듣고 특징음을 찾아보세요.',
+      prompt: '같은 루트에서 스케일을 상행으로 들려줍니다. 어느 모드인지 고르세요. 3음이 메이저 3도인지 마이너 3도인지 먼저 듣고 특징음을 찾아보세요.',
       make() { const id = pick(MODES); const root = 48 + rand(12); return { answer: id, options: MODES, label: v => GH.scales.get(v).ko, root, rootName: N.noteName(root % 12, 'sharp') }; },
       play(c) { playSequence(scaleEvents(c.root, c.answer)); },
       explain: c => [h('span', null, '정답: ', h('b', null, GH.scales.get(c.answer).ko), ' · 특징음 ' + (GH.scales.get(c.answer).characteristic.join(', ') || '–')),
         btn('▶ 정답 듣기', () => playSequence(scaleEvents(c.root, c.answer))),
         state.lastOk ? null : btn('▶ 내가 고른 ' + GH.scales.get(state.lastPick).ko.split(' ')[0], () => playSequence(scaleEvents(c.root, state.lastPick))),
         h('a', { class: 'btn small', href: GH.app.modeHref(c.answer, c.rootName) }, '모드 페이지 →')],
-      tips: ['3음이 장3도인지 단3도인지로 메이저 계열(아이오니안, 리디안, 믹솔리디안)과 마이너 계열(도리안, 에올리안, 프리지안, 로크리안)을 나눈 뒤 특징음(#4, b7, 6, b6, b2, b5)을 찾습니다.'],
+      tips: ['3음이 메이저 3도인지 마이너 3도인지로 메이저 계열(아이오니안, 리디안, 믹솔리디안)과 마이너 계열(도리안, 에올리안, 프리지안, 로크리안)을 나눈 뒤 특징음(#4, b7, 6, b6, b2, b5)을 찾습니다.'],
       links: [['#/theory/modes?tab=parallel', '모드 평행 비교표 →']]
     },
     prog: {
@@ -304,7 +304,7 @@
     }
     const feedback = h('div', { class: 'quiz-feedback' + (state.answered ? (state.lastOk ? ' ok' : ' bad') : ''), 'aria-live': 'polite' });
     if (state.answered) feedback.appendChild(h('div', { class: 'row' }, h('b', { style: 'font-size:1.02rem' }, state.lastOk ? '정답!' : '아쉽다.'), Q.explain(c)));
-    else feedback.appendChild(h('span', { class: 'muted' }, c.multi > 1 ? '▶ 문제 듣기를 누른 뒤 코드 순서대로 근음의 계이름을 고르세요. 키보드: 숫자 = 답, Space = 다시 듣기, Enter = 다음 문제.' : '▶ 문제 듣기를 누른 뒤 답을 고르세요. 키보드: 숫자 = 답 고르기, Space = 다시 듣기, Enter = 다음 문제.'));
+    else feedback.appendChild(h('span', { class: 'muted' }, c.multi > 1 ? '▶ 문제 듣기를 누른 뒤 코드 순서대로 루트의 계이름을 고르세요. 키보드: 숫자 = 답, Space = 다시 듣기, Enter = 다음 문제.' : '▶ 문제 듣기를 누른 뒤 답을 고르세요. 키보드: 숫자 = 답 고르기, Space = 다시 듣기, Enter = 다음 문제.'));
     card.appendChild(feedback);
     const opts = h('div', { class: 'quiz-opts' + (Q.optsClass ? ' ' + Q.optsClass : '') });
     const answerSet = state.answered ? new Set(c.answer.split('-')) : null; const pickSet = state.answered ? new Set(state.lastPick.split('-')) : null;
@@ -344,7 +344,7 @@
       const qy = params.query || {};
       if (qy.tab && QUIZZES[qy.tab]) state.tab = qy.tab;
       el.appendChild(h('h1', null, '이어 트레이닝'));
-      el.appendChild(h('p', { class: 'muted' }, '듣고 맞히는 음감 퀴즈입니다. 계이름과 진행 근음은 조성 안에서 음의 위치를 듣는 상대음감 훈련이고, 음정 · 코드 퀄리티 · 모드 · 진행은 서로 다른 소리의 성격을 구분하는 연습입니다. 틀리면 정답과 내가 고른 답을 번갈아 들어 보세요.'));
+      el.appendChild(h('p', { class: 'muted' }, '듣고 맞히는 음감 퀴즈입니다. 계이름과 진행 루트는 키 안에서 음의 위치를 듣는 상대음감 훈련이고, 인터벌 · 코드 퀄리티 · 모드 · 진행은 서로 다른 소리의 성격을 구분하는 연습입니다. 틀리면 정답과 내가 고른 답을 번갈아 들어 보세요.'));
       el.appendChild(tabs(TAB_LIST, state.tab, id => GH.router.go('/ear', { tab: id })));
       const box = h('div'); el.appendChild(box);
       renderQuiz(box);

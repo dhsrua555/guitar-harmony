@@ -32,7 +32,7 @@
         h('div', { class: 'muted' }, '재즈 컴핑·네오소울·화성 확장 →'))));
     el.appendChild(section('두 방식을 나눈 기준', h('div', { class: 'split' },
       h('div', null, h('h3', null, '기본 코드 폼'), h('p', { class: 'muted' }, '개방현과 바레를 포함해 노래 반주에 바로 쓰는 폼입니다.')),
-      h('div', null, h('h3', null, '재즈·확장 보이싱'), h('p', { class: 'muted' }, '가이드 톤, 텐션, 성부 배치와 최소 이동을 중심으로 보는 폼입니다.')))));
+      h('div', null, h('h3', null, '재즈·확장 보이싱'), h('p', { class: 'muted' }, '가이드 톤, 텐션, 보이스 배치와 최소 이동을 중심으로 보는 폼입니다.')))));
   }
 
   function renderExplorer(el, params, level) {
@@ -47,15 +47,16 @@
     const chord = GH.chords.buildChord(root, qId);
     el.appendChild(breadcrumb(level));
     el.appendChild(h('h1', null, level === 'basic' ? '기본 코드 폼' : '재즈·확장 보이싱'));
+    if (level === 'basic' && GH.course) { const hint = GH.course.hint('openchords'); if (hint) el.appendChild(hint); }
     el.appendChild(h('p', { class: 'muted' }, level === 'basic'
-      ? '오픈 포지션, CAGED 이동형 폼, 파워 코드를 코드 퀄리티와 근음에 맞춰 찾습니다.'
-      : '가이드 톤·텐션·성부 배치를 중심으로 셸, 드롭, 4도 보이싱을 찾습니다.'));
+      ? '오픈 포지션, CAGED 이동형 폼, 파워 코드를 코드 퀄리티와 루트에 맞춰 찾습니다.'
+      : '가이드 톤·텐션·보이스 배치를 중심으로 셸, 드롭, 4도 보이싱을 찾습니다.'));
     el.appendChild(h('div', { class: 'toc' }, h('a', { href: '#/guitar/voicings/' + (level === 'basic' ? 'advanced' : 'basic') }, level === 'basic' ? '재즈·확장 보이싱 보기 →' : '기본 코드 폼 보기 →')));
     if (!GH.state.isStandardTuning()) el.appendChild(notice('코드 폼은 스탠다드 튜닝 기준입니다. 현재 튜닝(' + GH.state.TUNINGS[st.tuning].label + ')에서는 스케일 지판만 튜닝 설정을 따릅니다.'));
 
     const navigate = extra => GH.router.go(path, Object.assign({ root, q: state.q[level] }, extra || {}));
     const tb = h('div', { class: 'toolbar' });
-    tb.appendChild(h('label', null, '근음', A.rootSelect(root, v => navigate({ root: v }))));
+    tb.appendChild(h('label', null, '루트', A.rootSelect(root, v => navigate({ root: v }))));
     tb.appendChild(h('label', null, '코드 퀄리티', A.qualitySelect(qId, v => { state.q[level] = v; navigate({ q: v }); })));
     tb.appendChild(h('label', null, '다이어그램 표기', select({ options: [{ value: 'iv', label: '도수' }, { value: 'finger', label: '손가락 번호' }, { value: 'name', label: '음이름' }], value: state.labelMode, onChange: v => { state.labelMode = v; GH.router.rerender(); } })));
     tb.appendChild(h('label', null, '현 세트', select({ options: [{ value: 'all', label: '전체' }, '6-5-4-3', '5-4-3-2', '4-3-2-1', '6-4-3-2', '5-3-2-1'], value: state.strSet, onChange: v => { state.strSet = v; GH.router.rerender(); } })));
@@ -78,11 +79,11 @@
     allowed.forEach(t => {
       const g = groups[t]; if (!g || !g.length) return; any = true;
       const desc = {
-        open: '개방현을 포함한 오픈 포지션. 특정 근음에서만 쓸 수 있습니다.',
+        open: '개방현을 포함한 오픈 포지션. 특정 루트에서만 쓸 수 있습니다.',
         caged: 'C·A·G·E·D 오픈 코드 셰이프를 지판 전체로 확장한 이동형 포지션입니다. 일부 셰이프는 바레를 사용합니다.',
-        power: '근음과 완전5도로 만든 파워 코드입니다.',
-        shell: '근음·3음·7음(가이드 톤)을 중심으로 한 간결한 컴핑 보이싱입니다.',
-        jazz: '9th·11th·13th와 변화 텐션을 포함하며, 문맥에 따라 근음이나 5음을 생략합니다.',
+        power: '루트와 퍼펙트 5도로 만든 파워 코드입니다.',
+        shell: '루트·3음·7음(가이드 톤)을 중심으로 한 간결한 컴핑 보이싱입니다.',
+        jazz: '9th·11th·13th와 변화 텐션을 포함하며, 문맥에 따라 루트이나 5음을 생략합니다.',
         quartal: '4도 간격으로 쌓은 모달·네오소울 사운드의 보이싱입니다.',
         drop2: '4-way close의 위에서 두 번째 음을 한 옥타브 내린 4성 보이싱입니다.',
         drop3: '4-way close의 위에서 세 번째 음을 내려, 보통 한 현을 건너뛰어 배치합니다.',
@@ -107,7 +108,7 @@
     const voiceSets = state.vlKind === 'drop3' ? ['6-4-3-2', '5-3-2-1'] : ['6-5-4-3', '5-4-3-2', '4-3-2-1'];
     if (!voiceSets.includes(state.vlSet)) state.vlSet = voiceSets[0];
     const seq = GH.voicings.voiceLead(chords, { kind: state.vlKind, strSet: state.vlSet });
-    const vlSec = section('코드 진행의 보이스 리딩', h('p', { class: 'muted' }, '공통음을 유지하고 각 성부의 이동을 줄인 보이싱 조합입니다.'));
+    const vlSec = section('코드 진행의 보이스 리딩', h('p', { class: 'muted' }, '공통음을 유지하고 각 보이스의 이동을 줄인 보이싱 조합입니다.'));
     let strip;
     vlSec.appendChild(h('div', { class: 'toolbar' },
       h('label', null, '코드 진행', select({ options: progs.map(p => ({ value: p.id, label: p.ko })), value: P.id, onChange: v => { state.progId = v; GH.router.rerender(); } })),
@@ -118,7 +119,7 @@
     const grid = h('div', { class: 'grid diagrams', style: 'margin-top:10px' });
     seq.forEach((v, i) => { if (v) grid.appendChild(GH.render.chordCard(v, { labelMode: state.labelMode, pref, title: chords[i].symbol, sub: v.name })); });
     vlSec.appendChild(grid); el.appendChild(vlSec);
-    el.appendChild(callout(h('b', null, '4-way close 보이싱이란? '), '네 성부를 한 옥타브 안에 밀집시킨 클로즈 보이싱입니다. 기타에서는 스트레치가 커지기 쉽기 때문에, 특정 성부를 한 옥타브 내린 드롭 보이싱으로 연주합니다.'));
+    el.appendChild(callout(h('b', null, '4-way close 보이싱이란? '), '네 보이스를 한 옥타브 안에 밀집시킨 클로즈 보이싱입니다. 기타에서는 스트레치가 커지기 쉽기 때문에, 특정 보이스를 한 옥타브 내린 드롭 보이싱으로 연주합니다.'));
   }
 
   GH.pages['/guitar/voicings'] = {

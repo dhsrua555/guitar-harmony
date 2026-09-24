@@ -138,7 +138,7 @@
         h('div', { class: 'path-grid' },
           h('a', { href: '#/learn', class: 'path-card c-pink' },
             h('span', { class: 'path-num' }, '01'), h('span', { class: 'path-ic', 'aria-hidden': 'true' }, I('learn')),
-            h('div', { class: 'title' }, '처음이라면, 배우기'), h('p', null, '음정 → 코드 → 스케일 → 진행 순서의 6단계 로드맵. 보고, 듣고, 쳐 보고, 퀴즈로 확인합니다.'),
+            h('div', { class: 'title' }, '처음이라면, 기초 코스'), h('p', null, '음 이름부터 코드, 리듬, 스케일, 코드 진행까지 23개의 짧은 레슨. 한 장에 개념 하나씩, 듣고 쳐 보고 문제로 확인합니다.'),
             h('span', { class: 'sticker path-sticker', 'aria-hidden': 'true' }, 'START', h('br'), 'HERE'), go()),
           h('div', { class: 'path-card c-sun' },
             h('span', { class: 'path-num' }, '02'), h('span', { class: 'path-ic', 'aria-hidden': 'true' }, I('chord')),
@@ -146,7 +146,7 @@
             h('div', { class: 'quick-start-form' }, h('label', null, h('span', null, '루트'), rootSel), h('label', null, h('span', null, '타입'), qSel), h('button', { class: 'btn primary', type: 'button', onclick: () => { GH.router.go('/chord/' + encodeURIComponent(root) + '/' + q); } }, '코드 열기'))),
           h('a', { href: '#/practice', class: 'path-card c-sky' },
             h('span', { class: 'path-num' }, '03'), h('span', { class: 'path-ic', 'aria-hidden': 'true' }, I('headphones')),
-            h('div', { class: 'title' }, '귀와 손 연습하기'), h('p', null, '계이름 · 음정 · 코드 퀴즈로 음감을 기르고, 메트로놈과 백킹 트랙 위에서 연주합니다.'), go()))));
+            h('div', { class: 'title' }, '귀와 손 연습하기'), h('p', null, '계이름 · 인터벌 · 코드 퀴즈로 음감을 기르고, 메트로놈과 백킹 트랙 위에서 연주합니다.'), go()))));
 
       /* 더 깊이: 섹션별 링크 (둥근 경계의 색 띠) */
       const secs = A.SECTIONS.filter(s => s.items.length);

@@ -75,11 +75,11 @@
       if (!state.pair || !PAIRS[gapKind].includes(state.pair)) state.pair = DEFAULT_PAIR[state.size];
       const [upper, lower] = state.pair.split('-').map(Number);
       el.appendChild(h('h1', null, '더블스탑'));
-      el.appendChild(h('p', { class: 'muted' }, '두 줄을 함께 눌러 두 음을 동시에 내는 연주법입니다. 키와 스케일, 음정, 줄 쌍을 고르면 스케일 순서대로 지판을 따라 올라가는 패턴을 만들어 줍니다. 3도와 6도는 멜로디를 두껍게 만드는 가장 흔한 더블스탑입니다.'));
+      el.appendChild(h('p', { class: 'muted' }, '두 줄을 함께 눌러 두 음을 동시에 내는 연주법입니다. 키와 스케일, 인터벌, 줄 쌍을 고르면 스케일 순서대로 지판을 따라 올라가는 패턴을 만들어 줍니다. 3도와 6도는 멜로디를 두껍게 만드는 가장 흔한 더블스탑입니다.'));
       el.appendChild(h('div', { class: 'toolbar' },
         h('label', null, '키', A.rootSelect(key, v => { state.key = v; rerender(); })),
         h('label', null, '스케일', A.scaleSelect(state.scale, v => { state.scale = v; rerender(); }, s => s.intervals.length === 7)),
-        h('label', null, '음정', select({ options: [['3', '3도'], ['4', '4도'], ['6', '6도'], ['8', '옥타브']].map(([v, l]) => ({ value: v, label: l })), value: state.size, onChange: v => { state.size = v; state.pair = null; rerender(); } })),
+        h('label', null, '인터벌', select({ options: [['3', '3도'], ['4', '4도'], ['6', '6도'], ['8', '옥타브']].map(([v, l]) => ({ value: v, label: l })), value: state.size, onChange: v => { state.size = v; state.pair = null; rerender(); } })),
         h('label', null, '줄 쌍', select({ options: PAIRS[gapKind].map(p => { const [u, l] = p.split('-'); return { value: p, label: STRING_NAMES[u] + ' + ' + STRING_NAMES[l] }; }), value: state.pair, onChange: v => { state.pair = v; rerender(); } })),
         h('label', null, '최대', GH.ui.numberInput({ value: state.maxFret, min: 4, max: 24, suffix: '프렛까지', label: '쓸 수 있는 가장 높은 프렛', onChange: v => { state.maxFret = v; rerender(); } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.allowOpen, onchange: e => { state.allowOpen = e.target.checked; rerender(); } }), '개방현 허용'),
@@ -92,7 +92,7 @@
       const v = view(seq.map(s => Object.assign({}, s)), { gap: gapKind === 1 ? 'adjacent' : 'skip', allowOpen: state.allowOpen, maxFret: state.maxFret, tempo: () => state.tempo, pref });
       const ivRow = h('div', { class: 'ds-ivs' }, base.map(s => h('span', { class: 'ds-iv', title: s.iv ? s.iv.ko : '' }, h('b', null, N.pretty(s.hiName)), h('b', null, N.pretty(s.loName)), h('small', null, s.iv ? s.iv.en : ''))));
       el.appendChild(section(STRING_NAMES[upper] + ' + ' + STRING_NAMES[lower] + ' · ' + N.pretty(key) + ' ' + GH.scales.get(state.scale).ko.split(' (')[0] + ' ' + { 3: '3도', 4: '4도', 6: '6도', 8: '옥타브' }[state.size],
-        h('p', { class: 'muted' }, '위 칸은 높은 줄의 음, 아래 칸은 낮은 줄의 음입니다. 장·단 음정이 스케일에 따라 바뀌는 것을 들어 보세요.'), ivRow, v));
+        h('p', { class: 'muted' }, '위 칸은 높은 줄의 음, 아래 칸은 낮은 줄의 음입니다. 메이저 · 마이너 인터벌이 스케일에 따라 바뀌는 것을 들어 보세요.'), ivRow, v));
       el.appendChild(callout(h('b', null, '연습 방법. '), '먼저 메트로놈 60~80에서 한 박에 한 쌍씩 올라가고 내려오세요. 익숙해지면 두 줄을 번갈아 치는 트레몰로, 한 음 위에서 슬라이드로 들어가는 소리, 그리고 3도 패턴 위에 코드를 떠올리며 즉흥으로 이어 보세요. 3도는 컨트리와 소울, 6도는 R&B와 블루스 발라드, 옥타브는 재즈(웨스 몽고메리) 스타일에서 자주 씁니다.'));
       el.appendChild(h('div', { class: 'toc' }, h('a', { href: '#/tools/harmony' }, '멜로디에 화음을 쌓아 더블스탑으로 바꾸기 →'), h('a', { href: A.scaleHref(state.scale, key) }, '이 스케일 포지션 →')));
     }

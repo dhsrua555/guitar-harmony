@@ -8,26 +8,33 @@
   const LEVELS = [
     { id: 'new', dyn: 'pp', ko: '완전히 처음이에요', desc: '코드 이름이나 악보가 아직 낯설어요.' },
     { id: 'chords', dyn: 'p', ko: '코드 몇 개는 잡아요', desc: 'C, G, Am 같은 오픈 코드로 간단히 반주할 수 있어요.' },
-    { id: 'theory', dyn: 'mf', ko: '기초 이론은 알아요', desc: '메이저 스케일, 음정 이름, 다이어토닉 코드를 알아요.' },
+    { id: 'theory', dyn: 'mf', ko: '기초 이론은 알아요', desc: '메이저 스케일, 인터벌 이름, 다이어토닉 코드를 알아요.' },
     { id: 'advanced', dyn: 'ff', ko: '꽤 공부했어요', desc: '모드, 텐션, 세컨더리 도미넌트, 재즈 진행이 익숙해요.' }
   ];
   const GOALS = [
     { id: 'theory', ko: '화성학 이해', icon: 'piano', desc: '코드와 스케일이 왜 그렇게 들리는지' },
     { id: 'guitar', ko: '기타 연주 실력', icon: 'guitar', desc: '코드 폼, 스케일 포지션, 운지' },
-    { id: 'ear', ko: '음감 훈련', icon: 'ear', desc: '음정, 코드, 진행을 귀로 구분' },
+    { id: 'ear', ko: '음감 훈련', icon: 'ear', desc: '인터벌, 코드, 진행을 귀로 구분' },
     { id: 'solo', ko: '즉흥 솔로', icon: 'melody', desc: '코드 위에서 멜로디 만들기' },
     { id: 'compose', ko: '작곡 · 편곡', icon: 'staff', desc: '멜로디에 코드와 화음 붙이기' },
     { id: 'rhythm', ko: '리듬감', icon: 'metronome', desc: '박 유지, 스트럼, 싱코페이션' }
   ];
   /* lv: [가장 쉬운 수준, 가장 어려운 수준] (LEVELS 인덱스) */
+  const ALL = ['theory', 'guitar', 'ear', 'solo', 'compose', 'rhythm'];
   const MISSIONS = [
+    { id: 'course-ch1', title: '기초 코스 1장: 소리의 이름', route: '/learn/notes', goals: ALL, lv: [0, 0], desc: '음 이름, 반음 · 온음, 개방현, 6 · 5번 줄의 음을 다섯 레슨으로 익힙니다.' },
+    { id: 'course-ch2', title: '기초 코스 2장: 인터벌', route: '/learn/interval', goals: ALL, lv: [0, 0], desc: '두 음 사이의 거리, 메이저 · 마이너 3도, 퍼펙트 5도와 파워 코드.' },
+    { id: 'course-ch3', title: '기초 코스 3장: 첫 코드', route: '/learn/triad', goals: ALL, lv: [0, 1], desc: '트라이어드, 메이저 · 마이너 코드, 오픈 코드 8개, 코드 이름 읽기.' },
+    { id: 'course-ch4', title: '기초 코스 4장: 리듬과 스트로크', route: '/learn/beat', goals: ALL, lv: [0, 1], desc: '박과 템포, 4분 · 8분음표, 다운 · 업 스트로크.' },
+    { id: 'course-ch5', title: '기초 코스 5장: 키와 스케일', route: '/learn/majorscale', goals: ALL, lv: [0, 1], desc: '메이저 스케일, 키와 토닉, 다이어토닉 코드, 마이너 펜타토닉.' },
+    { id: 'course-ch6', title: '기초 코스 6장: 코드 진행', route: '/learn/function', goals: ALL, lv: [0, 1], desc: '토닉 · 서브도미넌트 · 도미넌트, 1-5-6-4 와 투파이브원, MR 위에서 쳐 보기.' },
     { id: 'finder', title: '지판에서 음 찾기', route: '/tools/finder', goals: ['guitar', 'theory'], lv: [0, 1], desc: '지판을 눌러 소리를 들으며 같은 음이 어디에 또 있는지 찾아봅니다.' },
     { id: 'open', title: '오픈 코드 네 개 잡기 (C · G · Am · F)', route: '/guitar/voicings/basic', q: { types: 'open' }, goals: ['guitar', 'compose'], lv: [0, 1], desc: '다이어그램을 보고 잡은 뒤 ▶ 듣기로 소리를 비교합니다.' },
     { id: 'metro', title: '메트로놈에 맞춰 4분·8분 치기', route: '/rhythm', goals: ['rhythm', 'guitar'], lv: [0, 2], desc: '60~80 BPM에서 박마다 한 번, 그다음 두 번씩 쳐 봅니다.' },
     { id: 'strum', title: '팝 기본 스트럼 익히기', route: '/rhythm', q: { tab: 'strum' }, goals: ['guitar', 'rhythm'], lv: [0, 2], desc: 'D - D U - U D U 패턴을 코드 진행에 맞춰 반복합니다.' },
-    { id: 'intervals', title: '음정 이름과 소리 익히기', route: '/theory/intervals', goals: ['theory', 'ear'], lv: [0, 1], desc: '장3도, 완전5도처럼 두 음 사이의 거리를 노래로 기억합니다.' },
+    { id: 'intervals', title: '인터벌 이름과 소리 익히기', route: '/theory/intervals', goals: ['theory', 'ear'], lv: [0, 1], desc: '메이저 3도, 퍼펙트 5도처럼 두 음 사이의 거리를 노래로 기억합니다.' },
     { id: 'chordbuild', title: '코드가 만들어지는 원리', route: '/theory/chords', goals: ['theory', 'compose'], lv: [0, 1], desc: '코드 빌더에서 메이저와 마이너를 번갈아 듣고 구성음을 비교합니다.' },
-    { id: 'earint', title: '음정 퀴즈 10문제', route: '/ear', q: { tab: 'interval' }, goals: ['ear'], lv: [0, 2], desc: '스케일 음정 범위로 시작해 80%가 넘으면 범위를 넓힙니다.' },
+    { id: 'earint', title: '인터벌 퀴즈 10문제', route: '/ear', q: { tab: 'interval' }, goals: ['ear'], lv: [0, 2], desc: '스케일 인터벌 범위로 시작해 80%가 넘으면 범위를 넓힙니다.' },
     { id: 'tap1', title: '리듬 따라 치기 1단계', route: '/rhythm', q: { tab: 'tap' }, goals: ['rhythm', 'ear'], lv: [0, 1], desc: '4분·8분음표 리듬을 듣고 패드를 눌러 80점 이상을 목표로 합니다.' },
     { id: 'pent', title: '마이너 펜타토닉 박스 1', route: '/guitar/scales', q: { scale: 'minor_pent' }, goals: ['guitar', 'solo'], lv: [1, 2], desc: '박스 1을 외우고 상행·하행 패턴을 재생에 맞춰 따라 칩니다.' },
     { id: 'degree', title: '계이름 퀴즈 (메이저 스케일)', route: '/ear', q: { tab: 'degree' }, goals: ['ear'], lv: [1, 2], desc: '스케일을 듣고 도를 붙잡은 뒤 들린 음의 계이름을 맞힙니다.' },
@@ -35,7 +42,7 @@
     { id: 'prog', title: '장르별 기본 진행 듣기', route: '/theory/progressions', goals: ['theory', 'compose', 'guitar'], lv: [1, 2], desc: 'I – V – vi – IV 와 ii – V – I 을 듣고 기능 흐름을 비교합니다.' },
     { id: 'backing', title: '백킹 트랙 위에서 솔로하기', route: '/backing', q: { id: 'blues12' }, goals: ['solo', 'guitar', 'rhythm'], lv: [1, 3], desc: '12마디 블루스를 틀고 펜타토닉과 코드톤으로 솔로합니다.' },
     { id: 'melody', title: '멜로디에 코드 붙이기', route: '/tools/melody', goals: ['compose'], lv: [1, 3], desc: '아는 멜로디를 넣고 추천 코드를 들어 가며 반주를 만듭니다.' },
-    { id: 'root', title: '진행 근음 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [1, 3], desc: '코드 진행을 듣고 근음을 계이름으로 맞힙니다.' },
+    { id: 'root', title: '진행 루트 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [1, 3], desc: '코드 진행을 듣고 루트를 계이름으로 맞힙니다.' },
     { id: 'rq', title: '리듬 듣고 맞히기 퀴즈', route: '/ear', q: { tab: 'rhythm' }, goals: ['rhythm', 'ear'], lv: [1, 3], desc: '들은 리듬과 같은 악보를 고릅니다. 쉼표와 16분음표 단계까지.' },
     { id: 'triads', title: '현 세트별 트라이어드', route: '/guitar/triads', goals: ['guitar', 'solo'], lv: [2, 3], desc: '같은 코드를 세 가지 인버전으로 지판 위아래에서 잡아 봅니다.' },
     { id: 'phrase', title: '코드톤 타겟팅과 어프로치 노트', route: '/guitar/phrasing', goals: ['solo', 'theory'], lv: [2, 3], desc: '기법 카드를 들어 보고 빌더에서 ii – V – I 라인을 만듭니다.' },
@@ -53,10 +60,10 @@
     ['/guitar/voicings', '코드를 잡는 여러 방법을 찾는 곳입니다.', ['루트와 코드 퀄리티를 고르세요.', '다이어그램의 점을 누르면 그 줄 소리가 나고, ▶ 듣기로 전체를 들을 수 있습니다.', '처음이라면 기본 코드 폼의 오픈 코드부터 시작하세요.']],
     ['/guitar/scales', '스케일이 지판 어디에 있는지 포지션별로 보는 곳입니다.', ['스케일과 루트를 고르세요.', '포지션을 하나 골라 그 박스만 외웁니다.', '연습 패턴 재생에 맞춰 따라 치고, 백킹을 켜서 솔로해 보세요.']],
     ['/guitar/triads', '세 음짜리 코드를 줄 세트마다 여러 자리에서 잡는 법을 익힙니다.', ['한 줄 세트(예: 3-2-1번 줄)만 골라 기본형 → 1전위 → 2전위 순서로 올라가 보세요.', '아래 아르페지오에서 같은 코드톤을 한 음씩 쳐 봅니다.']],
-    ['/guitar/doublestops', '두 줄을 함께 눌러 3도·6도 화음으로 멜로디를 두껍게 만드는 연습입니다.', ['음정과 줄 쌍을 고르세요. 3도는 2·3번 줄이 가장 쉽습니다.', '▶ 듣기로 소리를 확인하고 느린 템포로 올라갔다 내려오세요.']],
+    ['/guitar/doublestops', '두 줄을 함께 눌러 3도·6도 화음으로 멜로디를 두껍게 만드는 연습입니다.', ['인터벌과 줄 쌍을 고르세요. 3도는 2·3번 줄이 가장 쉽습니다.', '▶ 듣기로 소리를 확인하고 느린 템포로 올라갔다 내려오세요.']],
     ['/guitar/phrasing', '코드톤과 어프로치 노트로 솔로 라인을 만드는 원리를 배웁니다.', ['기법 카드를 위에서부터 하나씩 들어 보세요.', '마음에 드는 기법을 "빌더에서 열기"로 가져와 진행과 키를 바꿔 봅니다.', '만든 라인을 따라 친 뒤 백킹 트랙 위에서 반복하세요.']],
     ['/guitar/licks', '장르별 실전 프레이즈를 TAB과 오선, 느린 재생으로 익힙니다.', ['난이도 1~2부터 고르세요.', '느리게(60%) 재생에 맞춰 따라 치고, 익숙해지면 템포를 올립니다.']],
-    ['/theory/intervals', '두 음 사이의 거리(음정)를 소리와 지판 모양으로 익힙니다.', ['표에서 음정을 누르고 ▶ 순차 / 동시로 들어 보세요.', '기억할 곡을 흥얼거리며 소리와 이름을 연결합니다.']],
+    ['/theory/intervals', '두 음 사이의 거리(인터벌)를 소리와 지판 모양으로 익힙니다.', ['표에서 인터벌을 누르고 ▶ 순차 / 동시로 들어 보세요.', '기억할 곡을 흥얼거리며 소리와 이름을 연결합니다.']],
     ['/theory/chords', '코드가 어떤 음으로 만들어지는지 보고 듣는 곳입니다.', ['코드 빌더에서 루트와 퀄리티를 바꿔 가며 들어 보세요.', '다이어토닉 코드 탭에서 한 키 안의 코드 7개를 확인합니다.']],
     ['/theory/scales', '스케일의 구조와 스케일에서 만들어지는 코드를 봅니다.', ['스케일을 고르고 ▶ 듣기로 소리를 확인하세요.', '오선, 건반, 지판을 같이 보며 같은 음의 위치를 비교합니다.']],
     ['/theory/progressions', '장르별로 자주 쓰는 코드 진행을 듣고 기능을 분석합니다.', ['진행을 고르고 ▶ 재생으로 들어 보세요.', '색으로 표시된 기능(T · S · D)이 어떻게 흘러가는지 보고, 백킹 트랙으로 넘어가 연주해 봅니다.']],
@@ -65,7 +72,7 @@
     ['/chord/', '코드 하나에 대한 모든 정보(구성음, 잡는 법, 스케일, 진행)가 모인 곳입니다.', ['▶ 듣기로 소리를 확인하고, 기타 보이싱에서 잡기 쉬운 폼을 고르세요.', '어울리는 스케일 표에서 솔로에 쓸 스케일을 찾습니다.']],
     ['/tools/finder', '지판을 눌러 잡은 모양이 무슨 코드인지 찾아 줍니다.', ['줄마다 한 칸씩 누르세요. 같은 자리를 다시 누르면 지워집니다.', '아래에 가능한 코드 이름이 나옵니다.']],
     ['/tools/melody', '멜로디를 넣으면 어울리는 코드를 제안합니다.', ['건반이나 글자로 멜로디를 넣으세요.', '추천 순위의 ▶로 멜로디와 코드를 함께 들어 봅니다.', '자동 코드 붙이기 결과를 백킹 트랙으로 보내 연주해 보세요.']],
-    ['/tools/harmony', '멜로디 위아래에 3도·6도 같은 화음 성부를 쌓아 들어 봅니다.', ['멜로디를 넣고 빠른 설정에서 "3도 위"를 먼저 골라 보세요.', '성부마다 뮤트·솔로로 따로 들어 봅니다.', '아래 더블스탑으로 기타에서 바로 쳐 볼 수 있습니다.']],
+    ['/tools/harmony', '멜로디 위아래에 3도·6도 같은 화음 보이스를 쌓아 들어 봅니다.', ['멜로디를 넣고 빠른 설정에서 "3도 위"를 먼저 골라 보세요.', '보이스마다 뮤트·솔로로 따로 들어 봅니다.', '아래 더블스탑으로 기타에서 바로 쳐 볼 수 있습니다.']],
     ['/ear', '듣고 맞히는 퀴즈로 음감을 기릅니다.', ['탭을 골라 ▶ 문제 듣기를 누르고 답을 고르세요.', '틀리면 정답과 내가 고른 답을 번갈아 들어 차이를 확인합니다.', '정답률 80%가 넘으면 설정에서 범위를 넓히세요.']],
     ['/rhythm', '박을 유지하고 리듬을 정확하게 치는 연습을 합니다.', ['메트로놈에서 편한 템포로 박을 세어 보세요.', '리듬 따라 치기에서 패드를 눌러 점수를 확인합니다.', '스트럼 패턴을 코드 진행에 맞춰 반복합니다.']],
     ['/backing', '드럼 · 베이스 · 코드 반주 위에서 솔로와 리듬을 연습합니다.', ['진행과 스타일을 고르고 ▶ 시작을 누르세요.', '재생 중 지판에 표시되는 코드톤(색 있는 음) 위주로 쳐 봅니다.']],
@@ -177,7 +184,7 @@
     const app = document.getElementById('app'); if (!app || !route) return;
     if (route.path !== lastPath) { lastPath = route.path; data.visits[route.path] = (data.visits[route.path] || 0) + 1; save(); }
     const old = app.querySelector(':scope > .page-guide'); if (old) old.remove();
-    if (route.path === '/' || route.path === '/learn' || data.profile.showGuides === false) return;
+    if (route.path === '/' || route.path === '/learn' || route.path.startsWith('/learn/') || data.profile.showGuides === false) return;
     const info = pageInfo(route.path); const mission = data.profile.onboarded ? missionFor(route) : null;
     if (!info && !mission) return;
     /* 처음 두 번 방문할 때만 펼쳐 둔다 (초보 수준일 때) */

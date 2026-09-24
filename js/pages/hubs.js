@@ -5,18 +5,18 @@
   const { h, section } = GH.ui;
 
   const STEPS = [
-    { n: 1, level: 1, title: '음과 음정: 소리의 거리 재기', what: '기타 지판에서 음을 찾고, 두 음 사이의 거리(음정)를 귀와 눈으로 익힙니다.',
-      todo: ['지판을 눌러 소리를 들으며 같은 음이 어디에 또 있는지 찾아보세요.', '완전5도(스타워즈), 장3도(나비야)처럼 노래로 인터벌을 기억하세요.'],
-      links: [['#/theory/intervals', '음정 이론'], ['#/tools/finder', '지판 눌러 보기'], ['#/ear?tab=interval', '음정 퀴즈']] },
-    { n: 2, level: 1, title: '코드: 음을 쌓아 화음 만들기', what: '메이저 · 마이너 3화음에서 7화음까지, 코드가 어떻게 만들어지는지 보고 듣습니다.',
+    { n: 1, level: 1, title: '음과 인터벌: 소리의 거리 재기', what: '기타 지판에서 음을 찾고, 두 음 사이의 거리(인터벌)를 귀와 눈으로 익힙니다.',
+      todo: ['지판을 눌러 소리를 들으며 같은 음이 어디에 또 있는지 찾아보세요.', '퍼펙트 5도(스타워즈), 메이저 3도(나비야)처럼 노래로 인터벌을 기억하세요.'],
+      links: [['#/learn/notes', '기초 코스 1 · 2장'], ['#/theory/intervals', '인터벌 표'], ['#/tools/finder', '지판 눌러 보기'], ['#/ear?tab=interval', '인터벌 퀴즈']] },
+    { n: 2, level: 1, title: '코드: 음을 쌓아 화음 만들기', what: '메이저 · 마이너 트라이어드에서 세븐 코드까지, 코드가 어떻게 만들어지는지 보고 듣습니다.',
       todo: ['코드 빌더에서 C, Am, F, G 를 차례로 듣고 밝음/어두움을 비교하세요.', '오픈 코드 폼으로 같은 코드를 기타에서 잡아 보세요.'],
-      links: [['#/theory/chords', '코드 빌더'], ['#/guitar/voicings/basic?types=open,caged', '기본 코드 폼'], ['#/ear?tab=chord', '코드 퀄리티 퀴즈']] },
+      links: [['#/learn/triad', '기초 코스 3장'], ['#/theory/chords', '코드 빌더'], ['#/guitar/voicings/basic?types=open,caged', '기본 코드 폼'], ['#/ear?tab=chord', '코드 퀄리티 퀴즈']] },
     { n: 3, level: 1, title: '키와 스케일: 어떤 음을 쓸까', what: '메이저 스케일과 펜타토닉으로 키 안의 음을 익히고, 계이름(도레미)으로 듣는 상대음감을 시작합니다.',
       todo: ['마이너 펜타토닉 박스 1을 외우고 연습 패턴을 따라 치세요.', '계이름 퀴즈로 스케일 안에서 음의 위치를 듣는 연습을 하세요.'],
-      links: [['#/guitar/scales?scale=minor_pent', '펜타토닉 박스'], ['#/theory/scales', '스케일 이론'], ['#/ear?tab=degree', '계이름 퀴즈']] },
+      links: [['#/learn/majorscale', '기초 코스 5장'], ['#/guitar/scales?scale=minor_pent', '펜타토닉 박스'], ['#/theory/scales', '스케일 이론'], ['#/ear?tab=degree', '계이름 퀴즈']] },
     { n: 4, level: 2, title: '코드 진행: 코드가 움직이는 이유', what: '토닉 · 프리도미넌트 · 도미넌트 기능과 장르별 필수 진행을 익히고, 백킹 트랙 위에서 연주합니다.',
       todo: ['I – V – vi – IV 와 ii – V – I 을 듣고 토닉으로 해결되는 느낌을 비교해 보세요.', '백킹 트랙을 틀고 코드톤만으로 솔로해 보세요.'],
-      links: [['#/theory/progressions', '코드 진행'], ['#/backing', '백킹 트랙'], ['#/ear?tab=root', '근음 진행 퀴즈'], ['#/ear?tab=prog', '진행 맞히기']] },
+      links: [['#/learn/function', '기초 코스 6장'], ['#/theory/progressions', '코드 진행'], ['#/backing', '백킹 트랙'], ['#/ear?tab=root', '루트 진행 퀴즈'], ['#/ear?tab=prog', '진행 맞히기']] },
     { n: 5, level: 2, title: '곡으로 연결하기', what: '실제 곡 형태의 진행을 마디별로 분석하고, 릭을 배워 진행 위에 얹습니다. 멜로디에 코드를 붙여 보기도 합니다.',
       todo: ['곡 분석에서 마디를 하나씩 눌러 스케일과 보이싱을 확인하세요.', '멜로디 → 코드 도구에 좋아하는 멜로디를 넣어 반주를 만들어 보세요.'],
       links: [['#/songs', '곡 분석'], ['#/guitar/licks', '릭'], ['#/tools/melody', '멜로디 → 코드']] },
@@ -38,9 +38,10 @@
     title: '배우기',
     render(el) {
       const A = GH.app; const sec = A.SECTIONS.find(x => x.id === 'learn');
-      el.appendChild(hubHead(sec, '배우기: 처음부터 차근차근', '위에서 아래로 따라가면 됩니다. 각 단계는 "보기 → 듣기 → 기타로 쳐 보기 → 퀴즈"로 이어집니다. 어려운 내용은 6단계에 모아 두었으니 처음엔 건너뛰어도 좋습니다.'));
+      el.appendChild(hubHead(sec, '배우기: 처음부터 차근차근', '음악을 처음 배운다면 기초 코스부터 시작하세요. 레슨 한 장에 개념 하나씩, 읽고 → 듣고 → 기타로 쳐 보고 → 짧은 문제로 확인합니다. 기초 코스를 마치면 아래 로드맵으로 넘어가면 됩니다.'));
+      if (GH.course) el.appendChild(GH.course.overview());
       if (GH.guide) el.appendChild(GH.guide.planSection());
-      el.appendChild(h('div', { class: 'display-head compact' }, h('span', { class: 'en' }, 'ROADMAP'), h('h2', null, '6단계 로드맵')));
+      el.appendChild(h('div', { class: 'display-head compact' }, h('span', { class: 'en' }, 'ROADMAP'), h('h2', null, '기초 코스 다음: 6단계 로드맵'), h('p', null, '기초 코스에서 익힌 것을 실제 도구와 퀴즈로 넓혀 가는 순서입니다. 각 단계의 첫 링크는 해당 기초 코스 장으로 이어집니다.')));
       const list = h('ol', { class: 'roadmap' });
       STEPS.forEach((s, i) => list.appendChild(h('li', { class: 'step lv' + s.level, style: '--i:' + i },
         h('div', { class: 'step-num', 'aria-hidden': 'true' }, String(s.n).padStart(2, '0')),
@@ -84,6 +85,6 @@
     el.appendChild(section('자주 찾는 주제', h('div', { class: 'toc' }, [['#/theory/progressions/ii-V-I', 'ii–V–I'], ['#/theory/progressions/blues12', '12마디 블루스'], ['#/theory/modes/dorian', '도리안'], ['#/theory/reharm/tritone_sub', '트라이톤 대체'], ['#/theory/scales?tab=circle', '5도권'], ['#/theory/chords?tab=tension', '텐션 규칙']].map(([href, t]) => h('a', { href }, t)))));
   });
   GH.pages['/practice'] = hub('practice', el => {
-    el.appendChild(section('오늘의 10분 루틴', h('ol', { class: 'plain' }, ['계이름 퀴즈 10문제 (스케일 기준 듣기)', '음정 퀴즈 10문제 (상행)', '백킹 트랙 ii – V – I을 90 BPM으로 틀고 코드톤 솔로 2분', '근음 진행 퀴즈 5문제'].map(t => h('li', null, t))), h('div', { class: 'toc' }, h('a', { href: '#/ear?tab=degree' }, '계이름 퀴즈'), h('a', { href: '#/ear?tab=interval' }, '음정 퀴즈'), h('a', { href: '#/backing?id=ii-V-I' }, 'ii – V – I 백킹 트랙'), h('a', { href: '#/ear?tab=root' }, '근음 퀴즈'))));
+    el.appendChild(section('오늘의 10분 루틴', h('ol', { class: 'plain' }, ['계이름 퀴즈 10문제 (스케일 기준 듣기)', '인터벌 퀴즈 10문제 (상행)', '백킹 트랙 ii – V – I을 90 BPM으로 틀고 코드톤 솔로 2분', '루트 진행 퀴즈 5문제'].map(t => h('li', null, t))), h('div', { class: 'toc' }, h('a', { href: '#/ear?tab=degree' }, '계이름 퀴즈'), h('a', { href: '#/ear?tab=interval' }, '인터벌 퀴즈'), h('a', { href: '#/backing?id=ii-V-I' }, 'ii – V – I 백킹 트랙'), h('a', { href: '#/ear?tab=root' }, '루트 퀴즈'))));
   });
 })();

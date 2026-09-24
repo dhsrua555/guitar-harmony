@@ -14,7 +14,7 @@
     ok(N.spell('F#', '7') === 'E#', 'spell F# 7 = E# (' + N.spell('F#', '7') + ')');
     ok(N.spell('C', '#11') === 'F#', 'spell C #11 = F#');
     ok(N.spell('A', 'bb7') === 'Gb', 'spell A bb7 = Gb (' + N.spell('A', 'bb7') + ')');
-    ok(N.intervalKo('b3') === '단3도' && N.intervalKo('#4') === '증4도' && N.intervalKo('bb7') === '감7도', 'intervalKo');
+    ok(N.intervalKo('b3') === '마이너 3도' && N.intervalKo('#4') === '어그멘티드 4도' && N.intervalKo('bb7') === '디미니시 7도' && N.intervalKo('1') === '유니즌', 'intervalKo');
     /* chords */
     const c = GH.chords.buildChord('F#', 'm7b5');
     ok(c.notes.map(n => n.name).join(' ') === 'F# A C E', 'F#m7b5 = F# A C E (' + c.notes.map(n => n.name).join(' ') + ')');
@@ -261,8 +261,16 @@
     /* 가이드 */
     (function () {
       const G = GH.guide;
-      const routesOk = G.MISSIONS.every(m => GH.pages[m.route]);
-      ok(routesOk, 'guide mission routes exist ' + G.MISSIONS.filter(m => !GH.pages[m.route]).map(m => m.route).join(','));
+      /* '/learn/:id' 처럼 변수가 있는 경로도 인정 */
+      const hasPage = r => !!GH.pages[r] || Object.keys(GH.pages).some(k => k.includes(':') && new RegExp('^' + k.replace(/:[^/]+/g, '[^/]+') + '$').test(r));
+      const routesOk = G.MISSIONS.every(m => hasPage(m.route));
+      ok(routesOk, 'guide mission routes exist ' + G.MISSIONS.filter(m => !hasPage(m.route)).map(m => m.route).join(','));
+      /* 기초 코스: 레슨 id 가 겹치지 않고, 위젯이 모두 있고, 정답 번호가 보기 안에 있다 */
+      const lessons = GH.course.lessons();
+      ok(new Set(lessons.map(l => l.id)).size === lessons.length, 'course lesson ids unique');
+      ok(lessons.every(l => !l.widget || GH.course.WIDGETS[l.widget.type]), 'course widgets exist ' + lessons.filter(l => l.widget && !GH.course.WIDGETS[l.widget.type]).map(l => l.id).join(','));
+      ok(lessons.every(l => !l.quiz || (l.quiz.answer >= 0 && l.quiz.answer < l.quiz.options.length)), 'course quiz answers in range');
+      G.MISSIONS.filter(m => /^course-/.test(m.id)).forEach(m => ok(lessons.some(l => '/learn/' + l.id === m.route), 'course mission lesson ' + m.route));
       const counts = G.LEVELS.map(l => G.plan({ level: l.id, goals: ['theory', 'guitar', 'ear', 'solo', 'compose', 'rhythm'] }).length);
       ok(counts.every(c => c >= 5), 'guide plan per level ' + counts.join(','));
       ok(G.GOALS.every(g => G.plan({ level: 'chords', goals: [g.id] }).length >= 2), 'guide plan per goal');

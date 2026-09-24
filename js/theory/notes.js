@@ -56,8 +56,10 @@
     const I = INTERVALS[iv]; if (!I) return iv;
     const diff = I.semi - DEG_REF[I.deg];
     let q;
-    if (PERFECT.has(I.deg)) q = diff === 0 ? '완전' : diff < 0 ? '감' : '증';
-    else q = diff === 0 ? '장' : diff === -1 ? '단' : diff <= -2 ? '감' : '증';
+    if (I.deg === 1 && diff === 0) return '유니즌';
+    if (I.deg === 8 && diff === 0) return '옥타브';
+    if (PERFECT.has(I.deg)) q = diff === 0 ? '퍼펙트 ' : diff < 0 ? '디미니시 ' : '어그멘티드 ';
+    else q = diff === 0 ? '메이저 ' : diff === -1 ? '마이너 ' : diff <= -2 ? '디미니시 ' : '어그멘티드 ';
     return q + I.deg + '도';
   }
   function intervalEn(iv) {
@@ -69,9 +71,9 @@
     return q + I.deg;
   }
   /* 철자가 있는 두 음 사이의 인터벌 이름. low → high, semis = 실제 반음 거리 (0 이상).
-     예: ('B', 'F', 6) → { num: 5, q: 'd', en: 'd5', ko: '감5도' } */
+     예: ('B', 'F', 6) → { num: 5, q: 'd', en: 'd5', ko: '디미니시 5도' } */
   const SIMPLE_SEMI = [0, 2, 4, 5, 7, 9, 11];
-  const Q_KO = { P: '완전', M: '장', m: '단', d: '감', A: '증', dd: '겹감', AA: '겹증' };
+  const Q_KO = { P: '퍼펙트 ', M: '메이저 ', m: '마이너 ', d: '디미니시 ', A: '어그멘티드 ', dd: '더블 디미니시 ', AA: '더블 어그멘티드 ' };
   function intervalBetween(lowName, highName, semis) {
     const a = parseNote(lowName), b = parseNote(highName);
     if (!a || !b || semis == null || semis < 0) return null;
