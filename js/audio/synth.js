@@ -122,7 +122,7 @@
      녹음에는 이미 몸통 울림이 들어 있으니 합성음용 필터를 거치지 않고 방 울림과 마스터로 바로 보낸다 */
   const sbuses = {}; let sampleMain = null;
   const SAMPLE_LEVEL = 0.4;
-  const useSamples = () => !!GH.samples && (!GH.state || GH.state.get().sound !== 'synth');
+  const useSamples = () => !!GH.samples && GH.samples.enabled();
   function sampleChain() {
     if (sampleMain) return sampleMain;
     const c = context();
@@ -140,6 +140,10 @@
       const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 30; hp.Q.value = 0.5;
       g.connect(hp); hp.connect(master);
       const snd = c.createGain(); snd.gain.value = 0.05; hp.connect(snd); snd.connect(convolver);
+    } else if (name === 'drums') { /* 녹음에 방 소리가 들어 있어 울림은 조금만 */
+      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 26; hp.Q.value = 0.5;
+      g.connect(hp); hp.connect(master);
+      const snd = c.createGain(); snd.gain.value = 0.07; hp.connect(snd); snd.connect(convolver);
     } else g.connect(sampleChain());
     sbuses[name] = g; return g;
   }
@@ -165,17 +169,18 @@
     /* 세기: 약하게 칠수록 작고 어둡게, 짧게 끊는 기타 음은 손바닥으로 누른 듯 더 어둡게 */
     const vel = Math.max(0.05, Math.min(1.3, velocity));
     const tone = c.createBiquadFilter(); tone.type = 'lowpass'; tone.Q.value = 0.5;
-    const muted = id !== 'piano' && id !== 'bass' && dur < 0.3;
+    const muted = id !== 'piano' && id !== 'bass' && id !== 'upright' && dur < 0.3;
     const bright = I.soft + (I.bright - I.soft) * Math.pow(Math.min(1, vel), 1.6);
     tone.frequency.value = Math.min(18000, muted ? bright * 0.55 : bright);
-    const g = c.createGain(); const level = I.gain * Math.pow(vel, 1.25) * SAMPLE_LEVEL;
+    const want = Math.pow(vel, 1.25);
+    const g = c.createGain(); const level = I.gain * SAMPLE_LEVEL * (v.lv ? v.lv * Math.max(0.5, Math.min(2, want / v.lv)) : want);
     g.gain.setValueAtTime(level, t0);
     g.gain.setValueAtTime(level, end);
     g.gain.setTargetAtTime(0, end, I.release / 3.5);
-    const pan = opts.pan != null ? Math.max(-1, Math.min(1, opts.pan)) : id === 'bass' ? 0 : Math.max(-0.22, Math.min(0.22, (midi - 60) * 0.008 + (Math.random() - .5) * .035));
+    const pan = opts.pan != null ? Math.max(-1, Math.min(1, opts.pan)) : id === 'bass' || id === 'upright' ? 0 : Math.max(-0.22, Math.min(0.22, (midi - 60) * 0.008 + (Math.random() - .5) * .035));
     const p = panNode(c, pan);
     src.connect(tone); tone.connect(g); g.connect(p); p.connect(opts.bus ? sbus(opts.bus) : sampleChain());
-    const left = (v.buf.duration - v.offset) / rate;
+    const left = ((v.end || v.buf.duration) - v.offset) / rate;
     src.start(t0, v.offset); src.stop(t0 + Math.min(left + 0.02, (end - t0) + I.release * 2.2 + 0.05));
     track(src);
     return src;
@@ -364,7 +369,12 @@
   function bass(midi, when, dur, opts) {
     const c = context(); if (!c) return null;
     opts = opts || {};
-    if (useSamples()) { const v = GH.samples.voice('bass', midi); if (v) return playSample(v, 'bass', midi, when, dur, Object.assign({}, opts, { bus: opts.bus || 'bass' })); }
+    if (useSamples()) {
+      const inst = opts.inst === 'upright' ? 'upright' : 'bass';
+      let v = GH.samples.voice(inst, midi, opts.gain); let id = inst;
+      if (!v && inst !== 'bass') { v = GH.samples.voice('bass', midi); id = 'bass'; }
+      if (v) return playSample(v, id, midi, when, dur, Object.assign({}, opts, { bus: opts.bus || 'bass' }));
+    }
     const t0 = Math.max(when, c.currentTime + 0.01);
     const end = t0 + Math.max(0.08, dur);
     const velocity = opts.gain == null ? 1 : opts.gain;
@@ -440,9 +450,35 @@
     const g = c.createGain(); const p = panNode(c, pan); hitEnv(g.gain, t0, peak, dur, kind === 'ride' ? .002 : .0008);
     src.connect(hp); hp.connect(g); g.connect(p); p.connect(out); src.start(t0); src.stop(t0 + Math.min(src.buffer.duration, dur + .04)); track(src);
   }
+  /* 녹음 드럼 한 타. 종류마다 음량을 조금 맞추고, 하이햇을 닫으면 울리던 열린 하이햇을 끊는다 */
+  const KIT_TRIM = { kick: 1.3, snare: 1.0, rim: 1.25, hat: 0.95, hatopen: 1.0, pedal: 1.8, ride: 4.2, shaker: 0.72 };
+  const DRUM_LEVEL = 1.5;
+  let openHats = [];
+  function drumSample(hv, type, t0, v) {
+    const c = context();
+    const src = c.createBufferSource(); src.buffer = hv.buf;
+    const want = Math.pow(Math.min(1.2, Math.max(0.03, v)), 1.6);
+    const g = c.createGain(); g.gain.value = KIT_TRIM[type] * DRUM_LEVEL * hv.lv * Math.max(0.35, Math.min(2.5, want / hv.lv));
+    src.connect(g); g.connect(sbus('drums'));
+    if (type === 'hat' || type === 'pedal') {
+      openHats = openHats.filter(o => o.end > t0);
+      openHats.forEach(o => { if (o.t0 < t0) { o.g.gain.setTargetAtTime(0, t0, 0.018); try { o.src.stop(t0 + 0.2); } catch (e) { /* ignore */ } } });
+      openHats = openHats.filter(o => o.t0 >= t0);
+    }
+    src.start(t0, hv.offset); src.stop(t0 + (hv.end - hv.offset) + 0.01);
+    if (type === 'hatopen') openHats.push({ src, g, t0, end: t0 + (hv.end - hv.offset) });
+    track(src);
+    return src;
+  }
   function drum(type, when, gain) {
     const c = context(); if (!c) return;
     const out = bus('drums'); const t0 = Math.max(when, c.currentTime + 0.005); const v = gain == null ? 1 : gain;
+    if (useSamples()) { const hv = GH.samples.hit(type, v); if (hv) return drumSample(hv, type, t0, v); }
+    if (type === 'pedal') { /* 합성음: 발로 닫는 하이햇은 짧고 작게 */
+      metalHit('hat', out, t0, .12 * v, .045, .24);
+      noiseHit(out, t0, .03 * v, .03, 'bandpass', 6200, .5, .2);
+      return;
+    }
     if (type === 'kick') {
       oscHit(out, t0, 'sine', 145, 47, .82 * v, .36, -.03);
       oscHit(out, t0 + .002, 'triangle', 74, 48, .2 * v, .23, -.03);
@@ -526,5 +562,5 @@
   /* 전화 · 잠금 · 앱 전환 뒤에 돌아오면 다시 깨운다 */
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running' && ctx.state !== 'closed') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } });
 
-  GH.audio = { context, unlock, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, available: () => !!(window.AudioContext || window.webkitAudioContext) };
+  GH.audio = { context, unlock, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, KIT_TRIM, available: () => !!(window.AudioContext || window.webkitAudioContext) };
 })();

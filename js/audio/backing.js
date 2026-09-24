@@ -19,11 +19,12 @@
       drums: [{ t: 0, k: 'kick' }, { t: .75, k: 'kick', g: .8 }, { t: 2, k: 'kick' }, { t: 2.75, k: 'kick', g: .7 }, { t: 1, k: 'snare' }, { t: 3, k: 'snare' }, { t: 1.75, k: 'snare', g: .25 }, { t: 3.5, k: 'snare', g: .25 }].concat([0, .25, .5, .75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5].map(t => ({ t, k: 'hat', g: t % .5 ? .3 : t % 1 ? .5 : .8 }))).concat([{ t: 3.75, k: 'hatopen', g: .5 }]),
       comp: [{ t: 0, d: .3, g: .85 }, { t: .75, d: .25, g: .6 }, { t: 1.5, d: .25, g: .7 }, { t: 2.5, d: .3, g: .85 }, { t: 3.25, d: .25, g: .6 }, { t: 3.75, d: .25, g: .5 }], bass: 'funk' },
     swing: { ko: '스윙 (재즈)', tempo: 140, swing: 0.67, bars: 1,
-      drums: [{ t: 0, k: 'ride', g: .9 }, { t: 1, k: 'ride', g: .8 }, { t: 1.5, k: 'ride', g: .6 }, { t: 2, k: 'ride', g: .9 }, { t: 3, k: 'ride', g: .8 }, { t: 3.5, k: 'ride', g: .6 }, { t: 1, k: 'hat', g: .5 }, { t: 3, k: 'hat', g: .5 }, { t: 0, k: 'kick', g: .25 }, { t: 2, k: 'kick', g: .2 }, { t: 2.5, k: 'rim', g: .35 }],
+      drums: [{ t: 0, k: 'ride', g: .78 }, { t: 1, k: 'ride', g: .9 }, { t: 1.5, k: 'ride', g: .58 }, { t: 2, k: 'ride', g: .78 }, { t: 3, k: 'ride', g: .9 }, { t: 3.5, k: 'ride', g: .58 }, { t: 1, k: 'pedal', g: .75 }, { t: 3, k: 'pedal', g: .75 }, { t: 0, k: 'kick', g: .3 }, { t: 1, k: 'kick', g: .22 }, { t: 2, k: 'kick', g: .28 }, { t: 3, k: 'kick', g: .22 }, { t: 2.5, k: 'rim', g: .35 }],
+      bassInst: 'upright',
       comp: [{ t: 0, d: 1.5, g: .7 }, { t: 1.5, d: 1, g: .55 }], compAlt: [{ t: 1.5, d: 1, g: .65 }, { t: 3.5, d: .5, g: .6 }], bass: 'walking' },
     bossa: { ko: '보사노바', tempo: 120, swing: 0.5, bars: 2,
       drums: [0, 1.5, 2, 3.5, 4, 5.5, 6, 7.5].map(t => ({ t, k: 'kick', g: t % 1 ? .7 : .9 })).concat([0, 1.5, 3, 5, 6.5].map(t => ({ t, k: 'rim', g: .8 }))).concat([0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5].map(t => ({ t, k: 'shaker', g: t % 1 ? .5 : .8 }))),
-      comp: [{ t: 0, d: 1, g: .7 }, { t: 1.5, d: .5, g: .6 }, { t: 2.5, d: .5, g: .6 }, { t: 3, d: 1, g: .65 }], bass: 'bossa' },
+      comp: [{ t: 0, d: 1, g: .7 }, { t: 1.5, d: .5, g: .6 }, { t: 2.5, d: .5, g: .6 }, { t: 3, d: 1, g: .65 }], bass: 'bossa', bassInst: 'upright' },
     shuffle: { ko: '셔플 블루스', tempo: 110, swing: 0.67, bars: 1,
       drums: [{ t: 0, k: 'kick' }, { t: 2, k: 'kick' }, { t: 1, k: 'snare' }, { t: 3, k: 'snare' }].concat([0, .5, 1, 1.5, 2, 2.5, 3, 3.5].map(t => ({ t, k: 'hat', g: t % 1 ? .45 : .85 }))),
       comp: [0, 1, 2, 3].flatMap(b => [{ t: b, d: .6, g: .8 }, { t: b + .5, d: .3, g: .5, dir: 'up' }]), bass: 'boogie' },
@@ -121,7 +122,7 @@
     if (o.bass !== false) bassLine(item, next, S.bass, barIndex).forEach(e => {
       if (e.t >= B) return;
       const laidBack = st.style === 'swing' || st.style === 'bossa' ? .004 : 0;
-      A.bass(e.midi, at + swingT(e.t, sw) * beat + laidBack + human(.003), Math.max(.12, e.d * beat * .93), { gain: e.g * (1 + human(.035)), bus: 'bass' });
+      A.bass(e.midi, at + swingT(e.t, sw) * beat + laidBack + human(.003), Math.max(.12, e.d * beat * .93), { gain: e.g * (1 + human(.035)), bus: 'bass', inst: S.bassInst });
     });
   }
   function tick() {
@@ -147,6 +148,20 @@
     const playable = GH.app.toPlayable(opts.chords, opts.voicings);
     st.items = opts.chords.map((c, i) => ({ symbol: c.symbol, root: c.root, rootPc: c.rootPc, qId: c.qId, fn: c.fn, roman: c.roman, beats: c.beats || 4, midi: playable[i].midi, bassMidi: playable[i].bass - 12 }));
     st.pass = 0; st.nextIndex = 0; st.nextBeat = 0;
+    /* 녹음을 아직 못 풀었으면 잠깐(최대 2.5초) 기다렸다가 시작해서, 첫 마디만 합성음으로 나오는 일이 없게 */
+    const Smp = GH.samples;
+    if (Smp && Smp.enabled()) {
+      const need = [opts.drums !== false && 'drums', opts.bass !== false && (STYLES[st.style].bassInst || 'bass'), opts.comp !== false && GH.state.get().instrument].filter(Boolean);
+      if (need.some(id => Smp.status(id) !== 'ready')) {
+        st.playing = 'loading';
+        Smp.whenReady(need, 2500).then(() => { if (st.playing === 'loading' && st.opts === opts) begin(A, opts); });
+        return st;
+      }
+    }
+    begin(A, opts);
+    return st;
+  }
+  function begin(A, opts) {
     const beat = 60 / st.tempo;
     const t0 = A.now() + 0.12;
     st.playing = true;
@@ -156,7 +171,6 @@
     tick();
     st.timer = setInterval(tick, 40);
     GH.events.emit('backing-start');
-    return st;
   }
   function stop() {
     const was = st.playing;

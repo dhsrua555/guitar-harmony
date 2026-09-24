@@ -263,7 +263,7 @@
       const upd = () => { const a = GH.samples.status(GH.state.get().instrument); stTxt.textContent = GH.state.get().sound === 'synth' ? '합성음으로 재생합니다.' : a === 'ready' ? '실제 악기 녹음으로 재생합니다.' : a === 'error' ? '녹음을 받지 못해 합성음으로 재생합니다.' : '녹음을 받는 중이에요. 그동안은 합성음으로 재생합니다.'; };
       upd(); GH.samples.onChange(upd);
       const soundSel = select({ options: [{ value: 'sample', label: '실제 악기 녹음 (기본)' }, { value: 'synth', label: '합성음 (데이터 절약)' }], value: s.sound || 'sample', onChange: v => { GH.state.set({ sound: v }); upd(); } });
-      const credit = h('small', { class: 'muted', style: 'font-size:.72rem;line-height:1.5' }, '녹음 출처 (CC BY 3.0): 어쿠스틱 University of Iowa MIS · 일렉 · 베이스 Karoryfer Samples · 클래식 Freesound quartertone · 피아노 Salamander Grand Piano (Alexander Holm), tonejs-instruments 모음');
+      const credit = h('small', { class: 'muted', style: 'font-size:.72rem;line-height:1.5' }, '녹음 출처: 어쿠스틱 University of Iowa MIS · 일렉 기타 · 일렉 베이스 Karoryfer Samples · 클래식 Freesound quartertone · 피아노 Salamander Grand Piano (Alexander Holm), tonejs-instruments 모음 (CC BY 3.0) · 드럼 Virtuosity Drums (Versilian Studios · Karoryfer Samples) · 콘트라베이스 D. Smolken (CC0)');
       panel.appendChild(field('소리 방식', h('div', { style: 'display:grid;gap:6px' }, soundSel, stTxt, credit)));
     }
     panel.appendChild(field('볼륨', h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.volume, style: 'width:100%', oninput: e => GH.state.set({ volume: Number(e.target.value) }) })));

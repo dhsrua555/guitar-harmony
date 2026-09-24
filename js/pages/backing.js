@@ -95,6 +95,8 @@
         if (i >= 0 && cellsByChord[i]) cellsByChord[i].classList.add('current');
         renderNow(i);
       };
+      /* 화면을 열면 드럼 · 베이스 녹음 파일을 미리 받아 둔다 (풀기는 재생할 때) */
+      if (GH.samples && GH.samples.enabled()) { GH.samples.prefetch('drums'); GH.samples.prefetch((S[style] && S[style].bassInst) || 'bass'); }
       const start = () => {
         GH.backing.start({ chords, voicings, tempo: state.tempo || tempo, style, loop: state.loop, countIn: state.countIn, drums: state.drums, bass: state.bass, comp: state.comp, metronome: state.metronome, onChord, onBeat, onStop: () => setPlaying(false) });
         Object.entries(state.mix).forEach(([k, v]) => GH.audio.setBusGain(k, v));
