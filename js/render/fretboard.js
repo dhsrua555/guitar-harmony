@@ -1,8 +1,8 @@
-/* SVG 프렛보드 */
+/* SVG 프렛보드 (손그림 선) */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const { h, svg } = GH.ui; const N = GH.notes; const mod = N.mod;
+  const { h, svg } = GH.ui; const N = GH.notes; const mod = N.mod; const S = () => GH.sketch;
   GH.render = GH.render || {};
 
   /* opts: { tuning, from, to, lefty, pcMap{pc:{label,cls}}, notes[{s,f,label,cls,ghost,dim}], filter(s,f,pc)->'dim'|'hide'|null,
@@ -26,29 +26,33 @@
     const sy = s => TOP + (s - 1) * SH;                     /* s=1 (높은 E) 위 */
     /* 보드 */
     const boardA = Math.min(nutX, fretX(to)), boardB = Math.max(nutX, fretX(to));
-    el.appendChild(svg('rect', { class: 'board', x: Math.min(mx(boardA), mx(boardB)), y: TOP - 8, width: boardB - boardA, height: 5 * SH + 16, rx: 3 }));
+    const bx0 = Math.min(mx(boardA), mx(boardB)), bw = boardB - boardA;
+    el.appendChild(svg('rect', { class: 'board', x: bx0, y: TOP - 8, width: bw, height: 5 * SH + 16, rx: 3 }));
+    el.appendChild(S().path(S().line(bx0, TOP - 8, bx0 + bw, TOP - 8, { passes: 1, bow: 0.6 }) + S().line(bx0, TOP + 5 * SH + 8, bx0 + bw, TOP + 5 * SH + 8, { passes: 1, bow: 0.6 }), 'board-edge'));
     /* 인레이 */
     [3, 5, 7, 9, 12, 15, 17, 19, 21, 24].forEach(f => {
       if (f <= from || f > to) return;
       const x = mx(noteX(f)); const cy = TOP + 2.5 * SH;
-      if (f % 12 === 0) { el.appendChild(svg('circle', { class: 'inlay', cx: x, cy: cy - SH, r: 5 })); el.appendChild(svg('circle', { class: 'inlay', cx: x, cy: cy + SH, r: 5 })); }
-      else el.appendChild(svg('circle', { class: 'inlay', cx: x, cy, r: 5 }));
+      if (f % 12 === 0) { el.appendChild(S().path(S().blob(x, cy - SH, 5, 5), 'inlay')); el.appendChild(S().path(S().blob(x, cy + SH, 5, 5), 'inlay')); }
+      else el.appendChild(S().path(S().blob(x, cy, 5, 5), 'inlay'));
     });
     /* 프렛 */
     for (let f = from; f <= to; f++) {
       const x = mx(fretX(f));
-      if (f === 0) el.appendChild(svg('line', { class: 'nut', x1: x, y1: TOP - 6, x2: x, y2: TOP + 5 * SH + 6 }));
-      else el.appendChild(svg('line', { class: 'fret', x1: x, y1: TOP - 8, x2: x, y2: TOP + 5 * SH + 8 }));
+      if (f === 0) el.appendChild(S().path(S().line(x, TOP - 6, x, TOP + 5 * SH + 6, { passes: 3, jitter: 1.4 }), 'nut'));
+      else el.appendChild(S().path(S().line(x, TOP - 8, x, TOP + 5 * SH + 8, { passes: 2, bow: 0.7 }), 'fret'));
       if (f > 0) el.appendChild(svg('text', { class: 'fretnum', x: mx(noteX(f)), y: H - 6 }, f));
     }
     /* 카포 */
     if (capo > from && capo <= to) {
       const capoA = fretX(capo) - 6, capoB = fretX(capo);
-      el.appendChild(svg('rect', { x: Math.min(mx(capoA), mx(capoB)), y: TOP - 10, width: 6, height: 5 * SH + 20, rx: 3, fill: 'var(--accent)', opacity: .82 }));
+      const cxp = Math.min(mx(capoA), mx(capoB)) + 3;
+      el.appendChild(S().path(S().blob(cxp, TOP + 2.5 * SH, 4, 2.5 * SH + 10, { points: 10, wobble: 0.04 }), 'capo', { fill: 'var(--accent)', opacity: .85 }));
+      el.appendChild(S().path(S().ellipse(cxp, TOP + 2.5 * SH, 4.6, 2.5 * SH + 10.5, { points: 12, wobble: 0.03 }), 'sk-ink'));
     }
     /* 줄 */
     for (let s = 1; s <= 6; s++) {
-      el.appendChild(svg('line', { class: 'string', x1: mx(nutX), y1: sy(s), x2: mx(fretX(to)), y2: sy(s), 'stroke-width': 0.9 + (s - 1) * 0.35 }));
+      el.appendChild(S().path(S().line(mx(nutX), sy(s), mx(fretX(to)), sy(s), { passes: s > 3 ? 2 : 1, bow: 1.2, overshoot: 0.5, jitter: 0.4 }), 'string', { 'stroke-width': 0.9 + (s - 1) * 0.35 }));
       if (opts.showStringNames !== false) el.appendChild(svg('text', { class: 'stringname', x: lefty ? W - 12 : 12, y: sy(s), 'text-anchor': lefty ? 'start' : 'end' }, N.noteName(tuning[6 - s] % 12, opts.pref || 'sharp')));
     }
     /* 윈도우 */
@@ -56,7 +60,9 @@
       const [lo, hi] = opts.window; const a = Math.max(lo, from), b = Math.min(hi, to);
       if (b >= a) {
         const x1 = a === 0 ? openX - 8 : fretX(a - 1) + 2, x2 = fretX(b) - 2;
-        el.appendChild(svg('rect', { class: 'window', x: mx(Math.min(x1, x2)) - (lefty ? Math.abs(x2 - x1) : 0), y: TOP - 11, width: Math.abs(x2 - x1), height: 5 * SH + 22, rx: 6 }));
+        const wx = mx(Math.min(x1, x2)) - (lefty ? Math.abs(x2 - x1) : 0), ww = Math.abs(x2 - x1);
+        el.appendChild(svg('rect', { class: 'window-fill', x: wx, y: TOP - 11, width: ww, height: 5 * SH + 22, rx: 6 }));
+        el.appendChild(S().path(S().rect(wx, TOP - 11, ww, 5 * SH + 22, { passes: 1, bow: 0.8 }), 'window'));
       }
     }
     /* 클릭 영역: 어디를 눌러도 그 음이 울린다. onClick 이 있으면 (코드 파인더) 함께 호출 */
@@ -83,7 +89,9 @@
       extra = extra || {};
       const g = svg('g', { class: 'note ' + (cls || 'iv-s') + (extra.dim ? ' dim' : '') + (extra.ghost ? ' ghost' : '') + (extra.clickable ? ' clickable' : ''), 'data-key': s + ':' + f });
       const x = mx(noteX(f)), y = sy(s);
-      g.appendChild(svg('circle', { cx: x, cy: y, r: f === 0 ? 8 : 10 }));
+      const r = f === 0 ? 8 : 10;
+      g.appendChild(S().path(S().blob(x, y, r, r * 0.94), 'fill'));
+      g.appendChild(S().path(S().ellipse(x + 0.8, y - 0.6, r + 0.4, r * 0.96), 'ink'));
       g.appendChild(svg('text', { x, y: y + 0.5 }, label == null ? '' : String(label)));
       if (extra.title) g.appendChild(svg('title', null, extra.title));
       notesLayer.appendChild(g); noteEls[s + ':' + f] = g; return g;
@@ -108,6 +116,7 @@
       const midi = tuning[6 - n.s] + n.f; const pc = mod(midi, 12);
       dot(n.s, n.f, n.label != null ? (opts.labelMode === 'name' || (!opts.labelMode && st.labelMode === 'name') ? N.noteName(pc, opts.pref || 'sharp') : n.label) : N.noteName(pc, opts.pref || 'sharp'), n.cls || 'iv-s', { dim: n.dim, ghost: n.ghost, title: N.noteName(pc, opts.pref || 'sharp') + (n.label ? ' · ' + n.label : '') });
     });
+    S().grain(el, W, H);
     let currentEls = [];
     const wrap = h('div', {
       class: 'fretboard-scroll ' + (nFrets > 8 ? 'wide' : 'compact'),

@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
+  const songTempo = {}; /* 곡마다 바꾼 재생 템포 (이 방문 동안만) */
   const { h, section, table } = GH.ui; const N = GH.notes;
 
   function findSong(id) { return GH.data.songs.find(s => s.id === id); }
@@ -65,8 +66,9 @@
     el.appendChild(h('div', { class: 'row' }, GH.ui.badge('키 ' + N.pretty(song.key)), GH.ui.badge(song.form), GH.ui.badge(song.tempo + ' BPM')));
     el.appendChild(h('p', null, song.summary));
     el.appendChild(h('div', { class: 'toolbar' },
-      h('a', { class: 'btn small primary', href: GH.router.href('/backing', { chords: song.bars.map(bar => bar.c).join(' | '), key: song.key, style: song.style, tempo: song.tempo }) }, '▶ 백킹 트랙으로 연습'),
-      A.playBtn('▶ 전체 차트 재생', () => GH.player.playProgression(A.toPlayable(flat), { tempo: song.tempo, style: song.style, loop: true, onChord: i => { chart.querySelectorAll('.bar').forEach(bar => bar.classList.remove('current')); if (i >= 0 && flat[i]) { const active = chart.children[flat[i].bar]; if (active) active.classList.add('current'); } } }), 'primary'),
+      h('a', { class: 'btn small primary', href: GH.router.href('/backing', { chords: song.bars.map(bar => bar.c).join(' | '), key: song.key, style: song.style, tempo: song.tempo }), onclick: e => { e.currentTarget.href = GH.router.href('/backing', { chords: song.bars.map(bar => bar.c).join(' | '), key: song.key, style: song.style, tempo: songTempo[song.id] || song.tempo }); } }, '▶ 백킹 트랙으로 연습'),
+      h('label', { class: 'inline-field' }, '템포', GH.ui.numberInput({ value: songTempo[song.id] || song.tempo, min: 40, max: 280, big: 5, suffix: 'BPM', label: '재생 템포', onChange: v => { songTempo[song.id] = v; } })),
+      A.playBtn('▶ 전체 차트 재생', () => GH.player.playProgression(A.toPlayable(flat), { tempo: songTempo[song.id] || song.tempo, style: song.style, loop: true, onChord: i => { chart.querySelectorAll('.bar').forEach(bar => bar.classList.remove('current')); if (i >= 0 && flat[i]) { const active = chart.children[flat[i].bar]; if (active) active.classList.add('current'); } } }), 'primary'),
       A.stopBtn(), A.fnLegend()));
     el.appendChild(section('전체 코드 차트', h('p', { class: 'muted' }, '마디를 선택하면 코드, 코드–스케일, 기타 보이싱과 관련 릭을 별도 페이지에서 분석합니다.'), chart));
     el.appendChild(section('연습 방법',
@@ -102,7 +104,7 @@
       next ? h('a', { class: 'btn small', href: songHref(A, song.id, next), 'aria-label': '다음 마디' }, next + '마디 ›') : h('span', { class: 'muted' }, '마지막 마디')));
 
     el.appendChild(section('코드 분석',
-      h('div', { class: 'row', style: 'margin-bottom:8px' }, A.playBtn('▶ 이 마디 재생', () => GH.player.playProgression(A.toPlayable(bar.chords), { tempo: song.tempo, style: song.style }), 'primary'), A.stopBtn()),
+      h('div', { class: 'row', style: 'margin-bottom:8px' }, A.playBtn('▶ 이 마디 재생', () => GH.player.playProgression(A.toPlayable(bar.chords), { tempo: songTempo[song.id] || song.tempo, style: song.style }), 'primary'), A.stopBtn()),
       table(['코드', '근음', '코드 퀄리티', '하모닉 펑션', '코드 상세'], bar.chords.map(chord => [
         chord.symbol,
         N.pretty(chord.root),

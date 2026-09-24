@@ -15,6 +15,20 @@
 </head>
 <body>
 <a class="skip-link" href="#app">본문으로 바로가기</a>
+<!-- 손그림 효과: 종이 알갱이, 흔들리는 잉크 선 -->
+<svg class="sk-defs" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <filter id="gh-noise" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.14  0 0 0 0 0.12  0 0 0 3.4 -2.05"/>
+    </filter>
+    <pattern id="gh-grain-pat" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" filter="url(#gh-noise)"/></pattern>
+    <filter id="gh-rough" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="1.3" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="gh-boil-a" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="gh-boil-b" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="23"/><feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="gh-boil-c" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="37"/><feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  </defs>
+</svg>
 <header class="topbar">
   <div class="topbar-inner">
     <button id="menu-btn" class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-panel" aria-label="메뉴 열기"><span class="menu-bars" aria-hidden="true"><i></i><i></i></span><span class="menu-label">MENU</span></button>
@@ -79,6 +93,7 @@
 <script src="js/audio/player.js"></script>
 <script src="js/audio/backing.js"></script>
 <script src="js/audio/rhythm.js"></script>
+<script src="js/render/sketch.js"></script>
 <script src="js/render/fretboard.js"></script>
 <script src="js/render/chordDiagram.js"></script>
 <script src="js/render/piano.js"></script>

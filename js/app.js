@@ -267,7 +267,7 @@
     panel.appendChild(field('코드 심볼 스타일', select({ options: [{ value: 'standard', label: '표준 (Cmaj7, Dm7, Bm7b5)' }, { value: 'jazz', label: '재즈 약식 (C△7, D-7, Bø7)' }], value: s.symbolStyle, onChange: v => GH.state.set({ symbolStyle: v }) })));
     panel.appendChild(h('h3', { class: 'settings-group' }, '기타'));
     panel.appendChild(field('튜닝 (스케일 지판에 적용·코드 폼은 스탠다드 기준)', select({ options: Object.entries(GH.state.TUNINGS).map(([k, t]) => ({ value: k, label: t.label })), value: s.tuning, onChange: v => GH.state.set({ tuning: v }) })));
-    panel.appendChild(field('카포 (지판 표시)', select({ options: [0, 1, 2, 3, 4, 5, 6, 7].map(n => ({ value: n, label: n === 0 ? '없음' : n + '프렛' })), value: s.capo, onChange: v => GH.state.set({ capo: Number(v) }) })));
+    panel.appendChild(field('카포 (지판 표시, 0은 없음)', GH.ui.numberInput({ value: Number(s.capo) || 0, min: 0, max: 12, suffix: '프렛', label: '카포 위치 (프렛)', onChange: v => GH.state.set({ capo: v }) })));
     const lefty = h('input', { type: 'checkbox', checked: s.lefty, onchange: e => GH.state.set({ lefty: e.target.checked }) });
     panel.appendChild(h('div', { class: 'field' }, h('label', null, '왼손잡이'), h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, lefty, '지판과 코드 다이어그램을 좌우 반전')));
     panel.appendChild(h('h3', { class: 'settings-group' }, '화면'));

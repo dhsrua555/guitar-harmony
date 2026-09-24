@@ -88,7 +88,7 @@
     const tb = h('div', { class: 'toolbar' },
       A.playBtn('▶ 재생', () => GH.player.playProgression(A.toPlayable(chords, seq), { tempo: state.tempo || P.tempo || 110, style: state.style || P.style || 'pop', loop: state.loop, metronome: state.metronome, onChord: i => { strip.setCurrent(i); chart.querySelectorAll('.bar').forEach(b => b.classList.remove('current')); if (i >= 0 && cellsByChord[i]) cellsByChord[i].classList.add('current'); } }), 'primary'),
       A.stopBtn(),
-      h('label', null, '템포', h('input', { type: 'range', min: 50, max: 260, value: tempo, oninput: e => { state.tempo = Number(e.target.value); e.target.nextSibling.textContent = state.tempo; } }), h('span', null, tempo)),
+      h('label', null, '템포', GH.ui.rangeNumber({ value: tempo, min: 40, max: 280, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; } })),
       h('label', null, '스타일 / 그루브', select({ options: [['pop', 'Pop'], ['rock', 'Rock'], ['ballad', 'Ballad'], ['soul', 'Neo Soul'], ['swing', 'Swing'], ['shuffle', 'Shuffle'], ['bossa', 'Bossa Nova'], ['funk', 'Funk'], ['gospel', 'Gospel']].map(([v, l]) => ({ value: v, label: l })), value: style, onChange: v => { state.style = v; } })),
       h('label', null, h('input', { type: 'checkbox', checked: state.loop, onchange: e => { state.loop = e.target.checked; } }), '루프'),
       h('label', null, h('input', { type: 'checkbox', checked: state.metronome, onchange: e => { state.metronome = e.target.checked; } }), '클릭'),

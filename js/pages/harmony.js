@@ -116,7 +116,6 @@
         state.voices.length < MAX_VOICES ? h('button', { class: 'btn small', type: 'button', style: 'margin-top:8px', onclick: () => { state.voices.push(newVoice(state.voices.length)); rerender(); } }, '＋ 성부 추가') : h('p', { class: 'muted', style: 'font-size:.84rem' }, '성부는 멜로디 외에 세 개까지 쌓을 수 있습니다.')));
 
       /* ---- 재생 ---- */
-      const tempoLabel = h('span', { class: 'mono' }, state.tempo);
       let staffView = null;
       const highlight = i => {
         grid.querySelectorAll('[data-col]').forEach(c => c.classList.toggle('current', Number(c.dataset.col) === i));
@@ -124,7 +123,7 @@
       };
       el.appendChild(h('div', { class: 'toolbar' },
         A.playBtn('▶ 전체 재생', () => playColumns(res, 0, state.notes.length, highlight), 'primary'), A.stopBtn(),
-        h('label', null, '템포', h('input', { type: 'range', min: 40, max: 200, value: state.tempo, oninput: e => { state.tempo = Number(e.target.value); tempoLabel.textContent = state.tempo; } }), tempoLabel),
+        h('label', null, '템포', GH.ui.rangeNumber({ value: state.tempo, min: 30, max: 240, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.loop, onchange: e => { state.loop = e.target.checked; } }), '반복'),
         h('span', { class: 'muted', style: 'font-size:.84rem' }, '열 번호를 누르면 그 박의 화음만 들립니다.')));
 
@@ -169,8 +168,8 @@
           h('div', { class: 'toolbar' },
             h('label', null, '성부', select({ options: res.voices.map((v, i) => ({ value: i, label: '성부 ' + (i + 1) + ' · ' + HM.cfgLabel(state.voices[i]) })), value: ds.voice, onChange: v => { ds.voice = Number(v); rerender(); } })),
             h('label', null, '줄 규칙', select({ options: GH.doublestops.GAP_OPTIONS, value: ds.gap, onChange: v => { ds.gap = v; rerender(); } })),
-            h('label', null, '최대', select({ options: GH.doublestops.FRET_OPTIONS, value: ds.maxFret, onChange: v => { ds.maxFret = Number(v); rerender(); } })),
-            h('label', null, '옥타브', select({ options: [{ value: 0, label: '입력한 높이' }, { value: 12, label: '한 옥타브 위' }, { value: -12, label: '한 옥타브 아래' }], value: ds.octave, onChange: v => { ds.octave = Number(v); rerender(); } })),
+            h('label', null, '최대', GH.ui.numberInput({ value: ds.maxFret, min: 4, max: 24, suffix: '프렛까지', label: '쓸 수 있는 가장 높은 프렛', onChange: v => { ds.maxFret = v; rerender(); } })),
+            h('label', null, '옥타브 이동', GH.ui.numberInput({ value: ds.octave / 12, min: -2, max: 2, suffix: '옥타브', label: '더블스탑 높이를 옮길 옥타브 수 (0은 입력한 높이)', onChange: v => { ds.octave = v * 12; rerender(); } })),
             h('label', null, h('input', { type: 'checkbox', checked: ds.allowOpen, onchange: e => { ds.allowOpen = e.target.checked; rerender(); } }), '개방현 허용')),
           dsBox,
           h('div', { class: 'toc' }, h('a', { href: '#/guitar/doublestops' }, '스케일 더블스탑 패턴 연습 →'))));

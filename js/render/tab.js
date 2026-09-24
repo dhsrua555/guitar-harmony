@@ -1,8 +1,8 @@
-/* 자체 TAB 렌더러 (SVG) */
+/* 자체 TAB 렌더러 (SVG, 손그림 선) */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const { svg } = GH.ui;
+  const { svg } = GH.ui; const S = () => GH.sketch;
   GH.render = GH.render || {};
   const TECH_KO = { h: 'H', p: 'P', '/': 'sl.', '\\': 'sl.', b: 'bend', '~': 'vib.' };
   /* lick: {notes:[...]}, opts: {ppb (박당 px), transpose} → {el, highlight(i)} */
@@ -14,14 +14,15 @@
     const W = LEFT + total * PPB + 24, H = TOP + 5 * LH + BOT;
     const el = svg('svg', { class: 'tab', viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: 'min-width:' + Math.min(W, 900) + 'px' });
     const sy = s => TOP + (s - 1) * LH;
-    for (let s = 1; s <= 6; s++) el.appendChild(svg('line', { class: 'line', x1: LEFT, y1: sy(s), x2: W - 10, y2: sy(s) }));
+    let ld = ''; for (let s = 1; s <= 6; s++) ld += S().line(LEFT, sy(s), W - 10, sy(s), { passes: 1, bow: 1, overshoot: 0.4, jitter: 0.3 });
+    el.appendChild(S().path(ld, 'line'));
     el.appendChild(svg('text', { class: 'tabclef', x: 14, y: sy(2) }, 'T'));
     el.appendChild(svg('text', { class: 'tabclef', x: 14, y: sy(3.5) }, 'A'));
     el.appendChild(svg('text', { class: 'tabclef', x: 14, y: sy(5) }, 'B'));
     const bars = Math.ceil(total / 4 - 1e-6);
     for (let b = 0; b <= bars; b++) {
       const x = LEFT + Math.min(b * 4, total) * PPB;
-      el.appendChild(svg('line', { class: 'bar', x1: x, y1: sy(1), x2: x, y2: sy(6) }));
+      el.appendChild(S().path(S().line(x, sy(1), x, sy(6), { passes: 2, bow: 0.6, overshoot: 0.8 }), 'bar'));
       if (b < bars) el.appendChild(svg('text', { x: x + 6, y: sy(6) + 12, style: 'font-size:8px;fill:var(--fg-muted);text-anchor:start' }, b + 1));
     }
     const items = [];
@@ -51,7 +52,7 @@
         } else if (prev && (ev.t === '/' || ev.t === '\\') && !prev.rest) {
           const px = prev.x; const y = sy(topS);
           const up = ev.t === '/';
-          g.appendChild(svg('line', { x1: px + 7, y1: y + (up ? 4 : -4), x2: x - 7, y2: y + (up ? -4 : 4), stroke: 'var(--fg-muted)', 'stroke-width': 1.2 }));
+          g.appendChild(S().path(S().line(px + 7, y + (up ? 4 : -4), x - 7, y + (up ? -4 : 4), { passes: 1, overshoot: 0.4 }), 'slide'));
         } else if (ev.t === '~') {
           const y = sy(topS) - 9;
           let d = `M${x + 7},${y}`; for (let k = 0; k < 4; k++) d += ` q3,-3 6,0 q3,3 6,0`;
@@ -59,7 +60,7 @@
         }
         /* 리듬 스템 */
         const yb = sy(6) + 4;
-        g.appendChild(svg('line', { class: 'stem', x1: x, y1: yb, x2: x, y2: yb + 12 }));
+        g.appendChild(S().path(S().line(x, yb, x, yb + 12, { passes: 1, overshoot: 0.4, jitter: 0.5 }), 'stem'));
         const flags = ev.d <= 0.25 ? 2 : ev.d <= 0.5 || ev.d === 0.75 ? 1 : 0;
         for (let k = 0; k < flags; k++) g.appendChild(svg('path', { d: `M${x},${yb + 12 - k * 4} q6,-2 6,-8`, fill: 'none', stroke: 'var(--fg)', 'stroke-width': 1.2 }));
         if (ev.d === 0.75 || ev.d === 1.5 || ev.d === 3) g.appendChild(svg('circle', { cx: x + 5, cy: yb + 12, r: 1.4, fill: 'var(--fg)' }));
@@ -70,6 +71,7 @@
       prev = { x, rest: ev.rest };
       pos += ev.d;
     });
+    S().grain(el, W, H);
     let cur = null;
     return {
       el,

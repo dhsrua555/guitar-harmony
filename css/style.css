@@ -15,7 +15,7 @@
   --footer-bg:#1F1B17; --footer-fg:#F3EFE3;
   --iv-1:#BE2447; --iv-3:#2E62B6; --iv-5:#2C7B58; --iv-7:#9F6318;
   --iv-t:#7550A6; --iv-s:#676C63; --iv-x:#AAA79B;
-  --wood:#F1EDDF; --wood-line:#C7C0AA; --string:#857E70;
+  --wood:#F1EDDF; --wood-line:#C7C0AA; --string:#857E70; --ink-line:#2A2622;
   --radius-sm:12px; --radius:16px; --radius-lg:26px; --pill:999px;
   --shadow-sm:none; --shadow-hover:none;
   --shadow:0 18px 44px rgba(40,30,15,.16),0 2px 8px rgba(40,30,15,.05);
@@ -43,13 +43,13 @@
   --footer-bg:#0B0A08; --footer-fg:#E9E3D4;
   --iv-1:#F2677B; --iv-3:#7EA2E8; --iv-5:#5DBE90; --iv-7:#DAA050;
   --iv-t:#B48CE2; --iv-s:#9BA095; --iv-x:#5A564E;
-  --wood:#221E1A; --wood-line:#4C443B; --string:#A69E8F;
+  --wood:#221E1A; --wood-line:#4C443B; --string:#A69E8F; --ink-line:#E6DECC;
   --shadow:0 18px 44px rgba(0,0,0,.42);
 }
 /* 종이(악보) 표면: 다크 테마에서도 밝은 종이 위 검은 잉크 */
 .staff-box,.chart,.sheet,.rhythm-staff,.rhythm-pick,.quiz-opts.rhythm-opts .btn {
   --fg:#1F1B17; --fg-soft:#48423A; --fg-muted:#6A6358; --line:#DDD4BA; --line-strong:#C4BA9F;
-  --bg-elev:#FCF9EF; --bg-soft:#F2EDDC; --accent:#23607F; --accent-soft:#DCE7E7; --accent-ink:#1A4B64;
+  --bg-elev:#FCF9EF; --bg-soft:#F2EDDC; --ink-line:#2A2622; --accent:#23607F; --accent-soft:#DCE7E7; --accent-ink:#1A4B64;
   --iv-1:#BE2447; --iv-3:#2E62B6; --iv-5:#2C7B58; --iv-7:#9F6318; --iv-t:#7550A6; --iv-s:#676C63;
 }
 
@@ -250,6 +250,24 @@ input[type=checkbox] { width:17px; height:17px; accent-color:var(--brand); }
 .tabs button { min-height:36px; padding:6px 15px; border:0; border-radius:var(--pill); background:transparent; color:var(--fg-muted); cursor:pointer; font-weight:500; }
 .tabs button:hover { background:var(--bg-soft); color:var(--fg); }
 .tabs button.active { background:var(--fg); color:var(--bg); }
+/* 숫자 직접 입력 */
+.num-field { display:inline-flex; flex:none; align-items:center; height:40px; border:1px solid var(--line-strong); border-radius:var(--pill); background:var(--bg-elev); color:var(--fg); overflow:hidden; }
+.num-field:focus-within { border-color:var(--fg); box-shadow:0 0 0 3px color-mix(in srgb,var(--ball) 70%,transparent); }
+.num-field .num-input { height:38px; min-width:0; padding:0 2px; border:0; border-radius:0; background:transparent; color:var(--fg); font-weight:700; font-variant-numeric:tabular-nums; text-align:center; box-shadow:none; -moz-appearance:textfield; appearance:textfield; }
+.num-field .num-input:focus { box-shadow:none; }
+.num-field .num-input::-webkit-outer-spin-button,.num-field .num-input::-webkit-inner-spin-button { margin:0; -webkit-appearance:none; }
+.num-step { flex:none; width:32px; height:38px; padding:0; border:0; background:transparent; color:var(--fg-soft); cursor:pointer; font-size:1.05rem; line-height:1; touch-action:manipulation; user-select:none; -webkit-user-select:none; }
+.num-step:hover { background:var(--bg-soft); color:var(--fg); }
+.num-step:active { background:var(--ball); color:var(--ink); }
+.num-suffix { padding:0 2px 0 1px; color:var(--fg-muted); font-size:.76rem; font-weight:500; white-space:nowrap; }
+.range-num { display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
+.range-num input[type=range] { width:120px; max-width:40vw; }
+.num-group { display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px 8px; min-width:0; color:var(--fg-muted); font-size:.83rem; }
+.num-group-title { font-weight:500; }
+.inline-field { display:inline-flex; align-items:center; gap:7px; color:var(--fg-muted); font-size:.83rem; font-weight:500; }
+.met-bpm-field { height:auto; border-color:var(--line); border-radius:22px; }
+.met-bpm-field .num-input { height:auto; padding:2px 0; font-family:var(--display-ko); font-size:clamp(2.8rem,8vw,4.2rem); font-weight:400; line-height:1.05; }
+.met-bpm-field .num-step { width:42px; height:auto; align-self:stretch; font-size:1.4rem; }
 
 /* Tables and interval labels */
 .table { width:100%; border-collapse:collapse; background:var(--bg-elev); font-size:.86rem; }
@@ -268,63 +286,83 @@ input[type=checkbox] { width:17px; height:17px; accent-color:var(--brand); }
 .legend { display:flex; gap:11px; flex-wrap:wrap; align-items:center; color:var(--fg-muted); font-size:.75rem; }
 .legend .sw { display:inline-block; width:10px; height:10px; margin-right:5px; border-radius:50%; background:var(--c); vertical-align:-1px; }
 
-/* SVG and notation */
-.fretboard-scroll { max-width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--bg-elev); scrollbar-color:var(--line-strong) transparent; }
+/* SVG and notation: 손그림 — 잉크 선은 두 번 겹쳐 긋고, 칠은 선에서 살짝 어긋나며, 위에 종이 알갱이 한 겹 */
+.fretboard-scroll { position:relative; max-width:100%; overflow-x:auto; border:1.5px solid var(--ink-line); border-radius:var(--radius); background:var(--bg-elev); box-shadow:inset 0 0 0 3px var(--bg-elev),inset 0 0 0 4px color-mix(in srgb,var(--ink-line) 35%,transparent); scrollbar-color:var(--line-strong) transparent; }
 svg.fretboard { width:100%; height:auto; display:block; }
 svg.fretboard .board { fill:var(--wood); }
-svg.fretboard .fret { stroke:var(--wood-line); stroke-width:1.5; }
-svg.fretboard .nut { stroke:var(--fg); stroke-width:4; }
-svg.fretboard .string { stroke:var(--string); }
-svg.fretboard .inlay { fill:var(--wood-line); opacity:.6; }
-svg.fretboard .fretnum { fill:var(--fg-muted); font-size:11px; text-anchor:middle; }
-svg.fretboard .note circle { fill:var(--c,var(--iv-s)); stroke:rgba(0,0,0,.2); stroke-width:1; }
-svg.fretboard .note text { fill:#fff; font-size:11px; font-weight:700; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
+svg.fretboard .board-edge { fill:none; stroke:var(--ink-line); stroke-width:1.1; stroke-linecap:round; opacity:.6; }
+svg.fretboard .fret { fill:none; stroke:var(--ink-line); stroke-width:1.15; stroke-linecap:round; opacity:.5; }
+svg.fretboard .nut { fill:none; stroke:var(--ink-line); stroke-width:2.6; stroke-linecap:round; }
+svg.fretboard .string { fill:none; stroke:var(--ink-line); stroke-linecap:round; opacity:.72; }
+svg.fretboard .inlay { fill:var(--wood-line); opacity:.55; }
+svg.fretboard .sk-ink { fill:none; stroke:var(--ink-line); stroke-width:1; opacity:.8; }
+svg.fretboard .fretnum { fill:var(--fg-muted); font-family:var(--hand); font-size:12px; text-anchor:middle; }
+svg.fretboard .note .fill { fill:var(--c,var(--iv-s)); }
+svg.fretboard .note .ink { fill:none; stroke:var(--ink-line); stroke-width:1.15; stroke-linecap:round; opacity:.85; }
+svg.fretboard .note text { fill:#fff; font-family:var(--hand); font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
 svg.fretboard .note.dim { opacity:.28; }
-svg.fretboard .note.ghost circle { fill:var(--bg-elev); stroke:var(--c); stroke-width:2; }
+svg.fretboard .note.ghost .fill { fill:var(--bg-elev); }
+svg.fretboard .note.ghost .ink { stroke:var(--c); stroke-width:1.8; opacity:1; }
 svg.fretboard .note.ghost text { fill:var(--c); }
-svg.fretboard .note.current circle { stroke:var(--ink); stroke-width:3; filter:drop-shadow(0 0 0 var(--ball)) drop-shadow(0 1px 4px rgba(0,0,0,.25)); }
+svg.fretboard .note.current .fill { stroke:var(--ink); stroke-width:3; filter:drop-shadow(0 0 0 var(--ball)) drop-shadow(0 1px 4px rgba(0,0,0,.25)); }
+svg.fretboard .note.current .ink { stroke:var(--ball); stroke-width:2.4; opacity:1; }
 svg.fretboard .note.clickable { cursor:pointer; }
-svg.fretboard .stringname { fill:var(--fg-muted); font-size:10px; text-anchor:end; dominant-baseline:central; }
-svg.fretboard .window { fill:color-mix(in srgb,var(--accent) 8%,transparent); stroke:var(--accent); stroke-dasharray:4 3; }
+svg.fretboard .stringname { fill:var(--fg-muted); font-family:var(--hand); font-size:12px; text-anchor:end; dominant-baseline:central; }
+svg.fretboard .window-fill { fill:color-mix(in srgb,var(--accent) 7%,transparent); stroke:none; }
+svg.fretboard .window { fill:none; stroke:var(--accent); stroke-width:1.5; stroke-dasharray:6 4; stroke-linecap:round; }
 svg.chord { width:100%; max-width:152px; height:auto; display:block; margin:0 auto; }
-svg.chord .grid line { stroke:var(--fg-muted); stroke-width:1; }
-svg.chord .nut { stroke:var(--fg); stroke-width:4; }
+svg.chord .sk-grid { fill:none; stroke:var(--ink-line); stroke-width:1; stroke-linecap:round; opacity:.62; }
+svg.chord .nut { fill:none; stroke:var(--ink-line); stroke-width:2.8; stroke-linecap:round; }
 svg.chord .dot { fill:var(--c,var(--fg)); }
-svg.chord .dot.open { fill:none; stroke:var(--fg-muted); stroke-width:1.5; }
-svg.chord text { fill:var(--fg); font-size:11px; font-weight:400; text-anchor:middle; dominant-baseline:central; }
-svg.chord .dot-label { fill:#fff; font-size:9.5px; font-weight:700; }
+svg.chord .ink { fill:none; stroke:var(--ink-line); stroke-width:1.05; stroke-linecap:round; opacity:.85; pointer-events:none; }
+svg.chord .dot.open { fill:none; stroke:var(--ink-line); stroke-width:1.4; stroke-linecap:round; }
+svg.chord .mute { fill:none; stroke:var(--ink-line); stroke-width:1.4; stroke-linecap:round; opacity:.75; }
+svg.chord text { fill:var(--fg); font-family:var(--hand); font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:central; }
+svg.chord .dot-label { fill:#fff; font-size:10px; }
 svg.chord .mark { fill:var(--fg-muted); font-size:11px; }
-svg.chord .basefret { fill:var(--fg-muted); font-size:10px; text-anchor:start; }
-svg.chord .title { font-family:var(--hand); font-size:15px; font-weight:700; }
-svg.chord .sub { fill:var(--fg-muted); font-size:9.5px; }
-svg.chord .barre { stroke:var(--fg); stroke-width:9; stroke-linecap:round; opacity:.82; }
+svg.chord .basefret { fill:var(--fg-muted); font-size:11px; text-anchor:start; }
+svg.chord .title { font-size:16px; }
+svg.chord .sub { fill:var(--fg-muted); font-family:var(--font); font-size:9.5px; font-weight:400; }
+svg.chord .barre { fill:none; stroke:var(--ink-line); stroke-width:8; stroke-linecap:round; opacity:.78; }
 svg.piano { width:100%; height:auto; display:block; border-radius:8px; }
-svg.piano .white { fill:#FFFDF6; stroke:#B3AA94; }
-svg.piano .black { fill:#221E1A; stroke:#100E0C; }
+svg.piano .white { fill:#FFFDF6; stroke:none; }
+svg.piano .black { fill:#2A2622; stroke:none; }
 svg.piano .white.on,svg.piano .black.on { fill:var(--c,var(--accent)); }
-svg.piano text { fill:#333; font-size:9px; font-weight:500; text-anchor:middle; pointer-events:none; }
+svg.piano .sk-key { fill:none; stroke:#2A2622; stroke-width:1.1; stroke-linecap:round; opacity:.8; pointer-events:none; }
+svg.piano .sk-hatch { fill:none; stroke:rgba(255,253,246,.2); stroke-width:.8; pointer-events:none; }
+svg.piano text { fill:#333; font-family:var(--hand); font-size:10px; font-weight:700; text-anchor:middle; pointer-events:none; }
 svg.piano text.onblack,svg.piano text.onkey { fill:#fff; }
 svg.circle { width:100%; max-width:440px; height:auto; display:block; margin:0 auto; }
-svg.circle .seg { fill:var(--bg-elev); stroke:var(--line-strong); cursor:pointer; }
+svg.circle .seg { fill:var(--bg-elev); stroke:none; cursor:pointer; }
 svg.circle .seg:hover { fill:var(--bg-soft); }
 svg.circle .seg.diatonic { fill:color-mix(in srgb,var(--ball) 38%,var(--bg-elev)); }
 svg.circle .seg.active { fill:var(--fg); }
-svg.circle text { fill:var(--fg); font-weight:500; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
+svg.circle .sk-outline { fill:none; stroke:var(--ink-line); stroke-width:1.3; stroke-linecap:round; opacity:.7; }
+svg.circle text { fill:var(--fg); font-family:var(--hand); font-weight:700; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
 svg.circle text.on { fill:var(--bg); }
-svg.circle .minor { font-size:11px; }
-svg.circle .center-text { font-size:13px; font-weight:500!important; }
-svg.tab { width:100%; height:auto; display:block; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg-elev); }
-svg.tab .line { stroke:var(--fg-muted); stroke-width:.8; }
-svg.tab .bar { stroke:var(--fg); stroke-width:1.3; }
-svg.tab text { fill:var(--fg); font-family:var(--mono); font-size:11px; font-weight:400; text-anchor:middle; dominant-baseline:central; }
+svg.circle .minor { font-size:12px; }
+svg.circle .center-text { font-size:13px; }
+svg.tab { width:100%; height:auto; display:block; border:1.5px solid var(--ink-line); border-radius:var(--radius-sm); background:var(--bg-elev); }
+svg.tab .line { fill:none; stroke:var(--fg-muted); stroke-width:.85; stroke-linecap:round; }
+svg.tab .bar { fill:none; stroke:var(--fg); stroke-width:1.3; stroke-linecap:round; }
+svg.tab text { fill:var(--fg); font-family:var(--hand); font-size:13px; font-weight:700; text-anchor:middle; dominant-baseline:central; }
 svg.tab text.fret { paint-order:stroke; stroke:var(--bg-elev); stroke-width:4px; }
-svg.tab text.fret.current { fill:var(--brand); font-weight:700; }
-svg.tab .tech { fill:var(--fg-muted); font-size:9px; font-style:italic; }
-svg.tab .arc { fill:none; stroke:var(--fg-muted); stroke-width:1; }
-svg.tab .stem { stroke:var(--fg); stroke-width:1.2; }
+svg.tab text.fret.current { fill:var(--brand); }
+svg.tab .tech { fill:var(--fg-muted); font-size:10px; font-style:italic; }
+svg.tab .arc,svg.tab .slide { fill:none; stroke:var(--fg-muted); stroke-width:1.1; stroke-linecap:round; }
+svg.tab .stem { fill:none; stroke:var(--fg); stroke-width:1.2; stroke-linecap:round; }
 svg.tab .beam { stroke:var(--fg); stroke-width:3; }
-svg.tab .tabclef { font-family:var(--display); font-size:13px; }
+svg.tab .tabclef { font-family:var(--display); font-size:13px; font-weight:400; }
 svg.tab .chordname { font-family:var(--hand); font-size:15px; font-weight:700; text-anchor:start; }
+/* 종이 알갱이: 그림 위에 곱하기로 얹는다 */
+.sk-grain { mix-blend-mode:multiply; opacity:.4; }
+/* 아이콘도 잉크로 그린 듯 살짝 흔들리게, 가리키면 선이 끓어오르듯 움직인다 */
+.ic { filter:url(#gh-rough); }
+@keyframes gh-boil { 0% { filter:url(#gh-boil-a); } 33% { filter:url(#gh-boil-b); } 66% { filter:url(#gh-boil-c); } }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+  .hub-card:hover .hub-ic .ic,.path-card:hover .path-ic .ic,.home-more-head:hover .hm-ic .ic,.mainnav a:hover .ic,.menu-big:hover .ic,.brand:hover .brand-mark .ic,.hub-head:hover .hub-head-ic .ic { animation:gh-boil .36s steps(1) infinite; }
+  .diagram-card:hover svg.chord,.hero-art-svg { animation:gh-boil .42s steps(1) infinite; }
+}
 
 /* 리얼북 악보: 크림 종이, 손글씨 음표(Petaluma), 손글씨 코드 심볼 */
 .staff-box { max-width:100%; overflow-x:auto; padding:10px 8px; border:1px solid #E0D7BC; border-radius:var(--radius-sm); background:#FCF9EF linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 60%); box-shadow:0 1px 0 rgba(60,45,20,.05),0 14px 26px -22px rgba(60,45,20,.45); color:#1F1B17; }
@@ -449,14 +487,18 @@ html.intro-lock .hero-title .ln,html.intro-lock .hero-lead,html.intro-lock .home
 .hero-art { position:relative; min-width:0; }
 .hero-art-svg { display:block; width:100%; height:auto; overflow:visible; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .ha-circle { fill:var(--pink); }
-.ha-ring { fill:none; stroke:var(--fg); stroke-width:1.3; stroke-dasharray:2 9; stroke-linecap:round; opacity:.55; transform-origin:300px 212px; animation:gh-spin 70s linear infinite; }
-.ha-line { stroke:var(--fg); stroke-width:2.2; stroke-linecap:round; }
+.ha-ink { fill:none; stroke:var(--fg); stroke-width:2; stroke-linecap:round; opacity:.85; }
+.ha-hatch { fill:none; stroke:var(--fg); stroke-width:1.2; stroke-linecap:round; opacity:.22; }
+.ha-ring { fill:none; stroke:var(--fg); stroke-width:1.3; stroke-dasharray:2 9; stroke-linecap:round; opacity:.55; }
+.ha-line { fill:none; stroke:var(--fg); stroke-width:1.8; stroke-linecap:round; }
 .ha-clef { fill:var(--fg); font-family:"Noto Music","Segoe UI Symbol","Apple Symbols",serif; font-size:112px; }
 .ha-head { fill:var(--fg); transition:fill .12s ease; }
-.ha-stem { stroke:var(--fg); stroke-width:3; stroke-linecap:round; }
+.ha-stem { fill:none; stroke:var(--fg); stroke-width:2.4; stroke-linecap:round; }
 .ha-beam { fill:var(--fg); }
 .ha-note.lit .ha-head { fill:var(--brand); }
-.ha-ball { fill:var(--ball); stroke:var(--ink); stroke-width:2.5; }
+.ha-ball-fill { fill:var(--ball); }
+.ha-ball-ink { fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linecap:round; }
+.ha-ball-shine { fill:none; stroke:#fff; stroke-width:2; stroke-linecap:round; opacity:.8; }
 .ha-float { color:var(--fg); }
 .ha-f1 { color:var(--brand); }
 .ha-f3 { color:var(--accent); }
@@ -641,9 +683,9 @@ html.can-reveal .reveal.in { opacity:1; transform:none; }
 .home-search .search-results { transform-origin:top left; }
 .quiz-feedback.ok,.quiz-feedback.bad { animation:gh-pop .2s ease both; }
 .quiz-opts .btn.correct { animation:gh-pulse .45s ease; }
-svg.fretboard .note.hit circle,svg.piano g.hit rect,svg.chord .dotg:active .dot { animation:gh-pulse .4s ease; transform-box:fill-box; transform-origin:center; }
-svg.fretboard .note.temp circle { stroke:var(--fg); stroke-width:2.5; }
-svg.fretboard .note.hit circle { filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ball) 90%,transparent)); }
+svg.fretboard .note.hit .fill,svg.piano g.hit rect,svg.chord .dotg:active .dot { animation:gh-pulse .4s ease; transform-box:fill-box; transform-origin:center; }
+svg.fretboard .note.temp .ink { stroke:var(--fg); stroke-width:2.2; }
+svg.fretboard .note.hit .fill { filter:drop-shadow(0 0 4px color-mix(in srgb,var(--ball) 90%,transparent)); }
 svg.piano g.hit rect.white { fill:color-mix(in srgb,var(--ball) 60%,#fff); }
 svg.piano g.hit rect.black { fill:var(--brand); }
 svg.fretboard .fret-hit:hover { fill:color-mix(in srgb,var(--ball) 30%,transparent); }
@@ -974,3 +1016,4 @@ details.page-guide>summary:hover .pg-toggle { color:var(--fg); transform:rotate(
   .page { width:100%; max-width:none; padding:0; }
   .card,.diagram-card,.table-wrap { box-shadow:none; }
 }
+.met-bpm-field .num-input { width:3.4ch!important; }

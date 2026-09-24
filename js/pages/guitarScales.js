@@ -84,7 +84,7 @@
       el.appendChild(section('연습 패턴 재생',
         h('div', { class: 'toolbar' },
           h('label', null, '패턴', select({ options: [{ value: 'asc', label: '상행' }, { value: 'desc', label: '하행' }, { value: 'ascdesc', label: '상행 후 하행' }, { value: 'thirds', label: '3도 시퀀스' }, { value: 'fours', label: '4음 그룹' }, { value: 'triads', label: '트라이어드 시퀀스' }], value: state.pattern, onChange: v => { state.pattern = v; GH.router.rerender(); } })),
-          h('label', null, '템포', h('input', { type: 'range', min: 60, max: 240, value: state.tempo, oninput: e => { state.tempo = Number(e.target.value); e.target.nextSibling.textContent = state.tempo; } }), h('span', null, state.tempo)),
+          h('label', null, '템포', GH.ui.rangeNumber({ value: state.tempo, min: 40, max: 260, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; } }), h('span', { hidden: true }, state.tempo)),
           playButton,
           A.playBtn('▶ 백킹 (코드 루프)', () => {
             const q = chordsFit[0] ? chordsFit[0].id : 'maj';

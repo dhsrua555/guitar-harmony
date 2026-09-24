@@ -104,7 +104,7 @@
       const hl = i => { tab.highlight(i); const f = out.frets[i]; fb.highlight(f ? f.s : null, f ? f.f : null); noteTable.querySelectorAll('tbody tr').forEach((tr, k) => tr.classList.toggle('hl', k === i)); };
       builder.appendChild(h('div', { class: 'toolbar' },
         A.playBtn('▶ 라인 듣기', () => play(out, ctx.chords, hl), 'primary'), A.stopBtn(),
-        h('label', null, '템포', h('input', { type: 'range', min: 60, max: 220, value: state.tempo, oninput: e => { state.tempo = Number(e.target.value); out.lick.tempo = state.tempo; e.target.nextSibling.textContent = state.tempo; } }), h('span', { class: 'mono' }, state.tempo)),
+        h('label', null, '템포', GH.ui.rangeNumber({ value: state.tempo, min: 40, max: 240, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; out.lick.tempo = v; } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.swing, onchange: e => { state.swing = e.target.checked; out.lick.feel = state.swing ? 'swing' : 'straight'; } }), '스윙'),
         h('label', null, h('input', { type: 'checkbox', checked: state.backing, onchange: e => { state.backing = e.target.checked; } }), '코드 반주')));
       builder.appendChild(A.chordStrip(ctx.chords, { link: true }));

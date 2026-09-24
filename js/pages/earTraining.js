@@ -90,7 +90,7 @@
       make() {
         const s = state.settings.degree; ensureKey(s.keyMode);
         const tonic = tonicOf(state.key);
-        const deg = rand(7); const oct = s.range === '2' ? rand(2) : 0;
+        const deg = rand(7), span = Math.max(1, Math.min(3, Number(s.range) || 1)); const oct = rand(span) - Math.floor((span - 1) / 2);
         const keyName = N.niceName(state.key);
         return { answer: String(deg + 1), options: DEGREES.map(d => d[0]), label: v => v + ' ' + DEGREES[Number(v) - 1][1], midi: tonic + MAJOR_SEMIS[deg] + 12 * oct, tonic, keyName, noteName: N.spell(keyName, String(deg + 1)) };
       },
@@ -107,7 +107,7 @@
         h('label', null, '키', select({ options: [{ value: 'fixed', label: '고정 (지금: ' + keyLabel() + ')' }, { value: 'random', label: '문제마다 바꾸기' }], value: state.settings.degree.keyMode, onChange: v => { state.settings.degree.keyMode = v; refresh(box); } })),
         btn('키 바꾸기', () => { state.key = N.mod(state.key + 1 + rand(11), 12); state.refDone = false; refresh(box); }),
         h('label', null, '기준 듣기', select({ options: REF_OPTIONS, value: state.settings.degree.ref, onChange: v => { state.settings.degree.ref = v; refresh(box); } })),
-        h('label', null, '범위', select({ options: [{ value: '1', label: '한 옥타브' }, { value: '2', label: '두 옥타브' }], value: state.settings.degree.range, onChange: v => { state.settings.degree.range = v; refresh(box); } }))
+        h('label', null, '범위', GH.ui.numberInput({ value: Number(state.settings.degree.range) || 1, min: 1, max: 3, suffix: '옥타브', label: '음 범위 (옥타브)', onChange: v => { state.settings.degree.range = String(v); refresh(box); } }))
       ],
       explain: c => {
         const octUp = c.midi - c.tonic >= 12 ? 12 : 0;
@@ -168,7 +168,7 @@
         { label: '▶ 스케일 (기준)', fn: () => playSequence(scaleRefEvents(c.tonic).events) }
       ],
       settings: box => [
-        h('label', null, '코드 수', select({ options: [{ value: '1', label: '코드 1개' }, { value: '2', label: '2개' }, { value: '3', label: '3개' }, { value: '4', label: '4개 진행' }], value: state.settings.root.len, onChange: v => { state.settings.root.len = v; refresh(box); } })),
+        h('label', null, '코드 수', GH.ui.numberInput({ value: Number(state.settings.root.len) || 1, min: 1, max: 8, suffix: '개', label: '한 문제의 코드 수', onChange: v => { state.settings.root.len = String(v); refresh(box); } })),
         h('label', null, '코드 범위', select({ options: Object.entries(ROOT_POOLS).map(([v, o]) => ({ value: v, label: o.ko })), value: state.settings.root.pool, onChange: v => { state.settings.root.pool = v; refresh(box); } })),
         h('label', null, '기준 듣기', select({ options: REF_OPTIONS, value: state.settings.root.ref, onChange: v => { state.settings.root.ref = v; refresh(box); } })),
         h('label', null, select({ options: [{ value: '0', label: '3화음' }, { value: '1', label: '7화음' }], value: state.settings.root.sevenths, onChange: v => { state.settings.root.sevenths = v; refresh(box); } })),
@@ -235,7 +235,7 @@
       play(c) { const r = GH.data.rhythms.find(x => x.id === c.answer); GH.rhythm.playPattern(GH.rhythm.parse(r.p), { tempo: state.settings.rhythm.tempo, countIn: 1, click: true }); },
       settings: box => [
         h('label', null, '단계', select({ options: Object.entries(GH.data.rhythmLevels).map(([v, l]) => ({ value: v, label: v + '. ' + l })), value: state.settings.rhythm.level, onChange: v => { state.settings.rhythm.level = v; refresh(box); } })),
-        h('label', null, '템포', select({ options: [60, 70, 80, 90, 100, 110].map(n => ({ value: n, label: n + ' BPM' })), value: state.settings.rhythm.tempo, onChange: v => { state.settings.rhythm.tempo = Number(v); } }))
+        h('label', null, '템포', GH.ui.numberInput({ value: state.settings.rhythm.tempo, min: 40, max: 180, big: 5, suffix: 'BPM', label: '리듬 문제 템포', onChange: v => { state.settings.rhythm.tempo = v; } }))
       ],
       explain: c => {
         const find = id => GH.data.rhythms.find(r => r.id === id);

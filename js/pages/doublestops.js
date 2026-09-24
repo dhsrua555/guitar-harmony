@@ -81,10 +81,10 @@
         h('label', null, '스케일', A.scaleSelect(state.scale, v => { state.scale = v; rerender(); }, s => s.intervals.length === 7)),
         h('label', null, '음정', select({ options: [['3', '3도'], ['4', '4도'], ['6', '6도'], ['8', '옥타브']].map(([v, l]) => ({ value: v, label: l })), value: state.size, onChange: v => { state.size = v; state.pair = null; rerender(); } })),
         h('label', null, '줄 쌍', select({ options: PAIRS[gapKind].map(p => { const [u, l] = p.split('-'); return { value: p, label: STRING_NAMES[u] + ' + ' + STRING_NAMES[l] }; }), value: state.pair, onChange: v => { state.pair = v; rerender(); } })),
-        h('label', null, '최대', select({ options: FRET_OPTIONS, value: state.maxFret, onChange: v => { state.maxFret = Number(v); rerender(); } })),
+        h('label', null, '최대', GH.ui.numberInput({ value: state.maxFret, min: 4, max: 24, suffix: '프렛까지', label: '쓸 수 있는 가장 높은 프렛', onChange: v => { state.maxFret = v; rerender(); } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.allowOpen, onchange: e => { state.allowOpen = e.target.checked; rerender(); } }), '개방현 허용'),
         h('label', null, '순서', select({ options: [{ value: 'asc', label: '올라가기' }, { value: 'desc', label: '내려가기' }, { value: 'ascdesc', label: '올라갔다 내려오기' }], value: state.dir, onChange: v => { state.dir = v; rerender(); } })),
-        h('label', null, '템포', h('input', { type: 'range', min: 50, max: 200, value: state.tempo, oninput: e => { state.tempo = Number(e.target.value); e.target.nextSibling.textContent = state.tempo; } }), h('span', { class: 'mono' }, state.tempo))));
+        h('label', null, '템포', GH.ui.rangeNumber({ value: state.tempo, min: 40, max: 220, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; } }))));
       const base = scalePattern(key, state.scale, state.size, lower, upper, state);
       if (!base.length) { el.appendChild(GH.ui.empty('이 줄 쌍과 프렛 범위에서는 만들 수 있는 더블스탑이 없습니다. 줄 쌍이나 최대 프렛을 바꿔 보세요.')); return; }
       const seq = state.dir === 'desc' ? base.slice().reverse() : state.dir === 'ascdesc' ? base.concat(base.slice(0, -1).reverse()) : base;

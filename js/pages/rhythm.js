@@ -2,14 +2,14 @@
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const { h, section, select, tabs, chips, callout } = GH.ui; const N = GH.notes; const R = () => GH.rhythm;
+  const { h, section, select, tabs, chips, callout, numberInput, rangeNumber } = GH.ui; const N = GH.notes; const R = () => GH.rhythm;
 
   const TAB_LIST = [{ id: 'metronome', label: '메트로놈' }, { id: 'tap', label: '리듬 따라 치기' }, { id: 'strum', label: '스트럼 패턴' }];
   const SUBDIVS = [{ value: 1, label: '4분' }, { value: 2, label: '8분' }, { value: 3, label: '셋잇단' }, { value: 4, label: '16분' }];
   const STRUM_PROGS = [['I-V-vi-IV', 'I – V – vi – IV'], ['I-IV-V', 'I – IV – V'], ['i-VII-VI-VII', 'i – VII – VI – VII'], ['ii-V-I', 'ii – V – I']];
   const state = {
     tab: 'metronome',
-    met: { tempo: 90, beats: 4, subdiv: 1, swing: false, accent: true, gap: 'off', trainer: 'off' },
+    met: { tempo: 90, beats: 4, subdiv: 1, swing: false, accent: true, gapOn: 2, gapOff: 0, trEvery: 4, trStep: 0 },
     tap: { level: 1, id: 'r1b', tempo: 80, bars: 2, sound: 'hear', offset: 0, best: {}, last: null },
     strum: { id: 'pop', prog: 'I-V-vi-IV', tempo: null, metronome: false }
   };
@@ -21,9 +21,9 @@
     const dots = h('div', { class: 'met-dots' });
     const drawDots = () => { GH.ui.clear(dots); for (let b = 0; b < m.beats; b++) dots.appendChild(h('span', { class: 'met-beat' + (b === 0 && m.accent ? ' accent' : '') }, h('b', null, b + 1), h('span', { class: 'met-subs' }, Array.from({ length: m.subdiv }, () => h('i'))))); };
     drawDots();
-    const bpm = h('span', { class: 'met-bpm' }, m.tempo);
+    const bpm = numberInput({ value: m.tempo, min: 30, max: 260, label: '템포 (BPM)', live: true, big: 5, onChange: v => setTempo(v) }); bpm.classList.add('met-bpm-field');
     const tempoIn = h('input', { type: 'range', min: 40, max: 240, value: m.tempo, 'aria-label': '템포', oninput: e => setTempo(Number(e.target.value)) });
-    const setTempo = v => { m.tempo = Math.max(30, Math.min(260, Math.round(v))); bpm.textContent = m.tempo; tempoIn.value = m.tempo; if (running()) R().current().tempo = m.tempo; };
+    const setTempo = v => { m.tempo = Math.max(30, Math.min(260, Math.round(v))); bpm.setValue(m.tempo); tempoIn.value = m.tempo; if (running()) R().current().tempo = m.tempo; };
     const onTick = (beat, sub, bar, muted) => {
       dots.querySelectorAll('.met-beat').forEach((d, i) => { d.classList.toggle('on', i === beat); d.classList.toggle('muted', muted); d.querySelectorAll('i').forEach((x, k) => x.classList.toggle('on', i === beat && k === sub)); });
       barLabel.textContent = (bar + 1) + '마디' + (muted ? ' · 소리 없이 세어 보세요' : '');
@@ -31,8 +31,8 @@
     const barLabel = h('span', { class: 'muted met-bar' }, '');
     const startBtn = h('button', { class: 'btn primary met-start', type: 'button' }, '▶ 시작');
     const opts = () => ({ tempo: m.tempo, beats: m.beats, subdiv: m.subdiv, swing: m.swing, accent: m.accent,
-      gap: m.gap === 'off' ? null : m.gap.split('-').map(Number),
-      trainer: m.trainer === 'off' ? null : { every: 4, step: Number(m.trainer), max: 240 },
+      gap: m.gapOff > 0 ? [m.gapOn, m.gapOff] : null,
+      trainer: m.trStep > 0 ? { every: m.trEvery, step: m.trStep, max: 260 } : null,
       onTick, onTempo: t => setTempo(t), onStop: () => { startBtn.textContent = '▶ 시작'; startBtn.classList.remove('playing'); dots.querySelectorAll('.on').forEach(x => x.classList.remove('on')); } });
     startBtn.addEventListener('click', () => { if (running()) { R().stop(); return; } if (R().metronome(opts())) { startBtn.textContent = '■ 정지'; startBtn.classList.add('playing'); } });
     const live = patch => { Object.assign(m, patch); drawDots(); if (running()) Object.assign(R().current(), opts(), { onTick }); };
@@ -46,12 +46,18 @@
       dots,
       h('div', { class: 'row' }, startBtn, tapTempo, h('button', { class: 'btn small', type: 'button', onclick: () => setTempo(m.tempo - 5) }, '−5'), tempoIn, h('button', { class: 'btn small', type: 'button', onclick: () => setTempo(m.tempo + 5) }, '+5'))));
     el.appendChild(h('div', { class: 'toolbar' },
-      h('label', null, '박자', select({ options: [2, 3, 4, 5, 6, 7].map(n => ({ value: n, label: n + '/4' })), value: m.beats, onChange: v => live({ beats: Number(v) }) })),
+      h('label', null, '박자', numberInput({ value: m.beats, min: 1, max: 12, suffix: '/4', label: '한 마디 박 수', onChange: v => live({ beats: v }) })),
       h('label', null, '분할', chips({ options: SUBDIVS, value: m.subdiv, onChange: v => live({ subdiv: Number(v) }) })),
       h('label', null, h('input', { type: 'checkbox', checked: m.swing, onchange: e => live({ swing: e.target.checked }) }), '스윙 (8분)'),
       h('label', null, h('input', { type: 'checkbox', checked: m.accent, onchange: e => live({ accent: e.target.checked }) }), '첫 박 강세'),
-      h('label', null, '갭 트레이닝', select({ options: [{ value: 'off', label: '끄기' }, { value: '2-1', label: '2마디 듣고 1마디 쉬기' }, { value: '2-2', label: '2마디 듣고 2마디 쉬기' }, { value: '4-4', label: '4마디 듣고 4마디 쉬기' }], value: m.gap, onChange: v => live({ gap: v }) })),
-      h('label', null, '스피드 트레이너', select({ options: [{ value: 'off', label: '끄기' }, { value: '2', label: '4마디마다 +2' }, { value: '5', label: '4마디마다 +5' }, { value: '10', label: '4마디마다 +10' }], value: m.trainer, onChange: v => live({ trainer: v }) }))));
+      h('div', { class: 'num-group' }, h('span', { class: 'num-group-title' }, '갭 트레이닝'),
+        numberInput({ value: m.gapOn, min: 1, max: 16, suffix: '마디 듣고', label: '소리 나는 마디 수', onChange: v => live({ gapOn: v }) }),
+        numberInput({ value: m.gapOff, min: 0, max: 16, suffix: '마디 쉬기', label: '소리 없는 마디 수 (0이면 끄기)', onChange: v => live({ gapOff: v }) }),
+        h('small', { class: 'muted' }, '쉬는 마디 0이면 끔')),
+      h('div', { class: 'num-group' }, h('span', { class: 'num-group-title' }, '스피드 트레이너'),
+        numberInput({ value: m.trEvery, min: 1, max: 32, suffix: '마디마다', label: '템포를 올리는 간격 (마디)', onChange: v => live({ trEvery: v }) }),
+        numberInput({ value: m.trStep, min: 0, max: 40, suffix: 'BPM 올리기', label: '한 번에 올리는 BPM (0이면 끄기)', onChange: v => live({ trStep: v }) }),
+        h('small', { class: 'muted' }, '0 BPM이면 끔'))));
     el.appendChild(callout(h('b', null, '이렇게 써 보세요. '), '갭 트레이닝은 클릭이 꺼진 마디에도 박을 유지하는 연습입니다. 다시 소리가 날 때 내 박과 맞는지 확인하세요. 스피드 트레이너는 편한 템포보다 10 낮게 시작해 조금씩 올라갑니다. 2·4박에만 박수를 치고 싶다면 박자를 2/4로 두고 템포를 절반으로 설정해도 됩니다.'));
   }
 
@@ -62,10 +68,10 @@
     const pat = GH.data.rhythms.find(r => r.id === t.id); const ev = R().parse(pat.p);
     el.appendChild(h('div', { class: 'toolbar' },
       h('label', null, '단계', select({ options: Object.entries(GH.data.rhythmLevels).map(([v, l]) => ({ value: v, label: v + '. ' + l })), value: t.level, onChange: v => { t.level = Number(v); t.last = null; GH.router.rerender(); } })),
-      h('label', null, '템포', h('input', { type: 'range', min: 50, max: 160, value: t.tempo, oninput: e => { t.tempo = Number(e.target.value); e.target.nextSibling.textContent = t.tempo; } }), h('span', { class: 'mono' }, t.tempo)),
-      h('label', null, '마디', select({ options: [1, 2, 4].map(n => ({ value: n, label: n + '번 반복' })), value: t.bars, onChange: v => { t.bars = Number(v); } })),
+      h('label', null, '템포', rangeNumber({ value: t.tempo, min: 40, max: 200, suffix: 'BPM', label: '템포', onInput: v => { t.tempo = v; } })),
+      h('label', null, '마디', numberInput({ value: t.bars, min: 1, max: 8, suffix: '번 반복', label: '반복할 마디 수', onChange: v => { t.bars = v; } })),
       h('label', null, '방식', select({ options: [{ value: 'hear', label: '듣고 따라 치기 (소리 있음)' }, { value: 'read', label: '악보만 보고 치기 (클릭만)' }], value: t.sound, onChange: v => { t.sound = v; } })),
-      h('label', null, '지연 보정', h('input', { type: 'range', min: -150, max: 150, step: 5, value: t.offset, oninput: e => { t.offset = Number(e.target.value); e.target.nextSibling.textContent = t.offset + 'ms'; } }), h('span', { class: 'mono' }, t.offset + 'ms'))));
+      h('label', null, '지연 보정', rangeNumber({ value: t.offset, min: -300, max: 300, step: 5, suffix: 'ms', label: '지연 보정 (밀리초)', sliderWidth: '100px', onInput: v => { t.offset = v; } }))));
     el.appendChild(h('div', { class: 'rhythm-picks' }, pool.map(r => h('button', { class: 'rhythm-pick' + (r.id === t.id ? ' active' : ''), type: 'button', 'aria-label': '리듬 ' + r.p, onclick: () => { t.id = r.id; t.last = null; GH.router.rerender(); } }, GH.render.rhythmMini(r.p))),
       h('button', { class: 'btn small', type: 'button', onclick: () => { const others = pool.filter(r => r.id !== t.id); t.id = GH.util.pick(others.length ? others : pool).id; t.last = null; GH.router.rerender(); } }, '무작위')));
     const staff = GH.render.rhythmStaff(ev, { width: Math.min(640, (el.clientWidth || 640) - 20), height: 110 });
@@ -128,7 +134,7 @@
       grid,
       h('div', { class: 'toolbar', style: 'margin-top:12px' }, startBtn,
         h('label', null, '진행', select({ options: STRUM_PROGS.filter(([id]) => GH.data.progressions.some(p => p.id === id)).map(([v, l]) => ({ value: v, label: l + ' (' + N.pretty(key) + ')' })), value: s.prog, onChange: v => { s.prog = v; GH.router.rerender(); } })),
-        h('label', null, '템포', h('input', { type: 'range', min: 50, max: 160, value: tempo, oninput: e => { s.tempo = Number(e.target.value); e.target.nextSibling.textContent = s.tempo; const c = R().current(); if (c && c.kind === 'strum') c.tempo = s.tempo; } }), h('span', { class: 'mono' }, tempo)),
+        h('label', null, '템포', rangeNumber({ value: tempo, min: 40, max: 200, suffix: 'BPM', label: '템포', onInput: v => { s.tempo = v; const c = R().current(); if (c && c.kind === 'strum') c.tempo = s.tempo; } })),
         h('label', null, h('input', { type: 'checkbox', checked: s.metronome, onchange: e => { s.metronome = e.target.checked; } }), '메트로놈')),
       strip,
       h('p', { class: 'muted', style: 'font-size:.84rem' }, '↓ 다운, ↑ 업, ✕ 뮤트 칩, · 쉼 (손은 움직이되 줄은 치지 않음). 코드 이름을 누르면 잡는 법을 볼 수 있습니다.')));

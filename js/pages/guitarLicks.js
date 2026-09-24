@@ -85,13 +85,14 @@
       el.appendChild(h('p', null, lick.desc));
       /* 컨트롤 */
       const tabR = GH.render.tab(displayLick, { transpose: tr });
-      const tempoLabel = h('span', null, Math.round(lick.tempo * detailState.tempoRatio) + ' BPM');
-      const tempoRange = h('input', { type: 'range', min: 0.4, max: 1.2, step: 0.05, value: detailState.tempoRatio, oninput: e => { detailState.tempoRatio = Number(e.target.value); tempoLabel.textContent = Math.round(lick.tempo * detailState.tempoRatio) + ' BPM'; } });
+      /* 템포는 BPM 으로 직접 적는다 (원래 템포에 대한 비율로 저장) */
+      const tempoLabel = h('span', { class: 'muted' }, '원래 ' + lick.tempo + ' BPM');
+      const tempoRange = GH.ui.rangeNumber({ value: Math.round(lick.tempo * detailState.tempoRatio), min: Math.max(30, Math.round(lick.tempo * 0.3)), max: Math.round(lick.tempo * 1.5), suffix: 'BPM', label: '템포', onInput: v => { detailState.tempoRatio = v / lick.tempo; } });
       let fb = null;
       const play = () => GH.player.playLick(lick, { tempo: lick.tempo * detailState.tempoRatio, loop: detailState.loop, transpose: tr, onNote: (i, ev) => { tabR.highlight(i); if (fb) { if (i < 0 || !ev || ev.rest) fb.highlightMany([]); else fb.highlightMany((ev.ns || [[ev.s, ev.f]]).map(([s, f]) => [s, f + tr])); } } });
       const tb = h('div', { class: 'toolbar' },
         A.playBtn('▶ 재생', play, 'primary'),
-        A.playBtn('▶ 느리게 (60%)', () => { detailState.tempoRatio = 0.6; tempoRange.value = 0.6; tempoLabel.textContent = Math.round(lick.tempo * 0.6) + ' BPM'; play(); }),
+        A.playBtn('▶ 느리게 (60%)', () => { detailState.tempoRatio = 0.6; tempoRange.setValue(Math.round(lick.tempo * 0.6)); play(); }),
         A.stopBtn(),
         h('label', null, '템포', tempoRange, tempoLabel),
         h('label', null, h('input', { type: 'checkbox', checked: detailState.loop, onchange: e => { detailState.loop = e.target.checked; } }), '반복'),

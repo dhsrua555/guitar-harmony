@@ -4,6 +4,7 @@
   const GH = window.GH = window.GH || {};
   const { h, svg } = GH.ui; const N = GH.notes;
   const I = (name, o) => GH.icon(name, o);
+  const K = () => GH.sketch;
 
   /* 히어로 그림: 오선 위 여섯 음을 노란 공이 차례로 튀며 지나간다. 누르면 그 음들을 들려준다 */
   const MELODY = [
@@ -13,20 +14,26 @@
   ];
   function heroArt() {
     const el = svg('svg', { class: 'hero-art-svg', viewBox: '0 0 540 420', role: 'img', 'aria-label': '오선 위 여섯 음과 그 위를 튀는 공. 누르면 소리가 납니다' });
-    el.appendChild(svg('circle', { class: 'ha-circle', cx: 300, cy: 212, r: 188 }));
-    el.appendChild(svg('circle', { class: 'ha-ring', cx: 300, cy: 212, r: 206 }));
-    [170, 190, 210, 230, 250].forEach(y => el.appendChild(svg('line', { class: 'ha-line', x1: 22, y1: y, x2: 522, y2: y })));
+    /* 잉크로 그린 해: 칠은 살짝 어긋나고, 오른쪽 아래에 빗금 그림자 */
+    el.appendChild(K().path(K().blob(303, 215, 187, 186, { points: 14, wobble: 0.02 }), 'ha-circle'));
+    el.appendChild(K().path(K().hatchCircle(300, 212, 184, { gap: 7, from: 0.62 }), 'ha-hatch'));
+    el.appendChild(K().path(K().ellipse(300, 212, 188, 188, { points: 26, overshoot: 0.05, wobble: 0.012 }), 'ha-ink'));
+    el.appendChild(K().path(K().ellipse(300, 212, 206, 206, { points: 30, overshoot: 0.02, wobble: 0.01 }), 'ha-ring'));
+    let staffD = ''; [170, 190, 210, 230, 250].forEach(y => { staffD += K().line(22, y, 522, y, { passes: 2, bow: 1.4, overshoot: 2 }); });
+    el.appendChild(K().path(staffD, 'ha-line'));
     el.appendChild(svg('text', { class: 'ha-clef', x: 34, y: 262 }, '\u{1D11E}'));
     const heads = [];
     const beam = (a, b) => {
       const A = MELODY[a], B = MELODY[b];
       const sx = p => p.x + (p.up ? 11 : -11), ey = p => p.y + (p.up ? -62 : 62);
-      el.appendChild(svg('path', { class: 'ha-beam', d: `M${sx(A)},${ey(A)} L${sx(B)},${ey(B)} L${sx(B)},${ey(B) + (A.up ? 9 : -9)} L${sx(A)},${ey(A) + (A.up ? 9 : -9)} Z` }));
+      const t = A.up ? 9 : -9, j = K().rng(K().seedOf(A.x, B.x)), w = () => (j() - 0.5) * 1.6;
+      el.appendChild(svg('path', { class: 'ha-beam', d: `M${sx(A) - 1 + w()},${ey(A) + w()} L${sx(B) + 1.5 + w()},${ey(B) + w()} L${sx(B) + 1 + w()},${ey(B) + t + w()} L${sx(A) - 1.5 + w()},${ey(A) + t + w()} Z` }));
     };
     MELODY.forEach(p => {
       const g = svg('g', { class: 'ha-note' });
-      g.appendChild(svg('line', { class: 'ha-stem', x1: p.x + (p.up ? 11 : -11), y1: p.y + (p.up ? -3 : 3), x2: p.x + (p.up ? 11 : -11), y2: p.y + (p.up ? -62 : 62) }));
-      g.appendChild(svg('ellipse', { class: 'ha-head', cx: p.x, cy: p.y, rx: 13, ry: 9.5, transform: `rotate(-22 ${p.x} ${p.y})` }));
+      const stx = p.x + (p.up ? 11 : -11);
+      g.appendChild(K().path(K().line(stx, p.y + (p.up ? -3 : 3), stx, p.y + (p.up ? -62 : 62), { passes: 2, overshoot: 1, jitter: 0.8 }), 'ha-stem'));
+      g.appendChild(K().path(K().blob(p.x, p.y, 13, 9.5, { points: 9, wobble: 0.08 }), 'ha-head', { transform: `rotate(-22 ${p.x} ${p.y})` }));
       el.appendChild(g); heads.push(g);
     });
     beam(0, 1); beam(2, 3); beam(4, 5);
@@ -37,7 +44,10 @@
     });
     const land = p => ({ x: p.x - (p.up ? 4 : 0), y: p.up ? p.y - 62 - 20 : p.y - 30 });
     const pts = MELODY.map(land);
-    const ball = svg('circle', { class: 'ha-ball', cx: pts[0].x, cy: pts[0].y, r: 15 });
+    const ball = svg('g', { class: 'ha-ball', transform: `translate(${pts[0].x} ${pts[0].y})` });
+    ball.appendChild(K().path(K().blob(0.8, 0.6, 15, 14.6, { points: 9, wobble: 0.05 }), 'ha-ball-fill'));
+    ball.appendChild(K().path(K().ellipse(0, 0, 15.4, 15, { points: 11 }), 'ha-ball-ink'));
+    ball.appendChild(K().path('M-6 -8C-3 -11 3 -11 6 -8', 'ha-ball-shine'));
     el.appendChild(ball);
     const sticker = h('button', { class: 'sticker hero-sticker', type: 'button' }, I('play', { size: 16 }), h('span', null, '눌러서', h('br'), '듣기'));
     const wrap = h('div', { class: 'hero-art' }, el, sticker);
@@ -48,7 +58,7 @@
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const HOP = 430, REST = 1500;
     let t0 = null, raf = 0, landed = -1, sound = false, visible = true;
-    const place = (x, y) => { ball.setAttribute('cx', x.toFixed(1)); ball.setAttribute('cy', y.toFixed(1)); };
+    const place = (x, y) => { ball.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')'); };
     const light = k => { heads.forEach((g, i) => g.classList.toggle('lit', i === k)); };
     const pluck = k => { const A = GH.audio; if (!sound || !A || !A.context()) return; A.pluck(MELODY[k].midi, A.now() + 0.01, 1.1, { gain: 0.85 }); };
     function frame(t) {

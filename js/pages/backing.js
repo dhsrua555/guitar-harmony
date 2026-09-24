@@ -101,10 +101,9 @@
         setPlaying(true);
       };
       playBtn.addEventListener('click', () => { if (GH.backing.isPlaying()) GH.backing.stop(); else start(); });
-      const tempoLabel = h('span', { class: 'mono' }, tempo + ' BPM');
       const tb = h('div', { class: 'toolbar' },
         playBtn,
-        h('label', null, '템포', h('input', { type: 'range', min: 40, max: 240, value: tempo, oninput: e => { state.tempo = Number(e.target.value); tempoLabel.textContent = state.tempo + ' BPM'; GH.backing.update({ tempo: state.tempo }); } }), tempoLabel),
+        h('label', null, '템포', GH.ui.rangeNumber({ value: tempo, min: 30, max: 260, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; GH.backing.update({ tempo: v }); } })),
         h('label', null, '그루브', select({ options: GH.backing.STYLE_ORDER.map(id => ({ value: id, label: S[id].ko })), value: style, onChange: v => { state.style = v; if (!state.tempo) { /* 스타일 기본 템포로 */ } GH.backing.update({ style: v }); go({ style: v }); } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.loop, onchange: e => { state.loop = e.target.checked; GH.backing.update({ loop: state.loop }); } }), '반복'),
         h('label', null, h('input', { type: 'checkbox', checked: state.countIn, onchange: e => { state.countIn = e.target.checked; } }), '카운트 인'),

@@ -138,7 +138,52 @@
     qs(obj) { return Object.entries(obj).filter(([, v]) => v != null && v !== '').map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&'); }
   };
 
-  GH.ui = { h, svg, clear, select, chips, button, section, table, badge, empty, notice, callout, kv, link, tabs, legend, pills, difficulty };
+  /* 숫자 직접 입력: [−] [숫자] 단위 [+]. 범위를 벗어나면 가장 가까운 값으로 맞춘다.
+     opts: {value, min, max, step, onChange(v), suffix, label(읽어 주는 이름), id, live(입력하는 동안에도 반영), big(한 번에 크게 움직이는 폭), width(ch)} */
+  function numberInput(opts) {
+    const min = opts.min == null ? -Infinity : opts.min, max = opts.max == null ? Infinity : opts.max, step = opts.step || 1;
+    const dec = String(step).includes('.') ? String(step).split('.')[1].length : 0;
+    const fit = v => { if (!isFinite(v)) return cur; v = Math.round(v / step) * step; return Number(Math.max(min, Math.min(max, v)).toFixed(dec)); };
+    let cur = null; cur = fit(Number(opts.value));
+    const width = opts.width || Math.max(3, String(isFinite(max) ? max : cur).length + (dec ? dec + 1 : 0) + 1);
+    const input = h('input', { type: 'number', class: 'num-input', inputmode: dec ? 'decimal' : 'numeric', min: isFinite(min) ? min : null, max: isFinite(max) ? max : null, step, value: cur, id: opts.id || null, 'aria-label': opts.label || null, style: 'width:' + (width + 1.6) + 'ch' });
+    const commit = (v, fire) => { const nv = fit(v); input.value = nv; if (nv !== cur) { cur = nv; if (fire !== false && opts.onChange) opts.onChange(nv); } };
+    input.addEventListener('change', () => commit(Number(input.value)));
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(Number(input.value)); } });
+    input.addEventListener('focus', () => { try { input.select(); } catch (e) { /* ignore */ } });
+    if (opts.live) {
+      let t = 0;
+      input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { const v = Number(input.value); if (input.value !== '' && v >= min && v <= max) commit(v); }, 450); });
+    }
+    /* 누르고 있으면 계속 움직인다 */
+    const stepper = (sign, text) => {
+      let timer = 0, rep = 0;
+      const stop = () => { clearTimeout(timer); clearInterval(rep); timer = 0; rep = 0; };
+      const b = h('button', { class: 'num-step', type: 'button', 'aria-label': (opts.label || '값') + (sign > 0 ? ' 올리기' : ' 내리기'), tabindex: -1 }, text);
+      b.addEventListener('pointerdown', e => { e.preventDefault(); commit(cur + sign * step); timer = setTimeout(() => { rep = setInterval(() => commit(cur + sign * (opts.big || step)), 70); }, 420); });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+      b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); commit(cur + sign * step); } });
+      return b;
+    };
+    const wrap = h('span', { class: 'num-field' }, stepper(-1, '−'), input, opts.suffix ? h('span', { class: 'num-suffix' }, opts.suffix) : null, stepper(1, '+'));
+    wrap.input = input;
+    wrap.value = () => cur;
+    wrap.setValue = v => { cur = fit(Number(v)); input.value = cur; };
+    return wrap;
+  }
+  /* 슬라이더 + 숫자 입력 (서로 따라 움직임). opts: {value, min, max, step, onInput(v), suffix, label, sliderWidth} */
+  function rangeNumber(opts) {
+    let num = null;
+    const range = h('input', { type: 'range', min: opts.min, max: opts.max, step: opts.step || 1, value: opts.value, 'aria-label': opts.label || null, style: opts.sliderWidth ? 'width:' + opts.sliderWidth : null,
+      oninput: e => { const v = Number(e.target.value); num.setValue(v); opts.onInput(num.value()); } });
+    num = numberInput({ value: opts.value, min: opts.min, max: opts.max, step: opts.step, suffix: opts.suffix, label: opts.label, live: true, big: opts.big, onChange: v => { range.value = v; opts.onInput(v); } });
+    const wrap = h('span', { class: 'range-num' }, range, num);
+    wrap.setValue = v => { range.value = v; num.setValue(v); };
+    wrap.value = () => num.value();
+    return wrap;
+  }
+
+  GH.ui = { h, svg, clear, select, chips, button, section, table, badge, empty, notice, callout, kv, link, tabs, legend, pills, difficulty, numberInput, rangeNumber };
   GH.events = events;
   GH.util = util;
 })();

@@ -1,8 +1,8 @@
-/* SVG 코드 다이어그램 */
+/* SVG 코드 다이어그램 (손그림 선) */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const { svg } = GH.ui; const N = GH.notes;
+  const { svg } = GH.ui; const N = GH.notes; const S = () => GH.sketch;
   GH.render = GH.render || {};
 
   /* v: 보이싱 {frets, fingers, labels, symbol, name, baseFret, barre}
@@ -32,10 +32,12 @@
       if (sub) el.appendChild(svg('text', { class: 'sub', x: W / 2, y: 24 }, sub));
     }
     const grid = svg('g', { class: 'grid' });
-    for (let k = 0; k <= nFr; k++) grid.appendChild(svg('line', { x1: sx(0), y1: fy(k), x2: sx(5), y2: fy(k) }));
-    for (let i = 0; i < 6; i++) grid.appendChild(svg('line', { x1: sx(i), y1: fy(0), x2: sx(i), y2: fy(nFr) }));
+    let gd = '';
+    for (let k = 0; k <= nFr; k++) gd += S().line(Math.min(sx(0), sx(5)), fy(k), Math.max(sx(0), sx(5)), fy(k), { passes: 1, bow: 0.6 });
+    for (let i = 0; i < 6; i++) gd += S().line(sx(i), fy(0), sx(i), fy(nFr), { passes: 1, bow: 0.8 });
+    grid.appendChild(S().path(gd, 'sk-grid'));
     el.appendChild(grid);
-    if (showNut) el.appendChild(svg('line', { class: 'nut', x1: sx(0) - 1, y1: fy(0), x2: sx(5) + 1, y2: fy(0) }));
+    if (showNut) el.appendChild(S().path(S().line(Math.min(sx(0), sx(5)) - 1, fy(0), Math.max(sx(0), sx(5)) + 1, fy(0), { passes: 3, jitter: 1 }), 'nut'));
     else el.appendChild(svg('text', { class: 'basefret', x: lefty ? W - 8 : sx(0) - 20, y: fy(0) + CH / 2, style: 'text-anchor:' + (lefty ? 'end' : 'start') }, base + 'fr'));
     /* 바레 */
     if (v.barre && v.fingers) {
@@ -45,19 +47,25 @@
         const k = f - base + (showNut ? 1 : 1);
         const y = fy(k) - CH / 2;
         const lo = Math.min(...ones), hi = Math.max(...ones);
-        el.appendChild(svg('line', { class: 'barre', x1: Math.min(sx(lo), sx(hi)), y1: y, x2: Math.max(sx(lo), sx(hi)), y2: y }));
+        el.appendChild(S().path(S().line(Math.min(sx(lo), sx(hi)), y, Math.max(sx(lo), sx(hi)), y, { passes: 2, bow: 0.5, overshoot: 0.3, jitter: 0.6 }), 'barre'));
       }
     }
     v.frets.forEach((f, i) => {
       const x = sx(i);
-      if (f == null) { el.appendChild(svg('text', { class: 'mark', x, y: fy(0) - 8 }, '×')); return; }
-      if (f === 0) { el.appendChild(svg('circle', { class: 'dot open', cx: x, cy: fy(0) - 8, r: 4.5, style: 'cursor:pointer', onclick: () => { if (GH.audio) GH.audio.pluck(GH.voicings.STD[i], GH.audio.now(), 1.4, { gain: 0.9 }); } })); }
+      if (f == null) { el.appendChild(S().path(S().line(x - 3.5, fy(0) - 11.5, x + 3.5, fy(0) - 4.5, { passes: 1, overshoot: 0.6 }) + S().line(x + 3.5, fy(0) - 11.5, x - 3.5, fy(0) - 4.5, { passes: 1, overshoot: 0.6 }), 'mute')); return; }
+      if (f === 0) {
+        const og = svg('g', { class: 'openg', style: 'cursor:pointer', onclick: () => { if (GH.audio) GH.audio.pluck(GH.voicings.STD[i], GH.audio.now(), 1.4, { gain: 0.9 }); } });
+        og.appendChild(svg('circle', { cx: x, cy: fy(0) - 8, r: 7, fill: 'transparent' }));
+        og.appendChild(S().path(S().ellipse(x, fy(0) - 8, 4.5, 4.3), 'dot open'));
+        el.appendChild(og);
+      }
       const cls = v.labels && v.labels[i] ? N.ivClass(v.labels[i]) : 'iv-s';
       if (f > 0) {
         const k = f - base + 1; const y = fy(k) - CH / 2;
         const midi = GH.voicings.STD[i] + f;
         const g = svg('g', { class: cls + ' dotg', style: 'cursor:pointer', onclick: () => { if (GH.audio) GH.audio.pluck(midi, GH.audio.now(), 1.4, { gain: 0.9 }); } });
-        g.appendChild(svg('circle', { class: 'dot', cx: x, cy: y, r: 7 }));
+        g.appendChild(S().path(S().blob(x, y, 7, 6.7), 'dot'));
+        g.appendChild(S().path(S().ellipse(x + 0.6, y - 0.5, 7.3, 7), 'ink'));
         let label = '';
         if (labelMode === 'finger') label = v.fingers && v.fingers[i] ? v.fingers[i] : '';
         else if (labelMode === 'name') label = N.noteName((GH.voicings.STD[i] + f) % 12, opts.pref || 'sharp');

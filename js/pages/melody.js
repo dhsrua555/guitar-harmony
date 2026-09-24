@@ -117,7 +117,7 @@
       const H = harmonize(state.notes, keyName, state.groupSize, state.sevenths);
       const strip = A.chordStrip(H.chords, { link: true });
       el.appendChild(section('자동 코드 붙이기 (Auto-harmonize)', h('div', { class: 'toolbar' },
-        h('label', null, '코드당 멜로디 음 수', select({ options: [1, 2, 3, 4].map(n => ({ value: n, label: n + '음' })), value: state.groupSize, onChange: v => { state.groupSize = Number(v); rerender(); } })),
+        h('label', null, '코드당 멜로디 음 수', GH.ui.numberInput({ value: state.groupSize, min: 1, max: 8, suffix: '음', label: '코드 하나에 묶을 멜로디 음 수', onChange: v => { state.groupSize = v; rerender(); } })),
         A.playBtn('▶ 멜로디 + 코드', () => playMelody(state.notes, H.chords, state.groupSize), 'primary'), A.stopBtn(),
         h('a', { class: 'btn small', href: GH.router.href('/backing', { chords: H.chords.map(c => c.symbol).join(' | '), key: keyName }) }, '백킹 트랙으로 →')),
         strip,

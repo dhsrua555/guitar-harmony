@@ -1,8 +1,8 @@
-/* 5도권 SVG */
+/* 5도권 SVG (손그림 선) */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const { svg } = GH.ui; const N = GH.notes; const mod = N.mod;
+  const { svg } = GH.ui; const N = GH.notes; const mod = N.mod; const S = () => GH.sketch;
   GH.render = GH.render || {};
   const MAJORS = ['C', 'G', 'D', 'A', 'E', 'B', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
   const MAJORS_ALT = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F'];
@@ -10,8 +10,8 @@
   /* opts: {key, mode: 'major'|'minor', onSelect(root, mode), pref, highlightDiatonic} */
   function circle(opts) {
     opts = opts || {};
-    const S = 420, cx = S / 2, cy = S / 2, R1 = 200, R2 = 140, R3 = 84;
-    const el = svg('svg', { class: 'circle', viewBox: `0 0 ${S} ${S}` });
+    const S_SIZE = 420, cx = S_SIZE / 2, cy = S_SIZE / 2, R1 = 200, R2 = 140, R3 = 84;
+    const el = svg('svg', { class: 'circle', viewBox: `0 0 ${S_SIZE} ${S_SIZE}` });
     const keyPc = N.pcOf(opts.key || 'C');
     const mode = opts.mode || 'major';
     const tonicPc = mode === 'minor' ? mod(keyPc + 3, 12) : keyPc; /* 메이저 기준 위치 */
@@ -45,9 +45,15 @@
       const sig = i === 0 ? '' : i <= 6 ? '♯' + i : '♭' + (12 - i);
       el.appendChild(svg('text', { x: cx + (R1 + 14) * Math.cos(ang), y: cy + (R1 + 14) * Math.sin(ang), style: 'font-size:10px;fill:var(--fg-muted)' }, i === 6 ? '♯6/♭6' : sig));
     }
+    /* 손으로 그은 동심원과 칸막이 (누르기는 아래 칸이 받는다) */
+    let od = S().ellipse(cx, cy, R1, R1, { overshoot: 0.04, wobble: 0.012, points: 28 }) + S().ellipse(cx, cy, R2, R2, { overshoot: 0.05, wobble: 0.015, points: 24 }) + S().ellipse(cx, cy, R3, R3, { overshoot: 0.06, wobble: 0.02, points: 18 });
+    for (let i = 0; i < 12; i++) { const a = ((i - 0.5) * 30 - 90) * Math.PI / 180; od += S().line(cx + R3 * Math.cos(a), cy + R3 * Math.sin(a), cx + R1 * Math.cos(a), cy + R1 * Math.sin(a), { passes: 1, overshoot: 1 }); }
+    const outline = S().path(od, 'sk-outline'); outline.setAttribute('pointer-events', 'none');
+    const firstText = el.querySelector('text'); el.insertBefore(outline, firstText);
     const ks = GH.scales.keySignature(opts.key || 'C', mode === 'minor');
     el.appendChild(svg('text', { class: 'center-text', x: cx, y: cy - 10, style: 'font-size:18px;font-weight:800' }, N.pretty(opts.key || 'C') + (mode === 'minor' ? 'm' : '')));
     el.appendChild(svg('text', { class: 'center-text', x: cx, y: cy + 12, style: 'font-size:12px;fill:var(--fg-muted)' }, '조표 ' + ks.text));
+    S().grain(el, 0, 0, { circle: [cx, cy, R1] });
     return el;
   }
   GH.render.circle = circle;
