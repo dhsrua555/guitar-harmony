@@ -23,14 +23,13 @@
     { id: 'rhythm', ko: '리듬감', icon: 'metronome', desc: '박 유지, 스트럼, 싱코페이션' }
   ];
   /* lv: [가장 쉬운 수준, 가장 어려운 수준] (LEVELS 인덱스) */
-  const ALL = ['theory', 'guitar', 'ear', 'solo', 'compose', 'rhythm'];
   const MISSIONS = [
-    { id: 'course-ch1', title: '기초 코스 1장: 소리의 이름', route: '/learn/notes', goals: ALL, lv: [0, 0], desc: '음 이름, 반음 · 온음, 개방현, 6 · 5번 줄의 음을 다섯 레슨으로 익힙니다.' },
-    { id: 'course-ch2', title: '기초 코스 2장: 인터벌', route: '/learn/interval', goals: ALL, lv: [0, 0], desc: '두 음 사이의 거리, 메이저 · 마이너 3도, 퍼펙트 5도와 파워 코드.' },
-    { id: 'course-ch3', title: '기초 코스 3장: 첫 코드', route: '/learn/triad', goals: ALL, lv: [0, 1], desc: '트라이어드, 메이저 · 마이너 코드, 오픈 코드 8개, 코드 이름 읽기.' },
-    { id: 'course-ch4', title: '기초 코스 4장: 리듬과 스트로크', route: '/learn/beat', goals: ALL, lv: [0, 1], desc: '박과 템포, 4분 · 8분음표, 다운 · 업 스트로크.' },
-    { id: 'course-ch5', title: '기초 코스 5장: 키와 스케일', route: '/learn/majorscale', goals: ALL, lv: [0, 1], desc: '메이저 스케일, 키와 토닉, 다이어토닉 코드, 마이너 펜타토닉.' },
-    { id: 'course-ch6', title: '기초 코스 6장: 코드 진행', route: '/learn/function', goals: ALL, lv: [0, 1], desc: '토닉 · 서브도미넌트 · 도미넌트, 1-5-6-4 와 투파이브원, MR 위에서 쳐 보기.' },
+    { id: 'course-ch1', title: '기초 코스 1장: 소리의 이름', route: '/learn/notes', goals: ['guitar', 'solo', 'theory'], lv: [0, 0], desc: '음 이름, 반음 · 온음, 개방현, 6 · 5번 줄의 음을 다섯 레슨으로 익힙니다.' },
+    { id: 'course-ch2', title: '기초 코스 2장: 인터벌', route: '/learn/interval', goals: ['theory', 'ear'], lv: [0, 0], desc: '두 음 사이의 거리, 메이저 · 마이너 3도, 퍼펙트 5도와 파워 코드.' },
+    { id: 'course-ch3', title: '기초 코스 3장: 첫 코드', route: '/learn/triad', goals: ['guitar', 'compose'], lv: [0, 1], desc: '트라이어드, 메이저 · 마이너 코드, 오픈 코드 8개, 코드 이름 읽기.' },
+    { id: 'course-ch4', title: '기초 코스 4장: 리듬과 스트로크', route: '/learn/beat', goals: ['rhythm', 'guitar'], lv: [0, 1], desc: '박과 템포, 4분 · 8분음표, 다운 · 업 스트로크.' },
+    { id: 'course-ch5', title: '기초 코스 5장: 키와 스케일', route: '/learn/majorscale', goals: ['solo', 'theory', 'ear'], lv: [0, 1], desc: '메이저 스케일, 키와 토닉, 다이어토닉 코드, 마이너 펜타토닉.' },
+    { id: 'course-ch6', title: '기초 코스 6장: 코드 진행', route: '/learn/function', goals: ['compose', 'theory', 'solo'], lv: [0, 1], desc: '토닉 · 서브도미넌트 · 도미넌트, 1-5-6-4 와 투파이브원, MR 위에서 쳐 보기.' },
     { id: 'finder', title: '지판에서 음 찾기', route: '/tools/finder', goals: ['guitar', 'theory'], lv: [0, 1], desc: '지판을 눌러 소리를 들으며 같은 음이 어디에 또 있는지 찾아봅니다.' },
     { id: 'open', title: '오픈 코드 네 개 잡기 (C · G · Am · F)', route: '/guitar/voicings/basic', q: { types: 'open' }, goals: ['guitar', 'compose'], lv: [0, 1], desc: '다이어그램을 보고 잡은 뒤 ▶ 듣기로 소리를 비교합니다.' },
     { id: 'metro', title: '메트로놈에 맞춰 4분·8분 치기', route: '/rhythm', goals: ['rhythm', 'guitar'], lv: [0, 2], desc: '60~80 BPM에서 박마다 한 번, 그다음 두 번씩 쳐 봅니다.' },
@@ -43,20 +42,23 @@
     { id: 'degree', title: '계이름 퀴즈 (메이저 스케일)', route: '/ear', q: { tab: 'degree' }, goals: ['ear'], lv: [1, 2], desc: '스케일을 듣고 도를 붙잡은 뒤 들린 음의 계이름을 맞힙니다.' },
     { id: 'diatonic', title: '다이어토닉 코드와 기능', route: '/theory/chords', q: { tab: 'diatonic' }, goals: ['theory', 'compose'], lv: [1, 2], desc: '한 키 안의 7개 코드와 토닉 · 서브도미넌트 · 도미넌트 기능을 봅니다.' },
     { id: 'prog', title: '장르별 기본 진행 듣기', route: '/theory/progressions', goals: ['theory', 'compose', 'guitar'], lv: [1, 2], desc: 'I – V – vi – IV 와 ii – V – I 을 듣고 기능 흐름을 비교합니다.' },
-    { id: 'backing', title: '백킹 트랙 위에서 솔로하기', route: '/backing', q: { id: 'blues12' }, goals: ['solo', 'guitar', 'rhythm'], lv: [1, 4], desc: '12마디 블루스를 틀고 펜타토닉과 코드톤으로 솔로합니다.' },
-    { id: 'melody', title: '멜로디에 코드 붙이기', route: '/tools/melody', goals: ['compose'], lv: [1, 4], desc: '아는 멜로디를 넣고 추천 코드를 들어 가며 반주를 만듭니다.' },
-    { id: 'root', title: '진행 루트 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [1, 4], desc: '코드 진행을 듣고 루트를 계이름으로 맞힙니다.' },
-    { id: 'rq', title: '리듬 듣고 맞히기 퀴즈', route: '/ear', q: { tab: 'rhythm' }, goals: ['rhythm', 'ear'], lv: [1, 4], desc: '들은 리듬과 같은 악보를 고릅니다. 쉼표와 16분음표 단계까지.' },
-    { id: 'triads', title: '현 세트별 트라이어드', route: '/guitar/triads', goals: ['guitar', 'solo'], lv: [2, 4], desc: '같은 코드를 세 가지 인버전으로 지판 위아래에서 잡아 봅니다.' },
-    { id: 'phrase', title: '코드톤 타겟팅과 어프로치 노트', route: '/guitar/phrasing', goals: ['solo', 'theory'], lv: [2, 4], desc: '기법 카드를 들어 보고 빌더에서 ii – V – I 라인을 만듭니다.' },
+    { id: 'backing', title: '백킹 트랙 위에서 솔로하기', route: '/backing', q: { id: 'blues12' }, goals: ['solo', 'guitar', 'rhythm'], lv: [1, 3], desc: '12마디 블루스를 틀고 펜타토닉과 코드톤으로 솔로합니다.' },
+    { id: 'melody', title: '멜로디에 코드 붙이기', route: '/tools/melody', goals: ['compose'], lv: [1, 3], desc: '아는 멜로디를 넣고 추천 코드를 들어 가며 반주를 만듭니다.' },
+    { id: 'root', title: '진행 루트 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [2, 3], desc: '코드 진행을 듣고 루트를 계이름으로 맞힙니다.' },
+    { id: 'rq', title: '리듬 듣고 맞히기 퀴즈', route: '/ear', q: { tab: 'rhythm' }, goals: ['rhythm', 'ear'], lv: [1, 3], desc: '들은 리듬과 같은 악보를 고릅니다. 쉼표와 16분음표 단계까지.' },
+    { id: 'triads', title: '현 세트별 트라이어드', route: '/guitar/triads', goals: ['guitar', 'solo'], lv: [2, 3], desc: '같은 코드를 세 가지 인버전으로 지판 위아래에서 잡아 봅니다.' },
+    { id: 'phrase', title: '코드톤 타겟팅과 어프로치 노트', route: '/guitar/phrasing', goals: ['solo', 'theory'], lv: [3, 4], desc: '기법 카드를 들어 보고 빌더에서 ii – V – I 라인을 만듭니다.' },
     { id: 'harmony', title: '멜로디에 3도·6도 화음 쌓기', route: '/tools/harmony', goals: ['compose', 'ear', 'theory'], lv: [2, 4], desc: '다이어토닉 3도 위와 6도 아래를 비교하며 들어 봅니다.' },
-    { id: 'ds', title: '3도·6도 더블스탑', route: '/guitar/doublestops', goals: ['guitar', 'solo'], lv: [2, 4], desc: '2·3번 줄 3도, 1·3번 줄 6도 패턴을 올라갔다 내려옵니다.' },
-    { id: 'songs', title: '곡 분석으로 마디별 스케일 연결', route: '/songs', goals: ['solo', 'theory'], lv: [2, 4], desc: '마디를 하나씩 눌러 코드, 스케일, 보이싱을 이어 봅니다.' },
-    { id: 'licks', title: '릭 하나를 여러 키로 옮기기', route: '/guitar/licks', goals: ['solo', 'guitar'], lv: [2, 4], desc: '마음에 드는 릭을 느리게 익힌 뒤 키 옮기기로 다른 키에서 칩니다.' },
-    { id: 'modes', title: '모드의 밝기와 특징음', route: '/theory/modes', goals: ['theory', 'ear', 'solo'], lv: [4, 4], desc: '같은 루트의 7모드를 밝은 순서로 듣고 특징음을 찾습니다.' },
+    { id: 'ds', title: '3도·6도 더블스탑', route: '/guitar/doublestops', goals: ['guitar', 'solo'], lv: [2, 3], desc: '2·3번 줄 3도, 1·3번 줄 6도 패턴을 올라갔다 내려옵니다.' },
+    { id: 'songs', title: '곡 분석으로 마디별 스케일 연결', route: '/songs', goals: ['solo', 'theory'], lv: [3, 4], desc: '마디를 하나씩 눌러 코드, 스케일, 보이싱을 이어 봅니다.' },
+    { id: 'licks', title: '릭 하나를 여러 키로 옮기기', route: '/guitar/licks', goals: ['solo', 'guitar'], lv: [3, 4], desc: '마음에 드는 릭을 느리게 익힌 뒤 키 옮기기로 다른 키에서 칩니다.' },
+    { id: 'modes', title: '모드의 밝기와 특징음', route: '/theory/modes', goals: ['theory', 'ear', 'solo'], lv: [3, 4], desc: '같은 루트의 7모드를 밝은 순서로 듣고 특징음을 찾습니다.' },
     { id: 'reharm', title: '리하모니제이션 기법 비교', route: '/theory/reharm', goals: ['theory', 'compose'], lv: [4, 4], desc: '원래 진행과 바꾼 진행을 A/B로 들어 봅니다.' },
-    { id: 'drop2', title: '드롭 2 보이스 리딩', route: '/guitar/voicings/advanced', q: { types: 'drop2' }, goals: ['guitar'], lv: [4, 4], desc: 'ii – V – I 을 한 현 세트 안에서 가장 가깝게 연결합니다.' },
-    { id: 'modeq', title: '모드 퀴즈', route: '/ear', q: { tab: 'mode' }, goals: ['ear'], lv: [4, 4], desc: '3음의 장단을 먼저 듣고 특징음으로 모드를 구분합니다.' }
+    { id: 'drop2', title: '드롭 2 보이스 리딩', route: '/guitar/voicings/advanced', q: { types: 'drop2' }, goals: ['guitar'], lv: [3, 4], desc: 'ii – V – I 을 한 현 세트 안에서 가장 가깝게 연결합니다.' },
+    { id: 'modeq', title: '모드 퀴즈', route: '/ear', q: { tab: 'mode' }, goals: ['ear'], lv: [4, 4], desc: '3음의 장단을 먼저 듣고 특징음으로 모드를 구분합니다.' },
+    { id: 'tap5', title: '리듬 따라 치기 4 · 5단계 (싱코페이션 · 셋잇단)', route: '/rhythm', q: { tab: 'tap' }, goals: ['rhythm', 'ear'], lv: [2, 4], desc: '당김음과 셋잇단 패턴을 듣고 따라 쳐서 80점 이상을 목표로 합니다.' },
+    { id: 'funk16', title: '펑크 16비트 스트럼과 칩', route: '/rhythm', q: { tab: 'strum' }, goals: ['rhythm', 'guitar'], lv: [3, 4], desc: '손은 16분음표로 쉬지 않고, 칩(짧게 끊기)으로 2 · 4박 백비트를 만듭니다.' },
+    { id: 'swingcomp', title: '스윙 MR 위에서 컴핑하기', route: '/backing', q: { id: 'ii-V-I', style: 'swing' }, goals: ['rhythm', 'guitar', 'compose'], lv: [3, 4], desc: '투파이브원 스윙 MR을 틀고 2 · 4박에 짧게 코드를 넣어 드럼 · 베이스와 그루브를 맞춥니다.' },
   ];
   /* 페이지 가이드: 경로(앞부분 일치) → 무엇을, 어떻게 */
   const PAGES = [
@@ -96,10 +98,18 @@
   function plan(p) {
     p = p || data.profile; const li = Math.max(0, LEVELS.findIndex(l => l.id === p.level));
     const goals = p.goals && p.goals.length ? p.goals : GOALS.map(g => g.id);
-    const rank = m => Math.min(...m.goals.map(g => { const k = goals.indexOf(g); return k < 0 ? 99 : k; }));
-    return MISSIONS.filter(m => m.lv[0] <= li + 1 && m.lv[1] >= li && m.goals.some(g => goals.includes(g)))
-      .sort((a, b) => (a.lv[0] - b.lv[0]) || (rank(a) - rank(b)))
-      .slice(0, 12);
+    /* 고른 목표마다 줄을 세우고, 첫 번째 목표부터 한 개씩 번갈아 꺼낸다 (목표에 따라 추천이 달라지게)
+       한 줄 안에서는: 처음이면 기초 코스 장 순서대로 → 수준에 가장 맞는 것 → 그 목표가 주된 목표인 것 → 쉬운 것 */
+    const pool = MISSIONS.filter(m => m.lv[0] <= li + 1 && m.lv[1] >= li && m.goals.some(g => goals.includes(g)));
+    const groups = goals.map(() => []);
+    pool.forEach(m => { const k = Math.min(...m.goals.map(g => { const i = goals.indexOf(g); return i < 0 ? 99 : i; })); groups[k].push(m); });
+    const isCourse = m => /^course-/.test(m.id);
+    const key = (m, g) => li === 0 && isCourse(m) ? [0, 0, 0, 0, MISSIONS.indexOf(m)] : [1, m.lv[0] > li ? 1.5 * (m.lv[0] - li) : li - m.lv[0], m.goals[0] === g ? 0 : 1, m.lv[0], MISSIONS.indexOf(m)]; /* 내 수준에서 시작하는 것 → 복습 → 한 단계 위 */
+    const cmp = g => (a, b) => { const x = key(a, g), y = key(b, g); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
+    groups.forEach((list, i) => list.sort(cmp(goals[i])));
+    const out = [];
+    for (let round = 0; out.length < pool.length; round++) groups.forEach(list => { if (list[round]) out.push(list[round]); });
+    return out.slice(0, 12);
   }
   const isDone = id => !!data.done[id];
   function toggleDone(id, on) { if (on == null) on = !isDone(id); if (on) data.done[id] = Date.now(); else delete data.done[id]; save(); GH.events.emit('guide', data); }
