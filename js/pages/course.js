@@ -375,7 +375,7 @@
     const k = find(lessonId); if (k < 0) return null;
     const { ch, l } = INDEX[k];
     const prof = GH.guide && GH.guide.profile ? GH.guide.profile() : null;
-    if (prof && (prof.level === 'theory' || prof.level === 'advanced')) return null;
+    if (prof && ['theory', 'player', 'advanced'].includes(prof.level)) return null;
     if (ch.lessons.every(x => isDone(x.id))) return null;
     return h('div', { class: 'course-hint' }, h('span', { class: 'lesson-ic', 'aria-hidden': 'true' }, GH.icon('learn')),
       h('p', null, h('b', null, '처음이라면 '), '이 페이지는 전체를 모아 둔 자료실이에요. 기초 코스 ' + ch.n + '장 「' + ch.title + '」에서 한 장씩 먼저 익히면 훨씬 쉬워요.'),

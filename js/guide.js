@@ -5,12 +5,15 @@
   const { h } = GH.ui;
   const KEY = 'gh.guide.v1';
 
+  /* 수준: 사이트 난이도와 같은 셈여림 다섯 단계 (lv → GH.ui.LEVELS: p 입문 · mp 기초 · mf 중급 · f 중상급 · ff 고급) */
   const LEVELS = [
-    { id: 'new', dyn: 'pp', ko: '완전히 처음이에요', desc: '코드 이름이나 악보가 아직 낯설어요.' },
-    { id: 'chords', dyn: 'p', ko: '코드 몇 개는 잡아요', desc: 'C, G, Am 같은 오픈 코드로 간단히 반주할 수 있어요.' },
-    { id: 'theory', dyn: 'mf', ko: '기초 이론은 알아요', desc: '메이저 스케일, 인터벌 이름, 다이어토닉 코드를 알아요.' },
-    { id: 'advanced', dyn: 'ff', ko: '꽤 공부했어요', desc: '모드, 텐션, 세컨더리 도미넌트, 재즈 진행이 익숙해요.' }
+    { id: 'new', lv: 1, ko: '완전히 처음이에요', desc: '코드 이름이나 악보가 아직 낯설어요.' },
+    { id: 'chords', lv: 2, ko: '코드 몇 개는 잡아요', desc: 'C, G, Am 같은 오픈 코드로 간단히 반주할 수 있어요.' },
+    { id: 'theory', lv: 3, ko: '기초 이론은 알아요', desc: '메이저 스케일, 인터벌 이름, 다이어토닉 코드를 알아요.' },
+    { id: 'player', lv: 4, ko: '곡을 분석하고 솔로도 해요', desc: '펜타토닉으로 애드리브하고, 코드 진행을 1-5-6-4 · 투파이브처럼 숫자로 읽어요.' },
+    { id: 'advanced', lv: 5, ko: '꽤 공부했어요', desc: '모드, 텐션, 세컨더리 도미넌트, 리하모니, 재즈 진행이 익숙해요.' }
   ];
+  LEVELS.forEach(l => { const L = GH.ui.LEVELS[l.lv]; l.dyn = L.dyn; l.tag = L.ko; });
   const GOALS = [
     { id: 'theory', ko: '화성학 이해', icon: 'piano', desc: '코드와 스케일이 왜 그렇게 들리는지' },
     { id: 'guitar', ko: '기타 연주 실력', icon: 'guitar', desc: '코드 폼, 스케일 포지션, 운지' },
@@ -40,20 +43,20 @@
     { id: 'degree', title: '계이름 퀴즈 (메이저 스케일)', route: '/ear', q: { tab: 'degree' }, goals: ['ear'], lv: [1, 2], desc: '스케일을 듣고 도를 붙잡은 뒤 들린 음의 계이름을 맞힙니다.' },
     { id: 'diatonic', title: '다이어토닉 코드와 기능', route: '/theory/chords', q: { tab: 'diatonic' }, goals: ['theory', 'compose'], lv: [1, 2], desc: '한 키 안의 7개 코드와 토닉 · 서브도미넌트 · 도미넌트 기능을 봅니다.' },
     { id: 'prog', title: '장르별 기본 진행 듣기', route: '/theory/progressions', goals: ['theory', 'compose', 'guitar'], lv: [1, 2], desc: 'I – V – vi – IV 와 ii – V – I 을 듣고 기능 흐름을 비교합니다.' },
-    { id: 'backing', title: '백킹 트랙 위에서 솔로하기', route: '/backing', q: { id: 'blues12' }, goals: ['solo', 'guitar', 'rhythm'], lv: [1, 3], desc: '12마디 블루스를 틀고 펜타토닉과 코드톤으로 솔로합니다.' },
-    { id: 'melody', title: '멜로디에 코드 붙이기', route: '/tools/melody', goals: ['compose'], lv: [1, 3], desc: '아는 멜로디를 넣고 추천 코드를 들어 가며 반주를 만듭니다.' },
-    { id: 'root', title: '진행 루트 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [1, 3], desc: '코드 진행을 듣고 루트를 계이름으로 맞힙니다.' },
-    { id: 'rq', title: '리듬 듣고 맞히기 퀴즈', route: '/ear', q: { tab: 'rhythm' }, goals: ['rhythm', 'ear'], lv: [1, 3], desc: '들은 리듬과 같은 악보를 고릅니다. 쉼표와 16분음표 단계까지.' },
-    { id: 'triads', title: '현 세트별 트라이어드', route: '/guitar/triads', goals: ['guitar', 'solo'], lv: [2, 3], desc: '같은 코드를 세 가지 인버전으로 지판 위아래에서 잡아 봅니다.' },
-    { id: 'phrase', title: '코드톤 타겟팅과 어프로치 노트', route: '/guitar/phrasing', goals: ['solo', 'theory'], lv: [2, 3], desc: '기법 카드를 들어 보고 빌더에서 ii – V – I 라인을 만듭니다.' },
-    { id: 'harmony', title: '멜로디에 3도·6도 화음 쌓기', route: '/tools/harmony', goals: ['compose', 'ear', 'theory'], lv: [2, 3], desc: '다이어토닉 3도 위와 6도 아래를 비교하며 들어 봅니다.' },
-    { id: 'ds', title: '3도·6도 더블스탑', route: '/guitar/doublestops', goals: ['guitar', 'solo'], lv: [2, 3], desc: '2·3번 줄 3도, 1·3번 줄 6도 패턴을 올라갔다 내려옵니다.' },
-    { id: 'songs', title: '곡 분석으로 마디별 스케일 연결', route: '/songs', goals: ['solo', 'theory'], lv: [2, 3], desc: '마디를 하나씩 눌러 코드, 스케일, 보이싱을 이어 봅니다.' },
-    { id: 'licks', title: '릭 하나를 여러 키로 옮기기', route: '/guitar/licks', goals: ['solo', 'guitar'], lv: [2, 3], desc: '마음에 드는 릭을 느리게 익힌 뒤 키 옮기기로 다른 키에서 칩니다.' },
-    { id: 'modes', title: '모드의 밝기와 특징음', route: '/theory/modes', goals: ['theory', 'ear', 'solo'], lv: [3, 3], desc: '같은 루트의 7모드를 밝은 순서로 듣고 특징음을 찾습니다.' },
-    { id: 'reharm', title: '리하모니제이션 기법 비교', route: '/theory/reharm', goals: ['theory', 'compose'], lv: [3, 3], desc: '원래 진행과 바꾼 진행을 A/B로 들어 봅니다.' },
-    { id: 'drop2', title: '드롭 2 보이스 리딩', route: '/guitar/voicings/advanced', q: { types: 'drop2' }, goals: ['guitar'], lv: [3, 3], desc: 'ii – V – I 을 한 현 세트 안에서 가장 가깝게 연결합니다.' },
-    { id: 'modeq', title: '모드 퀴즈', route: '/ear', q: { tab: 'mode' }, goals: ['ear'], lv: [3, 3], desc: '3음의 장단을 먼저 듣고 특징음으로 모드를 구분합니다.' }
+    { id: 'backing', title: '백킹 트랙 위에서 솔로하기', route: '/backing', q: { id: 'blues12' }, goals: ['solo', 'guitar', 'rhythm'], lv: [1, 4], desc: '12마디 블루스를 틀고 펜타토닉과 코드톤으로 솔로합니다.' },
+    { id: 'melody', title: '멜로디에 코드 붙이기', route: '/tools/melody', goals: ['compose'], lv: [1, 4], desc: '아는 멜로디를 넣고 추천 코드를 들어 가며 반주를 만듭니다.' },
+    { id: 'root', title: '진행 루트 퀴즈', route: '/ear', q: { tab: 'root' }, goals: ['ear', 'theory'], lv: [1, 4], desc: '코드 진행을 듣고 루트를 계이름으로 맞힙니다.' },
+    { id: 'rq', title: '리듬 듣고 맞히기 퀴즈', route: '/ear', q: { tab: 'rhythm' }, goals: ['rhythm', 'ear'], lv: [1, 4], desc: '들은 리듬과 같은 악보를 고릅니다. 쉼표와 16분음표 단계까지.' },
+    { id: 'triads', title: '현 세트별 트라이어드', route: '/guitar/triads', goals: ['guitar', 'solo'], lv: [2, 4], desc: '같은 코드를 세 가지 인버전으로 지판 위아래에서 잡아 봅니다.' },
+    { id: 'phrase', title: '코드톤 타겟팅과 어프로치 노트', route: '/guitar/phrasing', goals: ['solo', 'theory'], lv: [2, 4], desc: '기법 카드를 들어 보고 빌더에서 ii – V – I 라인을 만듭니다.' },
+    { id: 'harmony', title: '멜로디에 3도·6도 화음 쌓기', route: '/tools/harmony', goals: ['compose', 'ear', 'theory'], lv: [2, 4], desc: '다이어토닉 3도 위와 6도 아래를 비교하며 들어 봅니다.' },
+    { id: 'ds', title: '3도·6도 더블스탑', route: '/guitar/doublestops', goals: ['guitar', 'solo'], lv: [2, 4], desc: '2·3번 줄 3도, 1·3번 줄 6도 패턴을 올라갔다 내려옵니다.' },
+    { id: 'songs', title: '곡 분석으로 마디별 스케일 연결', route: '/songs', goals: ['solo', 'theory'], lv: [2, 4], desc: '마디를 하나씩 눌러 코드, 스케일, 보이싱을 이어 봅니다.' },
+    { id: 'licks', title: '릭 하나를 여러 키로 옮기기', route: '/guitar/licks', goals: ['solo', 'guitar'], lv: [2, 4], desc: '마음에 드는 릭을 느리게 익힌 뒤 키 옮기기로 다른 키에서 칩니다.' },
+    { id: 'modes', title: '모드의 밝기와 특징음', route: '/theory/modes', goals: ['theory', 'ear', 'solo'], lv: [4, 4], desc: '같은 루트의 7모드를 밝은 순서로 듣고 특징음을 찾습니다.' },
+    { id: 'reharm', title: '리하모니제이션 기법 비교', route: '/theory/reharm', goals: ['theory', 'compose'], lv: [4, 4], desc: '원래 진행과 바꾼 진행을 A/B로 들어 봅니다.' },
+    { id: 'drop2', title: '드롭 2 보이스 리딩', route: '/guitar/voicings/advanced', q: { types: 'drop2' }, goals: ['guitar'], lv: [4, 4], desc: 'ii – V – I 을 한 현 세트 안에서 가장 가깝게 연결합니다.' },
+    { id: 'modeq', title: '모드 퀴즈', route: '/ear', q: { tab: 'mode' }, goals: ['ear'], lv: [4, 4], desc: '3음의 장단을 먼저 듣고 특징음으로 모드를 구분합니다.' }
   ];
   /* 페이지 가이드: 경로(앞부분 일치) → 무엇을, 어떻게 */
   const PAGES = [
@@ -121,7 +124,7 @@
       if (step === 1) {
         box.appendChild(h('h2', { id: 'onboard-title' }, '음악을 얼마나 알고 계세요?'));
         box.appendChild(h('p', { class: 'muted' }, '수준에 맞춰 쉬운 것부터 순서대로 추천해 드립니다. 나중에 설정에서 언제든 바꿀 수 있어요.'));
-        box.appendChild(h('div', { class: 'onboard-options', role: 'radiogroup' }, LEVELS.map(l => h('button', { class: 'onboard-option' + (draft.level === l.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': draft.level === l.id ? 'true' : 'false', onclick: () => { draft.level = l.id; draw(); } }, h('i', { class: 'dyn-tag', 'aria-hidden': 'true' }, l.dyn), h('b', null, l.ko), h('small', null, l.desc)))));
+        box.appendChild(h('div', { class: 'onboard-options', role: 'radiogroup' }, LEVELS.map(l => h('button', { class: 'onboard-option' + (draft.level === l.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': draft.level === l.id ? 'true' : 'false', onclick: () => { draft.level = l.id; draw(); } }, h('i', { class: 'dyn-tag lv' + l.lv, 'aria-hidden': 'true', title: l.dyn + ' ' + l.tag }, l.dyn), h('b', null, l.ko), h('small', null, l.desc)))));
         box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: skip }, '나중에 할게요'), h('button', { class: 'btn primary', type: 'button', onclick: () => { step = 2; draw(); } }, '다음 →')));
       } else {
         box.appendChild(h('h2', { id: 'onboard-title' }, '이 사이트에서 무엇을 얻고 싶으세요?'));
@@ -144,7 +147,7 @@
   const shouldOnboard = () => !data.profile.onboarded && !data.profile.skipped;
 
   /* ---- 화면 조각 ---- */
-  const levelKo = () => (LEVELS.find(l => l.id === data.profile.level) || {}).ko || '수준 미선택';
+  const levelKo = () => { const l = LEVELS.find(x => x.id === data.profile.level); return l ? l.dyn + ' · ' + l.ko : '수준 미선택'; };
   const goalChips = () => (data.profile.goals || []).map(id => { const g = GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, GH.icon(g.icon, { cls: 'badge-ic' }), g.ko) : null; });
   function progressBar(list) { const done = list.filter(m => isDone(m.id)).length; return h('div', { class: 'guide-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': list.length, 'aria-valuenow': done }, h('span', { style: 'width:' + (list.length ? Math.round(100 * done / list.length) : 0) + '%' }), h('small', null, done + ' / ' + list.length + ' 완료')); }
 

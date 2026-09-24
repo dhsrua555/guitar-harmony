@@ -51,7 +51,7 @@ js/render/rhythm.js   리듬 악보(VexFlow 타악기 보표)와 타임라인
 js/data/rhythms.js    리듬 패턴(단계 1~5)과 스트럼 패턴
 js/data/lessons.js    기초 코스 레슨 내용 (장 → 레슨: 본문, 위젯, 해 보기, 기억할 것, 용어, 확인 문제)
 js/pages/course.js    기초 코스 레슨 페이지와 위젯(건반, 한 줄 지판, 인터벌, 코드, 메트로놈, 리듬, 스트로크, 스케일, 키, 다이어토닉, 펜타토닉, 펑션, 진행, MR)
-js/guide.js           학습 가이드: 처음 방문 설문(수준·목표), 맞춤 미션, 진행 기록, 페이지별 사용법
+js/guide.js           학습 가이드: 처음 방문 설문(수준 5단계 p ~ ff · 목표), 맞춤 미션, 진행 기록, 페이지별 사용법
 dev/run.sh            헤드리스 Edge로 dev 페이지를 열어 결과를 출력 (bash dev/run.sh check.html)
 js/search.js          통합 검색
 js/router.js, app.js  해시 라우터, 내비게이션, 설정 패널
