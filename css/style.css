@@ -857,9 +857,11 @@ svg.piano g[style*="cursor"] rect.black:hover { fill:#3A342D; }
 .guide-go { position:absolute; top:50%; right:14px; width:40px; height:40px; display:grid; place-items:center; border-radius:50%; background:var(--fg); color:var(--bg); transform:translateY(-50%); transition:transform .35s var(--ease-spring); }
 .guide-go .ic { width:20px; height:20px; }
 .guide-next:hover .guide-go { transform:translate(3px,-50%); }
-.guide-progress { position:relative; height:24px; overflow:hidden; border:1px solid var(--line-strong); border-radius:var(--pill); background:var(--bg-soft); }
+/* 글자 크기가 기기 · 앱 설정마다 달라도(아이폰, 카카오톡 글자 크기) 라벨이 막대 가운데에 오도록: 높이를 고정하지 않고 flex 로 가운데 정렬 */
+.guide-progress { position:relative; min-height:26px; display:flex; align-items:center; padding:3px; overflow:hidden; border:1px solid var(--line-strong); border-radius:var(--pill); background:var(--bg-soft); }
 .guide-progress>span { position:absolute; inset:0 auto 0 0; background:var(--ball); box-shadow:inset -1.5px 0 0 var(--ink); transition:width .3s ease; }
-.guide-progress small { position:relative; top:2px; display:inline-block; margin-left:3px; padding:0 9px; border-radius:var(--pill); background:var(--bg-elev); color:var(--fg); font-size:.72rem; font-weight:700; line-height:18px; }
+.guide-progress small { position:relative; display:inline-block; padding:1px 9px; border-radius:var(--pill); background:var(--bg-elev); color:var(--fg); font-size:.72rem; font-weight:700; line-height:1.45; white-space:nowrap; }
+.guide-card .guide-all { margin-top:-6px; }
 .guide-all { font-size:.88rem; font-weight:500; }
 .guide-plan .guide-progress { margin:12px 0; }
 .mission-list { display:grid; gap:6px; margin:0; padding:0; list-style:none; }
