@@ -441,6 +441,32 @@ svg.fretboard .fret-hit:hover { fill:color-mix(in srgb,var(--accent) 9%,transpar
 svg.piano g[style*="cursor"] rect.white:hover { fill:#f3f5f5; }
 svg.piano g[style*="cursor"] rect.black:hover { fill:#34383a; }
 
+/* Melody harmony (성부) */
+:root { --voice-0:#1b1c1e; --voice-1:#2f6fb0; --voice-2:#c2562e; --voice-3:#3a8757; }
+:root[data-theme="dark"] { --voice-0:#f1f1ef; --voice-1:#86b4e8; --voice-2:#ee936f; --voice-3:#77c396; }
+.voice-rows { display:grid; gap:8px; margin-top:10px; }
+.voice-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:10px 13px; border:1px solid var(--line); border-radius:var(--radius); background:var(--bg-elev); }
+.voice-row label { display:flex; align-items:center; gap:6px; color:var(--fg-muted); font-size:.84rem; }
+.voice-tag { display:inline-flex; align-items:center; gap:7px; min-width:76px; font-weight:500; }
+.voice-tag::before { content:""; width:10px; height:10px; border-radius:50%; background:var(--vc); }
+.voice-desc { font-size:.84rem; }
+.pan-label { min-width:66px; color:var(--fg-muted); font-size:.74rem; }
+.btn.toggle.mute.active { border-color:var(--warm); background:var(--warm-soft); color:var(--warm); }
+.btn.toggle.solo.active { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
+.voice-dot { display:inline-block; flex:none; width:9px; height:9px; margin-right:6px; border-radius:50%; vertical-align:0; }
+.harm-grid th,.harm-grid td { padding:8px 10px; text-align:center; white-space:nowrap; }
+.harm-grid .row-head { text-align:left; }
+.harm-grid td b { display:block; font-size:1rem; }
+.harm-grid td small { display:block; color:var(--fg-muted); font-size:.72rem; }
+.harm-grid td em { display:block; margin-top:3px; color:var(--warm); font-size:.68rem; font-style:normal; }
+.harm-grid td.oos { background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--warm) 8%,transparent) 6px 12px); }
+.harm-grid [data-col].current { background:var(--accent-soft); }
+.iv-tag { display:inline-block; margin-top:3px; padding:1px 7px; border-radius:999px; background:color-mix(in srgb,var(--vc) 14%,transparent); color:var(--vc); font-family:var(--mono); font-size:.74rem; font-weight:600; }
+.col-btn { padding:2px 7px; border:0; border-radius:6px; background:none; color:var(--fg-muted); cursor:pointer; font:inherit; }
+.col-btn:hover { background:var(--bg-soft); color:var(--fg); }
+.harm-summary li { display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:4px 0; font-size:.88rem; }
+.voices-staff g.current { filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 80%,transparent)); }
+
 @media (max-width:1040px) {
   .topbar-inner { gap:12px; }
   .topbar-leading { gap:12px; }

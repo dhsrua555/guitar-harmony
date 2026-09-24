@@ -175,6 +175,35 @@
     ok(GH.positions.systemsFor('ionian', GH.voicings.STD).some(s => s.id === 'caged') && !GH.positions.systemsFor('ionian', dropD).some(s => s.id === 'caged'), 'CAGED system only appears for compatible string intervals');
     /* modes data */
     Object.keys(GH.data.modes).forEach(id => { if (!GH.scales.get(id)) { fails++; log('FAIL modes data unknown scale ' + id); } const v = GH.data.modes[id].vamp; if (v) v.forEach(rm => { if (!GH.chords.romanToChord(rm, 'C', 'major')) { fails++; log('FAIL mode vamp parse ' + id + ' ' + rm); } }); });
+
+    /* 멜로디 화음 쌓기 */
+    (function () {
+      const HM = GH.harmony; const IB = N.intervalBetween;
+      ok(IB('B', 'F', 6).en === 'd5' && IB('C', 'E', 4).en === 'M3' && IB('E', 'G', 3).en === 'm3' && IB('C', 'C', 12).en === 'P8' && IB('F', 'B', 6).en === 'A4', 'intervalBetween d5 M3 m3 P8 A4');
+      const up3 = HM.build([60, 62, 64, 65, 67], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }]).voices[0];
+      ok(up3.map(n => n.name).join(' ') === 'E F G A B' && up3.map(n => n.iv.en).join(' ') === 'M3 m3 m3 M3 M3', 'C major 3rd above = E F G A B (' + up3.map(n => n.name + ':' + n.iv.en).join(' ') + ')');
+      ok(up3.map(n => n.midi).join(',') === '64,65,67,69,71', '3rd above midi');
+      const b5 = HM.build([71], 'C', 'ionian', [{ mode: 'diatonic', size: '5', dir: 1 }]).voices[0][0];
+      ok(b5.name === 'F' && b5.midi === 77 && b5.iv.en === 'd5', '5th above B = F d5 (' + b5.name + ' ' + b5.iv.en + ')');
+      const cs = HM.build([61], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }], ['C#']);
+      ok(cs.melody[0].outOfScale && cs.melody[0].name === 'C#' && cs.voices[0][0].name === 'E#' && cs.voices[0][0].midi === 65 && cs.voices[0][0].iv.en === 'M3' && cs.voices[0][0].outOfScale, 'C# out of scale → E# M3 (' + cs.voices[0][0].name + ')');
+      const bb = HM.build([70], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }]);
+      ok(bb.melody[0].name === 'Bb' && bb.voices[0][0].name === 'Db' && bb.voices[0][0].iv.en === 'm3', 'Bb in C → Db m3 (' + bb.voices[0][0].name + ' ' + bb.voices[0][0].iv.en + ')');
+      const down3 = HM.build([60], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: -1 }]).voices[0][0];
+      ok(down3.name === 'A' && down3.midi === 57 && down3.iv.en === 'm3', '3rd below C = A3 m3');
+      const hm = HM.build([68], 'A', 'harmonic_minor', [{ mode: 'diatonic', size: '3', dir: 1 }]).voices[0][0];
+      ok(hm.name === 'B' && hm.iv.en === 'm3', 'A harmonic minor: G# + 3rd = B m3 (' + hm.name + ')');
+      const oct = HM.build([64], 'C', 'ionian', [{ mode: 'diatonic', size: '8', dir: -1 }, { mode: 'diatonic', size: '6', dir: -1 }]).voices;
+      ok(oct[0][0].midi === 52 && oct[0][0].iv.en === 'P8' && oct[1][0].name === 'G' && oct[1][0].midi === 55 && oct[1][0].iv.en === 'M6', 'octave below E = E3 P8, 6th below E = G3 M6');
+      const db = HM.build([61], 'C', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }]).voices[0][0];
+      ok(db.name === 'Fb' && db.iv.en === 'm3', 'unspelled 61 in C = Db → Fb m3 (' + db.name + ')');
+      ok(GH.melodyInput.parseText('C#4 Bb').names.join(' ') === 'C# Bb', 'parseText keeps spelling');
+      const par = HM.build([71, 62], 'C', 'ionian', [{ mode: 'parallel', par: 'M3', dir: 1 }]).voices[0];
+      ok(par[0].name === 'D#' && par[0].iv.en === 'M3' && par[0].outOfScale && par[1].name === 'F#' && par[1].iv.en === 'M3', 'parallel M3 above B, D = D#, F# (' + par.map(n => n.name).join(' ') + ')');
+      const eb = HM.build([63, 65], 'Eb', 'ionian', [{ mode: 'diatonic', size: '3', dir: 1 }]).voices[0];
+      ok(eb.map(n => n.name).join(' ') === 'G Ab', 'Eb major spelled (' + eb.map(n => n.name).join(' ') + ')');
+      ok(GH.melodyInput.parseText('C D E5 F').midis.join(',') === '60,62,76,77' && GH.melodyInput.parseText('X1').bad.length === 1, 'melodyInput.parseText');
+    })();
     /* search */
     const sr = GH.search.query('Cmaj7');
     ok(sr.length && sr[0].type === '코드', 'search Cmaj7 → chord hub');
@@ -201,7 +230,7 @@
     const variants = [['/theory/chords', { query: { tab: 'types' } }], ['/theory/chords', { query: { tab: 'diatonic' } }], ['/theory/chords', { query: { tab: 'tension' } }], ['/theory/chords', { query: { tab: 'notation' } }], ['/theory/chords', { query: { tab: 'inversion' } }],
       ['/theory/scales', { query: { tab: 'circle' } }], ['/theory/scales', { query: { tab: 'chordscale' } }], ['/theory/scales', { query: { tab: 'compare' } }], ['/theory/scales', { query: { tab: 'list' } }],
       ['/theory/modes', { query: { tab: 'parallel' } }], ['/theory/modes', { query: { tab: 'relative' } }], ['/theory/modes', { query: { tab: 'mm' } }], ['/theory/modes', { query: { tab: 'hm' } }], ['/theory/modes', { query: { tab: 'modal' } }],
-      ['/guitar/scales', { query: { scale: 'ionian' } }], ['/guitar/scales', { query: { scale: 'hw_dim' } }], ['/guitar/voicings', { query: { q: '13', types: 'jazz,drop24,quartal' } }], ['/theory/progressions', { query: { id: 'coltrane' } }], ['/theory/reharm', { query: { id: 'coltrane' } }], ['/songs', { query: { id: 'fbluesjazz' } }], ['/ear', { query: { tab: 'degree' } }], ['/ear', { query: { tab: 'interval' } }], ['/ear', { query: { tab: 'root' } }], ['/ear', { query: { tab: 'chord' } }], ['/ear', { query: { tab: 'mode' } }], ['/ear', { query: { tab: 'prog' } }], ['/backing', { query: { id: 'blues12', key: 'A' } }], ['/backing', { query: { chords: 'Dm7 G7 | Cmaj7 | Xyz' } }], ['/backing', { query: { chords: 'C Am F G' } }], ['/tools/melody', { query: { notes: 'E D C D E E E' } }], ['/tools/melody', { query: { notes: 'A4 C5 E5 D5', key: 'C' } }], ['/theory/chords', { query: { tab: 'types', group: 'level' } }], ['/theory/reharm', { query: { id: 'tritone_sub' } }]];
+      ['/guitar/scales', { query: { scale: 'ionian' } }], ['/guitar/scales', { query: { scale: 'hw_dim' } }], ['/guitar/voicings', { query: { q: '13', types: 'jazz,drop24,quartal' } }], ['/theory/progressions', { query: { id: 'coltrane' } }], ['/theory/reharm', { query: { id: 'coltrane' } }], ['/songs', { query: { id: 'fbluesjazz' } }], ['/ear', { query: { tab: 'degree' } }], ['/ear', { query: { tab: 'interval' } }], ['/ear', { query: { tab: 'root' } }], ['/ear', { query: { tab: 'chord' } }], ['/ear', { query: { tab: 'mode' } }], ['/ear', { query: { tab: 'prog' } }], ['/backing', { query: { id: 'blues12', key: 'A' } }], ['/backing', { query: { chords: 'Dm7 G7 | Cmaj7 | Xyz' } }], ['/backing', { query: { chords: 'C Am F G' } }], ['/tools/melody', { query: { notes: 'E D C D E E E' } }], ['/tools/harmony', { query: { notes: 'C4 D4 E4 F4 G4 C#4', key: 'C' } }], ['/tools/harmony', { query: { notes: 'A3 B3 C4 G#4', key: 'A', scale: 'harmonic_minor' } }], ['/tools/melody', { query: { notes: 'A4 C5 E5 D5', key: 'C' } }], ['/theory/chords', { query: { tab: 'types', group: 'level' } }], ['/theory/reharm', { query: { id: 'tritone_sub' } }]];
     GH.data.licks.forEach(l => variants.push(['/guitar/licks/:id', { id: l.id, query: {} }]));
     variants.forEach(([path, params]) => { const div = document.createElement('div'); try { GH.pages[path].render(div, params); ok(true, 'render ' + path + ' ' + JSON.stringify(params)); } catch (e) { fails++; log('FAIL render ' + path + ' ' + JSON.stringify(params) + ': ' + e.message + '\n' + (e.stack || '').split('\n').slice(0, 3).join('\n')); } });
     /* 12 키로 허브 렌더 */

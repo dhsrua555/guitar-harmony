@@ -185,7 +185,7 @@
     n.start(t0, offset, 0.024); track(n);
   }
 
-  /* 한 음 재생. opts: {gain, bend(반음), bendAt, release, slideFrom(반음 차이), vibrato, bus} */
+  /* 한 음 재생. opts: {gain, bend(반음), bendAt, release, slideFrom(반음 차이), vibrato, bus, pan(-1 왼쪽 ~ 1 오른쪽)} */
   function pluck(midi, when, dur, opts) {
     const c = context(); if (!c) return null;
     opts = opts || {};
@@ -223,7 +223,7 @@
     const baseTone = Math.max(1900, P.tone * (0.76 + Math.min(1, velocity) * 0.16) * (muted ? 0.52 : 1));
     tone.frequency.setValueAtTime(Math.min(11000, baseTone * 1.35), t0);
     tone.frequency.exponentialRampToValueAtTime(baseTone, t0 + Math.min(0.38, dur * 0.45));
-    const pan = Math.max(-0.22, Math.min(0.22, (midi - 60) * 0.008 + (Math.random() - .5) * .035));
+    const pan = opts.pan != null ? Math.max(-1, Math.min(1, opts.pan)) : Math.max(-0.22, Math.min(0.22, (midi - 60) * 0.008 + (Math.random() - .5) * .035));
     const p = panNode(c, pan); const out = noteOut(opts);
     src.connect(hp); hp.connect(tone); tone.connect(g); g.connect(p); p.connect(out);
     pickTransient(P, midi, t0, velocity, out, pan);
@@ -243,7 +243,7 @@
     const velocity = opts && opts.gain != null ? opts.gain : 1;
     const vel = velocity * 0.275;
     const t = Math.max(0, Math.min(1, (midi - 36) / 50));
-    const g = c.createGain(); const p = panNode(c, Math.max(-.32, Math.min(.32, (midi - 60) * .012)));
+    const g = c.createGain(); const p = panNode(c, opts && opts.pan != null ? Math.max(-1, Math.min(1, opts.pan)) : Math.max(-.32, Math.min(.32, (midi - 60) * .012)));
     g.gain.value = 1; g.connect(p); p.connect(out);
     const inh = 0.00035;
     PARTIALS.forEach(([k, a]) => {

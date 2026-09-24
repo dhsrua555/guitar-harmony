@@ -14,6 +14,7 @@
     add('페이지', '화성학 홈', '화성학 섹션', ['theory', '이론'], '#/theory');
     add('페이지', '연습 홈', '연습 · 도구 섹션', ['practice', '도구'], '#/practice');
     add('페이지', '백킹 트랙', '연습', ['backing', 'backing track', '반주', '드럼', '베이스', '잼', 'jam', '메트로놈'], '#/backing');
+    add('페이지', '멜로디 화음 쌓기', '연습 · 도구', ['harmony', 'harmonize', '화음', '성부', '3도 화음', '6도', '하모니 라인', '코러스', '더블링', 'voice'], '#/tools/harmony');
     add('페이지', '멜로디 → 코드 찾기', '연습 · 도구', ['melody', '멜로디', '코드 붙이기', '하모나이즈', '반주 만들기', '작곡'], '#/tools/melody');
     add('페이지', '기본 코드 폼', '기타 · 보이싱', ['voicing', 'chord', '오픈 포지션', 'caged', '이동형', '바레', '파워 코드'], '#/guitar/voicings/basic');
     add('페이지', '재즈·확장 보이싱', '기타 · 보이싱', ['voicing', '드롭2', 'drop 2', '셸', '가이드 톤', '텐션', 'quartal'], '#/guitar/voicings/advanced');

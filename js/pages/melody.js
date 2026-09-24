@@ -76,23 +76,11 @@
       playable.forEach((p, gi) => { const at = t0 + gi * groupSize * step; p.midi.forEach((mm, k) => A.pluck(mm, at + k * 0.025, groupSize * step * 0.98, { gain: 0.55, bus: 'chords' })); A.bass(p.bass - 12, at, groupSize * step * 0.95, { gain: 0.8 }); });
     }
   }
-  function parseText(text) {
-    const out = []; const bad = []; let oct = 4;
-    text.split(/[\s,]+/).filter(Boolean).forEach(tok => {
-      const m = /^([A-Ga-g](?:#|b|♯|♭)?)(\d)?$/.exec(tok);
-      if (!m) { bad.push(tok); return; }
-      if (m[2]) oct = Number(m[2]);
-      const pc = N.pcOf(m[1]); if (pc == null) { bad.push(tok); return; }
-      out.push((oct + 1) * 12 + pc);
-    });
-    return { midis: out, bad };
-  }
-
   GH.pages['/tools/melody'] = {
     title: '멜로디 → 코드',
     render(el, params) {
       const A = GH.app; const qy = params.query || {};
-      if (qy.notes && qy.notes !== state.fromParam) { state.fromParam = qy.notes; const r = parseText(qy.notes); if (r.midis.length) state.notes = r.midis; }
+      GH.melodyInput.applyQuery(state, qy);
       if (qy.key && qy.key !== state.keyParam) { state.keyParam = qy.key; state.key = qy.key; }
       const guesses = guessKeys(state.notes);
       const keyPc = state.key === 'auto' ? (guesses[0] ? guesses[0].pc : N.pcOf(A.key())) : N.pcOf(state.key);
@@ -101,28 +89,18 @@
       el.appendChild(h('h1', null, '멜로디 → 코드 찾기'));
       el.appendChild(h('p', { class: 'muted' }, '멜로디 음을 넣으면 가능한 조성을 분석하고 함께 사용할 코드 후보를 제안합니다. 음별 후보를 비교하거나 자동으로 코드를 붙여 들어 볼 수 있습니다.'));
 
-      /* ---- 입력 ---- */
+      /* ---- 입력 (공용 모듈) ---- */
       const rerender = () => GH.router.rerender();
-      const seq = h('div', { class: 'melody-seq' });
-      const redrawSeq = () => {
-        GH.ui.clear(seq);
-        if (!state.notes.length) seq.appendChild(h('span', { class: 'muted' }, '건반이나 지판을 눌러 멜로디를 넣으세요.'));
-        state.notes.forEach((m, i) => seq.appendChild(h('button', { class: 'pill iv-s mnote', type: 'button', title: '누르면 삭제', onclick: () => { state.notes.splice(i, 1); rerender(); } }, N.pretty(N.midiName(m, pref)))));
-      };
-      redrawSeq();
-      const add = m => { if (state.notes.length >= 32) return; state.notes.push(m); rerender(); };
-      const textInput = h('input', { type: 'text', placeholder: '예: C D E F G A B C5 (옥타브 숫자는 선택)', value: state.text, style: 'flex:1 1 260px', onkeydown: e => { if (e.key === 'Enter') applyText(); } });
-      const applyText = () => { const r = parseText(textInput.value); if (r.bad.length) { alert('읽을 수 없는 음: ' + r.bad.join(', ')); return; } state.notes = r.midis; state.text = ''; rerender(); };
+      const input = GH.melodyInput.render({ state, pref, onChange: rerender });
       el.appendChild(h('div', { class: 'toolbar' },
-        h('label', null, '입력', select({ options: [{ value: 'piano', label: '피아노 건반' }, { value: 'fret', label: '기타 지판' }, { value: 'text', label: '글자로 (C D E …)' }], value: state.input, onChange: v => { state.input = v; rerender(); } })),
+        input.controls[0],
         h('label', null, '키', select({ options: [{ value: 'auto', label: '자동 추정' }].concat(N.rootList(pref).map(r => ({ value: r, label: N.pretty(r) + ' 메이저' }))), value: state.key, onChange: v => { state.key = v; rerender(); } })),
         h('label', null, h('input', { type: 'checkbox', checked: state.sevenths, onchange: e => { state.sevenths = e.target.checked; rerender(); } }), '7화음으로'),
         A.playBtn('▶ 멜로디 듣기', () => playMelody(state.notes), 'primary'), A.stopBtn(),
-        A.playBtn('마지막 음 지우기', () => { state.notes.pop(); rerender(); }), A.playBtn('전부 지우기', () => { state.notes = []; rerender(); })));
-      if (state.input === 'piano') el.appendChild(h('div', { class: 'card', style: 'padding:12px' }, GH.render.piano({ from: 48, to: 79, pref, on: (() => { const on = {}; state.notes.forEach(m => { on[mod(m, 12)] = { label: N.noteName(mod(m, 12), pref), cls: 'iv-s' }; }); return on; })(), onClick: add }), h('p', { class: 'muted', style: 'margin:8px 0 0;font-size:.82rem' }, '건반을 누르면 소리가 나며 멜로디 끝에 추가됩니다.')));
-      else if (state.input === 'fret') el.appendChild(h('div', null, GH.render.fretboard({ pref, to: 15, labelMode: 'name', onClick: (s, f, midi) => add(midi) }).el));
-      else el.appendChild(h('div', { class: 'toolbar' }, textInput, h('button', { class: 'btn small', type: 'button', onclick: applyText }, '적용')));
-      el.appendChild(h('div', { class: 'card', style: 'margin-top:10px' }, h('div', { class: 'row' }, h('b', null, '멜로디'), seq)));
+        input.controls.slice(1),
+        state.notes.length ? h('a', { class: 'btn small', href: GH.router.href('/tools/harmony', { notes: GH.melodyInput.toText(state.notes, pref, state.names), key: keyName }) }, '화음 쌓기 →') : null));
+      el.appendChild(input.panel);
+      el.appendChild(input.seq);
       if (!state.notes.length) { el.appendChild(GH.ui.empty('멜로디를 넣으면 코드를 제안합니다.')); return; }
 
       /* ---- 키 ---- */

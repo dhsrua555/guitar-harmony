@@ -68,6 +68,36 @@
     else q = diff === 0 ? 'M' : diff === -1 ? 'm' : diff <= -2 ? 'd' : 'A';
     return q + I.deg;
   }
+  /* 철자가 있는 두 음 사이의 인터벌 이름. low → high, semis = 실제 반음 거리 (0 이상).
+     예: ('B', 'F', 6) → { num: 5, q: 'd', en: 'd5', ko: '감5도' } */
+  const SIMPLE_SEMI = [0, 2, 4, 5, 7, 9, 11];
+  const Q_KO = { P: '완전', M: '장', m: '단', d: '감', A: '증', dd: '겹감', AA: '겹증' };
+  function intervalBetween(lowName, highName, semis) {
+    const a = parseNote(lowName), b = parseNote(highName);
+    if (!a || !b || semis == null || semis < 0) return null;
+    const steps = mod(LETTERS.indexOf(b.letter) - LETTERS.indexOf(a.letter), 7);
+    const k = Math.max(0, Math.round((semis - SIMPLE_SEMI[steps]) / 12));
+    const num = steps + 1 + 7 * k;
+    const diff = semis - (SIMPLE_SEMI[steps] + 12 * k);
+    const perfect = steps === 0 || steps === 3 || steps === 4;
+    let q;
+    if (perfect) q = diff === 0 ? 'P' : diff === -1 ? 'd' : diff === 1 ? 'A' : diff < 0 ? 'dd' : 'AA';
+    else q = diff === 0 ? 'M' : diff === -1 ? 'm' : diff === -2 ? 'd' : diff === 1 ? 'A' : diff < 0 ? 'dd' : 'AA';
+    return { num, q, en: q + num, ko: Q_KO[q] + num + '도', semis };
+  }
+  /* 음이름에 반음 변화를 더한다 (E + 1 → E#). 임시표가 3개 이상이 되면 이명동음으로 */
+  function alter(name, delta, pref) {
+    const p = parseNote(name); if (!p) return name;
+    const acc = p.acc + delta;
+    if (Math.abs(acc) > 2) return noteName(p.pc + delta, pref || (delta > 0 ? 'sharp' : 'flat'));
+    return p.letter + accStr(acc);
+  }
+  /* 글자를 정해 두고 원하는 pc 가 되도록 임시표를 붙인다 (letter 'E', pc 5 → 'E#') */
+  function spellLetter(letter, pc, pref) {
+    let acc = mod(pc - LETTER_SEMIS[letter], 12); if (acc > 6) acc -= 12;
+    if (Math.abs(acc) > 2) return noteName(pc, pref || 'sharp');
+    return letter + accStr(acc);
+  }
   function ivSemi(iv) { return INTERVALS[iv] ? INTERVALS[iv].semi : 0; }
   function ivPc(iv) { return mod(ivSemi(iv), 12); }
   /* 인터벌 색상 클래스 */
@@ -111,5 +141,5 @@
   function koName(name) { const p = parseNote(name); if (!p) return name; return KO_NAMES[p.letter] + (p.acc > 0 ? '♯'.repeat(p.acc) : p.acc < 0 ? '♭'.repeat(-p.acc) : ''); }
 
   GH.notes = { LETTERS, LETTER_SEMIS, SHARP_NAMES, FLAT_NAMES, INTERVALS, parseNote, pcOf, noteName, normalize, pretty, spell, transpose,
-    intervalKo, intervalEn, ivSemi, ivPc, ivClass, simpleIv, tensionIv, labelMap, intervalName, midiToFreq, midiName, midiFrom, rootList, rootFor, niceName, koName, mod };
+    intervalKo, intervalEn, intervalBetween, alter, spellLetter, ivSemi, ivPc, ivClass, simpleIv, tensionIv, labelMap, intervalName, midiToFreq, midiName, midiFrom, rootList, rootFor, niceName, koName, mod };
 })();

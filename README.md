@@ -34,6 +34,9 @@ js/audio/backing.js   백킹트랙 엔진 (스타일별 드럼 · 베이스 · �
 js/render/            프렛보드, 코드 다이어그램, 피아노, 5도권, TAB, 오선(VexFlow)
 js/data/              콘텐츠 데이터 (아래 참고)
 js/pages/             각 페이지 (hubs.js 배우기·허브, backing.js 백킹트랙, melody.js 멜로디 → 코드, earTraining.js 음감 퀴즈)
+js/theory/harmony.js  멜로디 화음 쌓기 계산 (다이어토닉 · 평행 성부, 인터벌 이름)
+js/melodyInput.js     공용 멜로디 입력 (건반 · 지판 · 글자), 멜로디 → 코드와 멜로디 화음 쌓기가 같이 씀
+dev/run.sh            헤드리스 Edge로 dev 페이지를 열어 결과를 출력 (bash dev/run.sh check.html)
 js/search.js          통합 검색
 js/router.js, app.js  해시 라우터, 내비게이션, 설정 패널
 dev/check.html        자체 점검 페이지 (데이터 검증 + 모든 페이지 렌더 테스트)

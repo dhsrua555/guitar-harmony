@@ -29,9 +29,9 @@
     }
     return best;
   }
-  function makeNote(VF, midis, names, pref, duration) {
+  function makeNote(VF, midis, names, pref, duration, clef) {
     const items = midis.map((m, i) => ({ m, k: keyOf(m, pref, names && names[i]), i })).sort((a, b) => a.m - b.m);
-    const n = new VF.StaveNote({ keys: items.map(x => x.k.key), duration, auto_stem: true });
+    const n = new VF.StaveNote({ keys: items.map(x => x.k.key), duration, auto_stem: true, clef: clef || 'treble' });
     items.forEach((x, idx) => { if (x.k.acc) n.addModifier(new VF.Accidental(x.k.acc), idx); });
     n.__order = items.map(x => x.i);
     return n;
@@ -150,7 +150,7 @@
       const SPLIT = 60; /* 큰보표에서 가운데 C 이상은 높은음자리표 */
       const perBar = 4;
       const bars = []; for (let i = 0; i < columns.length; i += perBar) bars.push(columns.slice(i, i + perBar));
-      const BW = 200, FIRST = 50;
+      const BW = 230, FIRST = 50;
       const width = Math.max(360, opts.width || 900);
       const perLine = Math.max(1, Math.floor((width - FIRST - 20) / BW));
       const lines = Math.ceil(bars.length / perLine);
@@ -165,7 +165,7 @@
       const build = (col, part) => {
         const pick = col.filter(n => layout !== 'grand' || (part === 'treble' ? n.midi >= SPLIT : n.midi < SPLIT));
         if (!pick.length) return new GhostNote({ duration: 'q' });
-        const n = makeNote(VF, pick.map(p => p.midi), pick.map(p => p.name), opts.pref || 'sharp', 'q');
+        const n = makeNote(VF, pick.map(p => p.midi), pick.map(p => p.name), opts.pref || 'sharp', 'q', part);
         n.__order.forEach((srcIdx, keyIdx) => { const c = colors[pick[srcIdx].voice]; if (c) n.setKeyStyle(keyIdx, { fillStyle: c, strokeStyle: c }); });
         const flag = pick.some(p => p.outOfScale); if (flag) n.__out = true;
         return n;
