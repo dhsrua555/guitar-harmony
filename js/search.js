@@ -41,6 +41,7 @@
     add('퀴즈', '코드 진행 맞추기', '이어 트레이닝', ['progression', '진행'], '#/ear?tab=prog');
     add('페이지', '용어집', '도구', ['glossary', '용어'], '#/glossary');
     add('페이지', '코드 파인더', '도구', ['finder', '지판 눌러서 코드 찾기'], '#/tools/finder');
+    add('페이지', '버그 제보함', '도움', ['bug', 'report', '버그', '오류', '에러', '제보', '신고', '고장', '안 돼요', '안돼요', '문의', '건의'], '#/bug');
     GH.chords.QUALITIES.forEach(q => add('코드 퀄리티', q.ko + ' (' + (q.sym || 'maj') + ')', q.intervals.join(' '), [q.id, q.sym, q.jazz].concat(q.aliases || []), '#/theory/chords?q=' + q.id));
     GH.chords.CATEGORY_ORDER.forEach(c => add('코드 분류', GH.chords.CATEGORY_KO[c], GH.chords.QUALITIES.filter(q => q.category === c).map(q => q.sym || 'maj').join(' '), [c], '#/theory/chords?tab=types&cat=' + c));
     GH.scales.SCALES.forEach(s => {

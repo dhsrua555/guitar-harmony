@@ -298,6 +298,18 @@
     ok(sr.length && sr[0].type === '코드', 'search Cmaj7 → chord hub');
     ok(GH.search.query('도리안').length > 0, 'search 도리안');
     ok(GH.search.query('ii-V-I').length > 0, 'search ii-V-I');
+    /* 버그 제보함 */
+    const B = GH.bug;
+    ok(GH.search.query('버그').some(x => x.route === '#/bug'), 'search 버그 → #/bug');
+    const br = { kind: 'sound', what: '드럼이 안 들려요\n둘째 줄', steps: '1. 재생', page: '백킹 트랙 (#/backing)', env: B.envLines().join('\n') };
+    const bu = B.issueUrl(br);
+    ok(bu.startsWith('https://github.com/dhsrua555/guitar-harmony/issues/new?template=bug.yml&') && /[?&]what=/.test(bu) && /[?&]env=/.test(bu) && !/ /.test(bu), 'bug issue url');
+    ok(decodeURIComponent(bu.match(/title=([^&]+)/)[1]) === '[버그] 소리: 드럼이 안 들려요', 'bug title ' + B.titleOf(br));
+    ok(B.reportText(br).includes('드럼이 안 들려요') && B.reportText(br).includes('기기 정보'), 'bug report text');
+    const longPlan = B.sendPlan(Object.assign({}, br, { what: '가'.repeat(1500) }));
+    ok(longPlan.url.length <= 7000 && longPlan.paste && longPlan.paste.length >= 1500, 'bug long report → short url + paste (' + longPlan.url.length + ')');
+    ok(B.sendPlan(br).paste === null, 'bug short report → full url');
+    ok(B.envLines().some(l => l.startsWith('기기: ')), 'bug env lines');
     /* render all pages */
     const samples = {
       '/chord/:root/:q': { root: 'F#', q: 'm7b5' },

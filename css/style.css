@@ -1199,3 +1199,35 @@ body.panel-open .coach-fab,body.menu-open .coach-fab,body.panel-open .coach-nudg
   .coach-nudge { right:12px; bottom:calc(66px + env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion:reduce) { .coach-ring { transition:none; } }
+
+/* ---- 버그 제보함 (js/pages/bug.js) ---- */
+.bug-form { display:grid; gap:22px; max-width:720px; margin-top:18px; }
+.bug-step { display:grid; gap:8px; min-width:0; }
+.bug-q { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-weight:700; }
+.bug-n { width:26px; height:26px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--ink); color:var(--ball); font-size:.8rem; }
+.bug-opt { color:var(--fg-muted); font-size:.8rem; font-weight:400; }
+.bug-kinds .chip { font-size:.86rem; }
+.bug-form textarea { width:100%; min-width:0; min-height:88px; padding:10px 13px; border:1px solid var(--line-strong); border-radius:12px; outline:0; background:var(--bg-elev); color:var(--fg); font:inherit; line-height:1.6; resize:vertical; }
+.bug-form textarea:hover { border-color:var(--fg-muted); }
+.bug-form textarea:focus { border-color:var(--fg); box-shadow:0 0 0 3px color-mix(in srgb,var(--ball) 70%,transparent); }
+.bug-form textarea.bad { border-color:var(--warm); box-shadow:0 0 0 3px var(--warm-soft); }
+.bug-form input[type=text] { width:100%; }
+.bug-sub { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 12px; color:var(--fg-muted); font-size:.8rem; line-height:1.5; }
+.bug-count { margin-left:auto; font-variant-numeric:tabular-nums; }
+.bug-err { color:var(--warm); font-size:.85rem; font-weight:700; }
+.bug-lab { color:var(--fg-soft); font-size:.84rem; }
+.bug-check { display:flex; align-items:flex-start; gap:8px; margin-top:4px; color:var(--fg); font-size:.9rem; line-height:1.45; }
+.bug-check input { flex:none; margin-top:2px; }
+.bug-env { margin:0; padding:10px 14px; border:1px dashed var(--line-strong); border-radius:12px; background:var(--bg-soft); color:var(--fg-soft); font-family:inherit; font-size:.8rem; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.bug-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.bug-copied { color:var(--brand); font-size:.84rem; font-weight:700; }
+.bug-help { margin:0; color:var(--fg-muted); font-size:.84rem; line-height:1.65; }
+.bug-more summary { cursor:pointer; color:var(--fg-soft); font-size:.88rem; font-weight:700; }
+.bug-more[open] summary { margin-bottom:8px; }
+.bug-preview { max-height:320px; overflow:auto; }
+.bug-done { max-width:720px; margin:14px 0 0; padding:14px 18px; border:1.5px solid var(--ink); border-radius:var(--radius); background:var(--bg-elev); box-shadow:5px 5px 0 var(--ball); animation:gh-pop .2s ease both; }
+.bug-done p { margin:6px 0 10px; line-height:1.6; }
+@media (max-width:600px) {
+  .bug-form textarea,.bug-form input[type=text] { font-size:16px; }
+  .bug-actions .btn { flex:1 1 auto; }
+}

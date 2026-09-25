@@ -93,7 +93,8 @@
     inner.appendChild(h('div', { class: 'menu-foot', style: '--i:' + SECTIONS.length },
       h('a', { class: 'btn primary', href: todayHref() }, GH.icon('metronome'), '오늘의 연습'),
       h('label', { class: 'keysel' }, h('span', null, '키'), keySel),
-      h('button', { class: 'btn', type: 'button', onclick: () => { closeMenu(false); openSettings(); } }, GH.icon('settings'), '설정')));
+      h('button', { class: 'btn', type: 'button', onclick: () => { closeMenu(false); openSettings(); } }, GH.icon('settings'), '설정'),
+      h('a', { class: 'btn', href: '#/bug' }, GH.icon('bug'), '버그 제보')));
     panel.appendChild(inner);
   }
   function setMenuBtn(open) {
@@ -290,6 +291,8 @@
     panel.appendChild(h('div', { class: 'field' }, h('label', null, '왼손잡이'), h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, lefty, '지판과 코드 다이어그램을 좌우 반전')));
     panel.appendChild(h('h3', { class: 'settings-group' }, '화면'));
     panel.appendChild(field('테마', select({ options: [{ value: 'auto', label: '크림 페이퍼 (기본)' }, { value: 'light', label: '크림 페이퍼' }, { value: 'dark', label: '다크' }], value: s.theme, onChange: v => GH.state.set({ theme: v }) })));
+    panel.appendChild(h('h3', { class: 'settings-group' }, '도움'));
+    panel.appendChild(h('div', { class: 'field' }, h('label', null, '이상한 점이 있나요?'), h('div', null, h('button', { class: 'btn small', type: 'button', onclick: () => { closeSettings(); location.hash = '#/bug'; } }, GH.icon('bug'), '버그 제보하기'))));
     panel.appendChild(h('div', { class: 'field' }, h('button', { class: 'btn small', onclick: () => { GH.state.reset(); renderSettings(); } }, '기본값으로 초기화')));
     panel.appendChild(h('p', { class: 'muted', style: 'font-size:.8rem' }, '설정은 이 브라우저에 저장됩니다.'));
   }
@@ -358,7 +361,7 @@
     GH.events.on('vexflow', () => { const r = GH.router.current(); if (r && r.page && r.page.staff) GH.router.rerender(); });
     const fl = document.getElementById('footer-links');
     SECTIONS.forEach(s => fl.appendChild(h('a', { href: '#' + s.path }, s.label)));
-    [['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙'], ['#/rhythm', '메트로놈']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p }, l)); });
+    [['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙'], ['#/rhythm', '메트로놈'], ['#/bug', '버그 제보']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p }, l)); });
     document.addEventListener('keydown', e => {
       const tag = document.activeElement && document.activeElement.tagName;
       const settingsPanel = document.getElementById('settings-panel');

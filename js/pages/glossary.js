@@ -25,5 +25,5 @@
       renderList();
     }
   };
-  GH.pages['/404'] = { title: '없는 페이지', render(el) { el.appendChild(GH.ui.empty('페이지를 찾을 수 없습니다.')); el.appendChild(h('p', null, h('a', { href: '#/' }, '홈으로'))); } };
+  GH.pages['/404'] = { title: '없는 페이지', render(el) { el.appendChild(GH.ui.empty('페이지를 찾을 수 없습니다.')); el.appendChild(h('p', null, h('a', { href: '#/' }, '홈으로'), ' · ', h('a', { href: '#/bug' }, '링크가 잘못됐다면 알려 주세요'))); } };
 })();

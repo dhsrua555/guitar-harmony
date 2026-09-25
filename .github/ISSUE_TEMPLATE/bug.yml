@@ -1,0 +1,41 @@
+name: 버그 제보
+description: 사이트에서 이상한 점을 알려 주세요. (사이트의 '버그 제보' 페이지에서 쓰면 칸이 미리 채워져요.)
+title: "[버그] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제보해 주셔서 고마워요! 이 글은 **누구나 볼 수 있어요.** 이름 · 연락처 같은 개인정보는 적지 말아 주세요.
+  - type: input
+    id: kind
+    attributes:
+      label: 어떤 문제인가요?
+      placeholder: "예: 소리 · 화면 · 버튼 · 내용 · 느림"
+  - type: input
+    id: page
+    attributes:
+      label: 어느 페이지에서요?
+      placeholder: "예: 코드 진행 (#/theory/progressions)"
+  - type: textarea
+    id: what
+    attributes:
+      label: 무엇이 이상했나요?
+      description: 보이는 그대로 적어 주세요. 기대한 것과 실제로 일어난 일을 함께 적으면 좋아요.
+      placeholder: "예: 백킹 트랙에서 재즈를 고르면 드럼이 안 들려요."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 어떻게 하면 다시 생기나요? (선택)
+      placeholder: |
+        1. 백킹 트랙 페이지로 가요
+        2. 스타일에서 재즈를 골라요
+        3. 재생을 눌러요
+  - type: textarea
+    id: env
+    attributes:
+      label: 기기 정보
+      description: 사이트에서 제보하면 자동으로 채워져요.
+      render: text
