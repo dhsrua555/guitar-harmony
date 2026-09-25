@@ -71,7 +71,8 @@
     shuffle: [{ at: 0, d: .66 }, { at: .66, d: .34, g: .5, dir: 'up' }, { at: 1, d: .66 }, { at: 1.66, d: .34, g: .5, dir: 'up' }, { at: 2, d: .66 }, { at: 2.66, d: .34, g: .5, dir: 'up' }, { at: 3, d: .66 }, { at: 3.66, d: .34, g: .5, dir: 'up' }],
     bossa: [{ at: 0, d: 1.5 }, { at: 1.5, d: 1, g: .7 }, { at: 2.5, d: 1, g: .8 }, { at: 3.5, d: .5, g: .6 }],
     funk: [{ at: 0, d: .5 }, { at: .75, d: .25, g: .5, dir: 'up' }, { at: 1.5, d: .5, g: .7 }, { at: 2, d: .5 }, { at: 2.75, d: .25, g: .5, dir: 'up' }, { at: 3.5, d: .5, g: .7 }],
-    gospel: [{ at: 0, d: 1 }, { at: 1, d: 1, g: .7 }, { at: 2, d: 1 }, { at: 3, d: 1, g: .7 }]
+    gospel: [{ at: 0, d: 1 }, { at: 1, d: 1, g: .7 }, { at: 2, d: 1 }, { at: 3, d: 1, g: .7 }],
+    worship: [{ at: 0, d: 1.5 }, { at: 1.5, d: 1, g: .5, dir: 'up' }, { at: 2.5, d: 1.5, g: .6 }]
   };
   /* chords: [{midi:[...], bass: midi, beats}] */
   function playProgression(chords, opts) {

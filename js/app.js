@@ -212,7 +212,7 @@
           const ps = GH.chords.parseSymbol(it.r);
           const root = N.niceName(N.pcOf(ps.root) + shift, pref);
           const c = GH.chords.buildChord(root, ps.qId, { bass: ps.bass ? N.niceName(N.pcOf(ps.bass) + shift, pref) : null });
-          return Object.assign(c, { roman: it.r, fn: ps.qId.match(/^(7|9|13|7b9|7#9|7alt|7#11|7b13|7#5|7sus4)$/) ? 'D' : ps.qId.match(/^(maj|maj7|maj9|6|69)$/) ? 'T' : 'S', beats: it.beats });
+          return Object.assign(c, { roman: it.roman || it.r, fn: it.fn || (ps.qId.match(/^(7|9|13|7b9|7#9|7alt|7#11|7b13|7#5|7sus4)$/) ? 'D' : ps.qId.match(/^(maj|maj7|maj9|6|69)$/) ? 'T' : 'S'), beats: it.beats }); /* 조가 바뀌는 진행은 roman · fn 을 직접 적어 둔다 */
         });
       }
       return items.map(it => {

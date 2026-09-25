@@ -9,6 +9,12 @@
     ballad: { ko: '발라드', tempo: 72, swing: 0.5, bars: 1,
       drums: [{ t: 0, k: 'kick' }, { t: 2, k: 'kick', g: .8 }, { t: 1, k: 'snare', g: .5 }, { t: 3, k: 'snare', g: .5 }, { t: 0, k: 'hat', g: .7 }, { t: .5, k: 'hat', g: .4 }, { t: 1, k: 'hat', g: .6 }, { t: 1.5, k: 'hat', g: .4 }, { t: 2, k: 'hat', g: .7 }, { t: 2.5, k: 'hat', g: .4 }, { t: 3, k: 'hat', g: .6 }, { t: 3.5, k: 'hat', g: .4 }],
       comp: [{ t: 0, d: 2, g: .8 }, { t: 2, d: 2, g: .6 }], bass: 'long' },
+    worship: { ko: '워십 (CCM)', tempo: 74, swing: 0.5, bars: 1,
+      drums: [{ t: 0, k: 'kick' }, { t: 1.5, k: 'kick', g: .55 }, { t: 2, k: 'kick', g: .8 }, { t: 1, k: 'snare', g: .6 }, { t: 3, k: 'snare', g: .65 }].concat([0, .5, 1, 1.5, 2, 2.5, 3].map(t => ({ t, k: 'hat', g: t % 1 ? .35 : .5 }))).concat([{ t: 3.5, k: 'hatopen', g: .35 }]),
+      comp: [{ t: 0, d: 1.5, g: .75 }, { t: 1.5, d: 1, g: .5, dir: 'up' }, { t: 2.5, d: 1.5, g: .6 }], bass: 'long' },
+    worshipup: { ko: '워십 업템포', tempo: 128, swing: 0.5, bars: 1,
+      drums: [0, 1, 2, 3].map(t => ({ t, k: 'kick', g: .9 })).concat([{ t: 1, k: 'snare', g: .85 }, { t: 3, k: 'snare', g: .9 }]).concat([0, .5, 1, 1.5, 2, 2.5, 3, 3.5].map(t => ({ t, k: t % 1 ? 'hatopen' : 'hat', g: t % 1 ? .4 : .35 }))),
+      comp: [0, .5, 1, 1.5, 2, 2.5, 3, 3.5].map(t => ({ t, d: .45, g: t % 1 ? .55 : .8, dir: t % 1 ? 'up' : null })), bass: 'eighths' },
     pop: { ko: '팝', tempo: 100, swing: 0.5, bars: 1,
       drums: [{ t: 0, k: 'kick' }, { t: 1.5, k: 'kick', g: .8 }, { t: 2, k: 'kick', g: .9 }, { t: 1, k: 'snare' }, { t: 3, k: 'snare' }, { t: 0, k: 'hat', g: .8 }, { t: .5, k: 'hat', g: .45 }, { t: 1, k: 'hat', g: .7 }, { t: 1.5, k: 'hat', g: .45 }, { t: 2, k: 'hat', g: .8 }, { t: 2.5, k: 'hat', g: .45 }, { t: 3, k: 'hat', g: .7 }, { t: 3.5, k: 'hatopen', g: .5 }],
       comp: [{ t: 0, d: 1.5 }, { t: 1.5, d: .5, g: .6, dir: 'up' }, { t: 2, d: 1 }, { t: 3, d: .5, g: .7 }, { t: 3.5, d: .5, g: .6, dir: 'up' }], bass: 'pop' },
@@ -32,7 +38,7 @@
       drums: [{ t: 2, k: 'kick' }, { t: 2, k: 'rim', g: .8 }, { t: 0, k: 'hat', g: .6 }, { t: .5, k: 'hat', g: .4 }, { t: 1, k: 'hat', g: .6 }, { t: 1.5, k: 'hat', g: .4 }, { t: 2, k: 'hat', g: .6 }, { t: 2.5, k: 'hat', g: .4 }, { t: 3, k: 'hat', g: .6 }, { t: 3.5, k: 'hatopen', g: .4 }],
       comp: [{ t: 1, d: .35, g: .8 }, { t: 3, d: .35, g: .8 }], bass: 'reggae' }
   };
-  const STYLE_ORDER = ['ballad', 'pop', 'rock', 'funk', 'swing', 'bossa', 'shuffle', 'reggae'];
+  const STYLE_ORDER = ['ballad', 'pop', 'rock', 'funk', 'swing', 'bossa', 'shuffle', 'reggae', 'worship', 'worshipup'];
 
   const st = { playing: false, timer: null, timers: [], opts: null, items: [], tempo: 100, style: 'pop', startTime: 0, loopStart: 0, loopBeats: 0, scheduledUntilIndex: 0, pass: 0 };
 

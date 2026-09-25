@@ -34,7 +34,7 @@
     },
     h('div', { class: 'title' }, p.ko),
     h('div', { class: 'muted', style: 'font-size:.85rem' }, p.en),
-    h('div', { style: 'margin-top:6px' }, GH.ui.difficulty(p.level), p.genres.slice(0, 3).map(g => GH.ui.badge(GH.data.genres[g]))))));
+    h('div', { style: 'margin-top:6px' }, GH.ui.difficulty(p.level), (genre !== 'all' ? [genre].concat(p.genres.filter(g => g !== genre)) : p.genres).slice(0, 3).map(g => GH.ui.badge(GH.data.genres[g], g === genre ? 'accent' : ''))))));
     el.appendChild(grid);
   }
 
@@ -90,7 +90,7 @@
       A.playBtn('▶ 재생', () => GH.player.playProgression(A.toPlayable(chords, seq), { tempo: state.tempo || P.tempo || 110, style: state.style || P.style || 'pop', loop: state.loop, metronome: state.metronome, onChord: i => { strip.setCurrent(i); chart.querySelectorAll('.bar').forEach(b => b.classList.remove('current')); if (i >= 0 && cellsByChord[i]) cellsByChord[i].classList.add('current'); } }), 'primary'),
       A.stopBtn(),
       h('label', null, '템포', GH.ui.rangeNumber({ value: tempo, min: 40, max: 280, suffix: 'BPM', label: '템포', onInput: v => { state.tempo = v; } })),
-      h('label', null, '스타일 / 그루브', select({ options: [['pop', 'Pop'], ['rock', 'Rock'], ['ballad', 'Ballad'], ['soul', 'Neo Soul'], ['swing', 'Swing'], ['shuffle', 'Shuffle'], ['bossa', 'Bossa Nova'], ['funk', 'Funk'], ['gospel', 'Gospel']].map(([v, l]) => ({ value: v, label: l })), value: style, onChange: v => { state.style = v; } })),
+      h('label', null, '스타일 / 그루브', select({ options: [['pop', 'Pop'], ['rock', 'Rock'], ['ballad', 'Ballad'], ['soul', 'Neo Soul'], ['swing', 'Swing'], ['shuffle', 'Shuffle'], ['bossa', 'Bossa Nova'], ['funk', 'Funk'], ['gospel', 'Gospel'], ['worship', 'Worship (CCM)']].map(([v, l]) => ({ value: v, label: l })), value: style, onChange: v => { state.style = v; } })),
       h('label', null, h('input', { type: 'checkbox', checked: state.loop, onchange: e => { state.loop = e.target.checked; } }), '루프'),
       h('label', null, h('input', { type: 'checkbox', checked: state.metronome, onchange: e => { state.metronome = e.target.checked; } }), '클릭'),
       h('label', null, '키', A.rootSelect(key, v => { GH.state.set({ key: v }); GH.router.go(detailPath(P.id), { key: v, genre: backQuery.genre }); })),

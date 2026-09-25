@@ -58,6 +58,30 @@
         { c: 'C E7', r: 'I – III7 (V7/vi)', fn: 'T', scale: ['E', 'phrygian_dom'], tip: 'E7 이 다음 코러스의 Am 또는 Fmaj7 으로 이끈다.', licks: ['metal-e-harm'] }
       ],
       practice: ['오픈 코드 → CAGED 바레 → 드롭 2 순으로 같은 진행을 세 가지 보이싱으로 쳐 본다.', 'iii7 을 III7 로, V7 을 V7sus4 로 바꾸며 리하모니 효과를 들어 본다.', '멜로디를 정하고 각 코드에서 멜로디 음이 몇 도인지 적어 본다 (리하모니의 기본 규칙).'],
-      progressions: ['royalroad', 'canon', 'ii-V-I'] }
+      progressions: ['royalroad', 'canon', 'ii-V-I'] },
+
+    { id: 'worshipform', ko: '모던 워십 곡 형태 (예제, D → E 키 업)', key: 'D', mode: 'major', form: '벌스 4 – 코러스 4 – 브리지 4 – 키 업 코러스 4 (16마디)', tempo: 72, style: 'worship',
+      summary: '찬양 인도곡에서 흔한 구조를 16마디로 줄인 예제. 벌스는 조용히, 코러스는 4-1-5-6 으로 열고, 브리지에서 같은 코드를 반복하며 쌓아 올린 뒤 마지막 코러스를 온음 위 키로 올린다.',
+      bars: [
+        { c: 'Dadd9', r: 'Iadd9', fn: 'T', scale: ['D', 'ionian'], tip: '벌스: 1박만 치고 길게 울리거나 아르페지오로 조용히 시작한다.', licks: ['worship-arp-d'] },
+        { c: 'A/C#', r: 'V/3', fn: 'D', scale: ['A', 'mixolydian'], tip: '베이스를 C# 으로 두면 D → C# → B 로 한 음씩 내려간다.', licks: [] },
+        { c: 'Bm7', r: 'vi7', fn: 'T', scale: ['B', 'aeolian'], tip: '', licks: [] },
+        { c: 'Gmaj7', r: 'IVmaj7', fn: 'S', scale: ['G', 'lydian'], tip: '벌스 끝. 다음 마디 코러스를 위해 스트로크를 조금씩 키운다.', licks: [] },
+        { c: 'G', r: 'IV', fn: 'S', scale: ['G', 'lydian'], tip: '코러스: 4-1-5-6. 워십 스트로크(D - D - D U D U)로 크게.', licks: [] },
+        { c: 'D', r: 'I', fn: 'T', scale: ['D', 'ionian'], tip: '', licks: [] },
+        { c: 'A', r: 'V', fn: 'D', scale: ['A', 'mixolydian'], tip: '', licks: [] },
+        { c: 'Bm', r: 'vi', fn: 'T', scale: ['B', 'aeolian'], tip: '', licks: [] },
+        { c: 'Bm7', r: 'vi7', fn: 'T', scale: ['B', 'aeolian'], tip: '브리지: 같은 네 코드를 반복하며 드럼과 함께 점점 크게 쌓아 올린다 (빌드업).', licks: [] },
+        { c: 'G', r: 'IV', fn: 'S', scale: ['G', 'lydian'], tip: '', licks: [] },
+        { c: 'D', r: 'I', fn: 'T', scale: ['D', 'ionian'], tip: '', licks: [] },
+        { c: 'Bsus4 B', r: 'V (새 키 E)', fn: 'D', scale: ['B', 'mixolydian'], tip: '키 업 준비: 새 키 E 의 V 인 B 를 sus4 → 3음으로 들려준다.', licks: [] },
+        { c: 'A', r: 'IV (E)', fn: 'S', scale: ['A', 'lydian'], tip: '마지막 코러스는 E 키. 4-1-5-6 이 A – E – B – C#m 이 된다.', licks: ['worship-dotted-e'] },
+        { c: 'E', r: 'I (E)', fn: 'T', scale: ['E', 'ionian'], tip: '', licks: [] },
+        { c: 'B', r: 'V (E)', fn: 'D', scale: ['B', 'mixolydian'], tip: '', licks: [] },
+        { c: 'C#m', r: 'vi (E)', fn: 'T', scale: ['C#', 'aeolian'], tip: '엔딩은 IV → I (아멘 종지)로 부드럽게 끝내도 좋다.', licks: [] }
+      ],
+      practice: ['코러스(G D A Bm)만 먼저 워십 스트로크로 루프한다.', '브리지에서는 4마디마다 스트로크를 한 단계씩 크게 (1박만 → 8분 → 16분) 쌓아 본다.', '키 업 직전 Bsus4 → B 를 연습하고, 카포 없이 E 키 코드로 바로 넘어간다.'],
+      progressions: ['ccm-4156', 'ccm-keyup', 'I-V-vi-IV'] }
+
   ];
 })();

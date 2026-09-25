@@ -84,6 +84,13 @@
     { ko: '렐러티브 키 (나란한조)', en: 'Relative Key', def: '같은 조표를 쓰는 메이저 키와 마이너 키의 관계(C 메이저 – A 마이너).', route: '#/theory/scales' },
     { ko: '패러렐 키 (같은으뜸음조)', en: 'Parallel Key', def: '루트가 같은 메이저 키와 마이너 키의 관계(C 메이저 – C 마이너). 모달 인터체인지의 주요 근거가 된다.', route: '#/theory/reharm' },
     { ko: '컴핑', en: 'Comping', def: '솔로나 멜로디 뒤에서 코드 반주를 하는 것 (accompanying).', route: '#/guitar/voicings' },
-    { ko: '스윙 / 셔플', en: 'Swing / Shuffle', def: '스윙은 8분음표 간격이 템포와 프레이징에 따라 유동적이고, 셔플은 셋잇단음표의 첫째와 셋째 분할을 반복적으로 강조한다.', route: '#/guitar/licks' }
+    { ko: '스윙 / 셔플', en: 'Swing / Shuffle', def: '스윙은 8분음표 간격이 템포와 프레이징에 따라 유동적이고, 셔플은 셋잇단음표의 첫째와 셋째 분할을 반복적으로 강조한다.', route: '#/guitar/licks' },
+
+    { ko: 'CCM · 워십', en: 'Contemporary Christian Music · Worship', def: '예배와 찬양에 쓰는 대중음악 장르. 교회 찬양팀은 보통 인도자 · 어쿠스틱 · 일렉 기타 · 건반 · 베이스 · 드럼으로 구성하고, 회중이 따라 부르기 쉬운 키(D · E · G · A 등)와 4-1-5-6 · 1-5-6-4 같은 진행을 많이 쓴다.', route: '#/theory/progressions?genre=ccm' },
+    { ko: '아멘 종지 (플라갈 케이던스)', en: 'Plagal Cadence', def: 'IV → I 로 끝나는 케이던스. 찬송가 끝의 "아-멘"이 이 소리라서 아멘 종지라고 부른다. IV – iv – I 처럼 마이너 iv 를 거치면 더 애틋해진다.', route: '#/theory/progressions/ccm-amen' },
+    { ko: '키 업 (마지막 후렴 전조)', en: 'Key Change · Lift', def: '곡 후반에 반음이나 온음 위 키로 올려 분위기를 끌어올리는 것. 새 키의 V 코드(V7, Vsus4)를 한 번 들려주고 들어가면 자연스럽다.', route: '#/theory/progressions/ccm-keyup' },
+    { ko: '빌드업', en: 'Build-up', def: '같은 진행을 반복하며 악기 수, 스트로크 밀도, 드럼 세기를 조금씩 키워 곡의 정점으로 끌고 가는 편곡. 워십 곡의 브리지에서 많이 쓴다.', route: '#/songs/worshipform' },
+    { ko: '패드', en: 'Pad', def: '길게 울려 공간을 채우는 소리 (신스, 오르간, 스웰 기타 등). 워십에서는 곡 사이와 기도 시간에 키의 루트와 5음을 계속 깔아 두기도 한다.', route: '#/backing' }
+
   ];
 })();

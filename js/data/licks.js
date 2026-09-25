@@ -6,7 +6,7 @@
   const GH = window.GH = window.GH || {};
   GH.data = GH.data || {};
   const n = (s, f, d, t, extra) => Object.assign({ s, f, d, t }, extra || {});
-  GH.data.lickGenres = { blues: '블루스', jazz: '재즈', rock: '록', funk: '펑크', country: '컨트리', soul: '네오소울', metal: '메탈', fusion: '퓨전' };
+  GH.data.lickGenres = { blues: '블루스', jazz: '재즈', rock: '록', funk: '펑크', country: '컨트리', soul: '네오소울', metal: '메탈', fusion: '퓨전', ccm: 'CCM · 워십' };
   GH.data.lickContexts = { dom7: '도미넌트 7 위', 'ii-V-I': 'ii-V-I', 'ii-V-i': '마이너 ii-V-i', minor: '마이너 코드 위', major: '메이저 코드 위', turnaround: '턴어라운드', ending: '엔딩', intro: '인트로', blues: '블루스 폼' };
   GH.data.licks = [
     { id: 'blues-a-box1', ko: 'A 블루스 벤딩 릭 (박스 1)', genre: 'blues', context: ['dom7', 'blues'], key: 'A', over: 'A7', qIds: ['7', 'm7', '9'], progressionIds: ['blues12'], scale: 'minor_pent', position: '5프렛 박스 1', difficulty: 1, tempo: 90, feel: 'shuffle',
@@ -90,6 +90,20 @@
       desc: '베이스 라인이 D–D#–E 로 걸어 올라간 뒤 반음 위 Bb7 코드를 거쳐 A7으로 착지하는 블루스 엔딩. bII7 → I7 은 트라이톤 대체를 엔딩에 응용한 것.',
       analysis: 'D#(b5)은 D와 E 사이의 크로매틱 경과음. Bb7 은 E7(V7)의 트라이톤 대체이므로 A7 으로 반음 하행 해결하는 힘이 있다.',
       notes: [n(4, 7, .5, null, { ch: 'A7' }), n(4, 5, .5), n(5, 7, .5), n(5, 5, .5), n(5, 6, .5, 'h'), n(5, 7, .5, 'h'), n(6, 5, 1),
-        n(null, null, .5, null, { ns: [[5, 1], [4, 3], [3, 1], [2, 3]], ch: 'Bb7' }), n(null, null, 1.5, null, { ns: [[5, 0], [4, 2], [3, 0], [2, 2]], ch: 'A7' }), n(null, null, 2, null, { rest: true })] }
+        n(null, null, .5, null, { ns: [[5, 1], [4, 3], [3, 1], [2, 3]], ch: 'Bb7' }), n(null, null, 1.5, null, { ns: [[5, 0], [4, 2], [3, 0], [2, 2]], ch: 'A7' }), n(null, null, 2, null, { rest: true })] },
+
+    { id: 'worship-arp-d', ko: '워십 아르페지오 필 (D – Bm7 – G – A)', genre: 'ccm', context: ['major', 'intro'], key: 'D', over: 'D', qIds: ['add9', 'maj', 'sus4', 'm7', 'maj7'], progressionIds: ['I-vi-IV-V', 'ccm-sus'], scale: 'ionian', position: '개방현 ~ 4프렛', difficulty: 1, tempo: 72, feel: 'straight',
+      desc: '워십 기타의 기본 어휘. 코드를 한 줄씩 8분음표로 풀되 개방현 E · D 를 계속 울려 add9 · sus 색을 만든다. 벌스 반주나 인트로에서 그대로 쓸 수 있다.',
+      analysis: 'D 위의 E 는 9음(add9), Bm7 위의 E 는 11음, G 위의 F# 은 메이저 7음. 코드가 바뀌어도 E · D · F# 같은 공통음이 이어져 소리가 끊기지 않는다. 마지막 A 마디는 sus4(D) → 3음(C#) 해결.',
+      notes: [n(4, 0, .5, null, { ch: 'Dadd9' }), n(3, 2, .5), n(2, 3, .5), n(1, 0, .5), n(2, 3, .5), n(3, 2, .5), n(1, 2, .5), n(1, 0, .5),
+        n(5, 2, .5, null, { ch: 'Bm7' }), n(4, 4, .5), n(3, 2, .5), n(2, 3, .5), n(1, 2, .5), n(2, 3, .5), n(3, 2, .5), n(1, 0, .5),
+        n(6, 3, .5, null, { ch: 'Gmaj7' }), n(4, 0, .5), n(3, 0, .5), n(2, 3, .5), n(1, 2, .5), n(2, 3, .5), n(1, 0, .5), n(1, 2, .5),
+        n(5, 0, .5, null, { ch: 'Asus4' }), n(4, 2, .5), n(3, 2, .5), n(2, 3, .5), n(1, 0, .5), n(2, 3, .5), n(2, 2, 1, '~', { ch: 'A' })] },
+    { id: 'worship-dotted-e', ko: '점 8분 리듬 워십 리프 (E)', genre: 'ccm', context: ['major', 'intro'], key: 'E', over: 'E', qIds: ['maj', 'add9', 'sus2'], progressionIds: ['ccm-4156', 'I-V-vi-IV'], scale: 'major_pent', position: '2~7프렛', difficulty: 2, tempo: 76, feel: 'straight',
+      desc: '일렉 기타에 점 8분음표 딜레이를 걸고 치는 모던 워십 리프를 흉내 낸 것. 딜레이가 없어도 점 8분(한 박 반의 반) 리듬으로 치면 비슷하게 출렁인다.',
+      analysis: 'E 메이저 펜타토닉(E F# G# B C#)만 쓴다. 점 8분음표 네 개가 한 마디 박과 엇갈리며 당겨지는 느낌을 만들고, 마디 끝의 긴 음에서 숨을 쉰다. 두 번째 마디는 A 위에서 E · C# · B 로 add9 색을 낸다.',
+      notes: [n(2, 5, .75, null, { ch: 'E' }), n(2, 7, .75), n(1, 4, .75), n(2, 5, .75), n(3, 6, 1, '~'),
+        n(2, 5, .75, null, { ch: 'Aadd9' }), n(3, 6, .75), n(3, 4, .75), n(2, 5, .75), n(3, 2, 1, '~')] }
+
   ];
 })();
