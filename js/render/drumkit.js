@@ -14,12 +14,14 @@
   const ALIAS = { hatopen: 'hat', rim: 'snare' };
   function drumkit(opts) {
     opts = opts || {};
-    const W = 370, H = 250;
+    const only = opts.only || null;                        /* ['snare'] 처럼 일부만 그리기 (손 연습 = 스네어 · 연습 패드) */
+    const W = only ? 220 : 370, H = only ? 170 : 250;
     const el = svg('svg', { class: 'drumkit', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': '드럼 킷' });
     const pads = {};
     const order = ['kick', 'crash', 'ride', 'hat', 'pedal', 'tom3', 'tom1', 'tom2', 'snare'];
-    order.forEach(id => {
-      const [k, name, x, y, r, cym] = PADS.find(p => p[0] === id);
+    order.filter(id => !only || only.includes(id)).forEach(id => {
+      let [k, name, x, y, r, cym] = PADS.find(p => p[0] === id);
+      if (only) { x = W / 2; y = H / 2 - 12; r = 58; name = k === 'snare' ? '스네어 (또는 연습 패드)' : name; }
       const ry = k === 'kick' ? r * 0.94 : cym ? r * 0.62 : r * 0.8;
       const g = svg('g', { class: 'kit-pad ' + (cym ? 'cym' : 'drum') + ' kit-' + k, 'data-k': k, tabindex: 0, role: 'button', 'aria-label': name + ' 소리 듣기' });
       if (k === 'pedal') {

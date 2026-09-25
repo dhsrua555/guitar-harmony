@@ -7,7 +7,7 @@
   const RH = { '2': { d: 2, ko: '2분음표', n: 0.5 }, '4': { d: 1, ko: '4분음표', n: 1 }, '8': { d: 0.5, ko: '8분음표', n: 2 }, '8t': { d: 1 / 3, ko: '셋잇단', n: 3 }, '16': { d: 0.25, ko: '16분음표', n: 4 } };
   const PPB = { 0.5: 36, 1: 36, 2: 46, 3: 60, 4: 76 };           /* TAB 박당 px: 음이 많을수록 넓게 */
   const FRET_RANGE = { 'chroma-shift': [1, 9], stretch: [4, 12], 'b-simandl': [1, 9] };
-  const REC_KEY = 'gh.tech.v1', VOICE_KEY = 'gh.tech.voice';
+  const VOICE_KEY = 'gh.tech.voice';
   const STD = () => GH.voicings.STD, BASS = () => GH.data.techBassTuning;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const instOf = id => GH.data.techInst.find(x => x.id === id);
@@ -27,24 +27,17 @@
     vocal: ['물을 조금씩 마시며, 목이 따갑거나 쉬면 바로 멈춰요.', '큰 소리보다 편한 소리. 높은 음은 억지로 밀어 올리지 않아요.', '연습 끝에는 허밍으로 낮은 음까지 내려오며 목을 풀어요 (쿨다운).']
   };
 
-  /* ---- 기록 (이 브라우저에만) ---- */
-  function records() { try { return JSON.parse(localStorage.getItem(REC_KEY)) || {}; } catch (e) { return {}; } }
-  function addRecord(id, bpm, rh) {
-    const all = records(); const r = all[id] = all[id] || { log: [] };
-    r.log.push({ bpm, rh, at: Date.now() }); if (r.log.length > 40) r.log.splice(0, r.log.length - 40);
-    try { localStorage.setItem(REC_KEY, JSON.stringify(all)); } catch (e) { /* ignore */ }
-  }
-  const nps = e => e.bpm * nOf(e.rh);
-  function bestOf(id) { const r = records()[id]; return r && r.log && r.log.length ? r.log.reduce((a, e) => !a || nps(e) > nps(a) ? e : a, null) : null; }
-  const recLabel = e => e.bpm + ' BPM' + (RH[e.rh] ? ' · ' + RH[e.rh].ko : '');
-  const dateKo = t => { const d = new Date(t); return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; };
+  /* ---- 마지막으로 쓴 템포 · 펼친 분류 (이 브라우저에만, 점수나 기록은 남기지 않는다) ---- */
+  const TEMPO_KEY = 'gh.tech.tempo', OPEN_KEY = 'gh.tech.open';
+  const loadJSON = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } };
+  const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } };
   const savedVoice = () => { try { return localStorage.getItem(VOICE_KEY); } catch (e) { return null; } };
 
   /* ---- 옵션 ---- */
   function rhOptions(ex) {
     if (ex.fixed || ex.inst === 'vocal') return null;
     if (ex.inst === 'drums') return ex.rhs || null;
-    if (ex.inst === 'keys') return ex.cat === 'k-chord' ? ['2', '4'] : ['4', '8', '8t', '16'];
+    if (ex.inst === 'keys') return ex.cat === 'k-chord' || ex.cat === 'k-voice' ? ['2', '4'] : ['4', '8', '8t', '16'];
     return ['4', '8', '8t', '16'];
   }
   function options(ex, qy) {
@@ -61,6 +54,7 @@
     if (o.oct != null && /^[12]$/.test(qy.oct || '')) o.oct = int(qy.oct);
     if (o.mode != null && /^(major|minor)$/.test(qy.mode || '')) o.mode = qy.mode;
     if (o.kick != null && GH.data.techKickVariants[qy.kick]) o.kick = qy.kick;
+    if (o.q != null && ['maj', 'min', 'maj7', 'm7', '7', 'm7b5'].includes(qy.q)) o.q = qy.q;
     if (ex.inst === 'vocal') {
       const V = GH.data.techVoices; const sv = savedVoice();
       o.voice = V[qy.voice] ? qy.voice : V[sv] ? sv : o.voice;
@@ -82,9 +76,9 @@
     const marks = ex.inst === 'bass' ? ['i', 'm'] : ['d', 'u'];
     let at = 0;
     const notes = ex.gen(o).map(n => {
-      const e = { at, d, s: n.s, f: n.f, fg: n.fg, t: n.t || null, x: !!n.x, label: n.label || null, midi: tun[NS - n.s] + n.f };
+      const e = { at, d: ex.fixed && n.d ? n.d : d, s: n.s, f: n.f, fg: n.fg, t: n.t || null, x: !!n.x, label: n.label || null, midi: tun[NS - n.s] + n.f };
       if (n.pk) e.pk = n.pk; else if (!e.t) { e.pk = marks[(first + alt) % 2]; alt++; }
-      at += d; return e;
+      at += e.d; return e;
     });
     return { kind: 'fretted', tun, NS, seq: notes, notes };
   }
@@ -132,7 +126,7 @@
     if (B.kind === 'fretted' && ex.inst === 'bass') return (ev, t, dur) => A.bass(ev.midi, t, ev.x ? 0.06 : dur * 0.92, { gain: ev.x ? 0.35 : ev.pk === 'P' ? 1.1 : 1 });
     if (B.kind === 'fretted') { const pre = guitarPreset(); return (ev, t, dur) => A.pluck(ev.midi, t, ev.x ? 0.05 : dur * 0.95, { gain: ev.t ? 0.6 : 0.85, preset: pre }); }
     if (B.kind === 'keys') return (ev, t, dur, pass, beat) => ev.notes.forEach(n => n.m.forEach(m => A.pluck(m, t, n.d * beat * 0.96, { preset: 'piano', gain: n.hand === 'l' ? 0.62 : 0.78 })));
-    if (B.kind === 'drums') return (ev, t) => ev.hits.forEach(x => A.drum(x.k, t, x.ghost ? 0.22 : x.acc ? 1.05 : 0.72));
+    if (B.kind === 'drums') return (ev, t) => ev.hits.forEach(x => A.drum(x.k, t, x.v != null ? 0.15 + x.v * 0.9 : x.ghost ? 0.22 : x.acc ? 1.05 : 0.72));
     return (ev, t, dur, pass, beat) => {
       const tr = B.trs[pass % B.trs.length];
       if (ev.i === 0) { const r = B.V.root + tr - 12; [r, r + 4, r + 7].forEach(m => A.pluck(m, t, Math.min(2, totalBeats(B)) * beat, { preset: 'piano', gain: 0.4 })); }
@@ -148,7 +142,7 @@
     const pref = o.key ? GH.state.pref(o.key.replace(/m$/, '')) : 'sharp';
     if (B.kind === 'fretted') return GH.render.sheet({ kind: 'line', clef: ex.inst === 'bass' ? 'bass' : 'treble', written: 12, width, pref, events: B.notes.map(n => ({ at: n.at, d: n.d, m: [n.midi], x: n.x, fg: n.fg > 0 || typeof n.fg === 'string' ? String(n.fg) : '' })) });
     if (B.kind === 'keys') { const ev = n => ({ at: n.at, d: n.d, m: n.m, fg: (n.fg || []).join('') }); return GH.render.sheet({ kind: 'grand', width, pref, rh: B.rh.map(ev), lh: B.lh.map(ev) }); }
-    if (B.kind === 'drums') return GH.render.sheet({ kind: 'drum', width, slots: B.seq });
+    if (B.kind === 'drums') return GH.render.sheet({ kind: 'drum', width, slots: B.seq, handsOnly: !!ex.handsOnly });
     return GH.render.sheet({ kind: 'line', clef: B.V.clef, written: B.V.clef === 'treble8vb' ? 12 : 0, width, pref: 'sharp', events: B.seq.map(n => n.rest ? { at: n.at, d: n.d, m: null } : { at: n.at, d: n.d, m: [n.midi], names: [n.name], lyric: n.syl, stacc: n.stacc }) });
   }
   /* 기타 · 베이스 TAB: 화면 너비에 맞춰 1~4마디씩 끊는다 */
@@ -192,8 +186,8 @@
       return { el: h('div', { class: 'tech-piano' }, el), highlight: ev => el.highlightMany(ev ? [].concat(...ev.notes.map(n => n.m)) : []), note: '노란 건반은 오른손, 파란 건반은 왼손. 숫자는 처음 누를 때의 손가락 번호예요.' };
     }
     if (B.kind === 'drums') {
-      const kit = GH.render.drumkit();
-      return { el: h('div', { class: 'tech-kit' }, kit.el), highlight: ev => kit.highlight(ev ? ev.hits.map(x => ({ k: x.k, st: ev.st })) : []), note: '치는 곳이 빛나고 스티킹(R 오른손 · L 왼손 · K 킥)이 떠요. 그림을 누르면 그 소리가 나요.' };
+      const kit = GH.render.drumkit(ex.handsOnly ? { only: ['snare'] } : {});
+      return { el: h('div', { class: 'tech-kit' + (ex.handsOnly ? ' pad' : '') }, kit.el), highlight: ev => kit.highlight(ev ? ev.hits.map(x => ({ k: x.k, st: ev.st })) : []), note: ex.handsOnly ? '손만 쓰는 연습이라 스네어(연습 패드)만 써요. 칠 때마다 R · L 이 떠요. 그림을 누르면 소리가 나요.' : '치는 곳이 빛나고 스티킹(R 오른손 · L 왼손 · K 킥)이 떠요. 그림을 누르면 그 소리가 나요.' };
     }
     return null;
   }
@@ -255,31 +249,40 @@
     render(el, params) {
       const I = instOf(params.inst); const qy = params.query || {};
       if (!I) { el.appendChild(GH.ui.empty('그런 세션이 없습니다.')); el.appendChild(h('p', null, h('a', { href: '#/technique' }, '세션 고르기로'))); return; }
-      el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/technique' }, '기본기 연습'), ' › ', I.ko));
-      el.appendChild(h('h1', null, I.ko + ' 기본기'));
-      el.appendChild(instChips(I.id));
-      el.appendChild(h('p', { class: 'muted' }, I.desc + '. 매일 10~20분, 느린 템포에서 정확하게 → 익숙해지면 조금씩 빠르게.'));
+      const only = params.only || null;                       /* 일부 분류만 (드럼 › 루디먼트 · 그루브 페이지) */
+      el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/' + I.id }, I.ko), ' › ', only ? params.title : '기본기 연습'));
+      el.appendChild(h('h1', null, only ? params.title : I.ko + ' 기본기'));
+      if (!only) el.appendChild(instChips(I.id));
+      el.appendChild(h('p', { class: 'muted' }, only ? params.desc : I.desc + '. 매일 10~20분, 느린 템포에서 정확하게 → 익숙해지면 조금씩 빠르게.'));
+      if (!only) {
       /* 오늘의 루틴 */
       const rid = suggestedRoutine(I.id, qy); const R = routineOf(rid);
       const rChips = chips({ options: GH.data.techRoutines.filter(r => r.inst === I.id).map(r => ({ value: r.id, label: r.ko + ' ' + r.min + '분' })), value: rid, onChange: v => GH.router.go('/technique/' + I.id, { r: v }) });
       el.appendChild(h('div', { class: 'card tech-routine' },
         h('div', { class: 'tech-routine-head' }, h('span', { class: 'eyebrow' }, 'TODAY'), h('h2', null, '오늘의 루틴')),
         rChips, h('p', { class: 'muted' }, R.desc),
-        h('ol', { class: 'tech-steps' }, R.steps.map(([id, min], i) => { const ex = byId(id); const b = bestOf(id); return h('li', null, h('a', { href: exHref(ex, { routine: rid, step: i + 1 }) }, h('span', { class: 'tech-step-title' }, ex.ko), h('span', { class: 'tech-step-meta' }, min + '분' + (b ? ' · 최고 ' + b.bpm + ' BPM' : '')))); })),
+        h('ol', { class: 'tech-steps' }, R.steps.map(([id, min], i) => { const ex = byId(id); return h('li', null, h('a', { href: exHref(ex, { routine: rid, step: i + 1 }) }, h('span', { class: 'tech-step-title' }, ex.ko), h('span', { class: 'tech-step-meta' }, min + '분'))); })),
         h('a', { class: 'btn primary', href: exHref(byId(R.steps[0][0]), { routine: rid, step: 1 }) }, GH.icon('play'), '루틴 시작')));
       el.appendChild(h('div', { class: 'callout tech-rules' }, h('b', null, '다치지 않고 늘리려면'), h('ul', null, RULES[I.id].map(x => h('li', null, x)))));
-      /* 분류별 연습 */
-      GH.data.techCats.filter(c => c.inst === I.id).forEach(c => {
+      }
+      /* 분류별 연습: 접었다 폈다 */
+      const cats = GH.data.techCats.filter(c => c.inst === I.id && (!only || only.includes(c.id)));
+      const openAll = loadJSON(OPEN_KEY); const opened = only ? cats.map(c => c.id) : openAll[I.id] || [cats[0] && cats[0].id];
+      const remember = () => { if (only) return; openAll[I.id] = Array.from(el.querySelectorAll('details.tech-cat')).filter(d => d.open).map(d => d.dataset.cat); saveJSON(OPEN_KEY, openAll); };
+      const total = GH.data.technique.filter(e => e.inst === I.id && cats.some(c => c.id === e.cat)).length;
+      el.appendChild(h('div', { class: 'tech-cats-bar' }, h('h2', null, '연습 목록 ', h('span', { class: 'muted' }, total + '가지')),
+        h('div', { class: 'row', style: 'gap:6px' }, h('button', { class: 'btn small', type: 'button', onclick: () => { el.querySelectorAll('details.tech-cat').forEach(d => { d.open = true; }); remember(); } }, '모두 펼치기'), h('button', { class: 'btn small', type: 'button', onclick: () => { el.querySelectorAll('details.tech-cat').forEach(d => { d.open = false; }); remember(); } }, '모두 접기'))));
+      cats.forEach(c => {
         const list = GH.data.technique.filter(e => e.cat === c.id).sort((a, b) => a.level - b.level);
-        el.appendChild(h('section', { class: 'section tech-cat' },
-          h('div', { class: 'tech-cat-head' }, h('span', { class: 'tech-cat-ic', 'aria-hidden': 'true' }, GH.icon(c.icon)), h('h2', null, c.ko), h('span', { class: 'tech-cat-en', 'aria-hidden': 'true' }, c.en)),
+        const lv = list.map(e => e.level); const range = GH.ui.LEVELS[Math.min(...lv)].dyn + (Math.max(...lv) !== Math.min(...lv) ? ' ~ ' + GH.ui.LEVELS[Math.max(...lv)].dyn : '');
+        const d = h('details', { class: 'tech-cat', 'data-cat': c.id, open: opened.includes(c.id) ? '' : null },
+          h('summary', { class: 'tech-cat-head' }, h('span', { class: 'tech-cat-ic', 'aria-hidden': 'true' }, GH.icon(c.icon)), h('span', { class: 'tech-cat-title' }, h('b', null, c.ko), h('small', null, list.length + '가지 · ' + range)), h('span', { class: 'tech-cat-en', 'aria-hidden': 'true' }, c.en), h('span', { class: 'tech-cat-chev', 'aria-hidden': 'true' }, GH.icon('arrow'))),
           h('p', { class: 'muted' }, c.desc),
-          h('div', { class: 'grid cols-3' }, list.map(ex => {
-            const b = bestOf(ex.id);
-            return h('a', { class: 'card link tech-card', href: exHref(ex) },
-              h('div', { class: 'row', style: 'gap:6px' }, GH.ui.level(ex.level), ex.rh && rhOptions(ex) ? h('span', { class: 'badge' }, RH[ex.rh].ko) : null, b ? h('span', { class: 'badge accent' }, '최고 ' + b.bpm + ' BPM') : null),
-              h('div', { class: 'title' }, ex.ko), h('div', { class: 'desc' }, ex.goal));
-          }))));
+          h('div', { class: 'grid cols-3' }, list.map(ex => h('a', { class: 'card link tech-card', href: exHref(ex) },
+            h('div', { class: 'row', style: 'gap:6px' }, GH.ui.level(ex.level), ex.rh && rhOptions(ex) ? h('span', { class: 'badge' }, RH[ex.rh].ko) : null),
+            h('div', { class: 'title' }, ex.ko), h('div', { class: 'desc' }, ex.goal)))));
+        d.addEventListener('toggle', remember);
+        el.appendChild(d);
       });
       /* 참고 교재 */
       el.appendChild(section('참고한 교재 · 입시 전통',
@@ -288,9 +291,13 @@
     }
   };
 
+  /* 드럼 › 루디먼트 · 그루브 (분류만 모은 페이지) */
+  GH.pages['/drums/rudiments'] = { title: '루디먼트 · 스틱 컨트롤', render(el, p) { GH.pages['/technique/:inst'].render(el, { inst: 'drums', query: p.query || {}, only: ['d-rud', 'd-ctrl'], title: '루디먼트 · 스틱 컨트롤', desc: '스네어(또는 연습 패드) 하나로 하는 손 연습. 국제 표준 루디먼트와 액센트 · 탭 컨트롤, 셈여림.' }); } };
+  GH.pages['/drums/grooves'] = { title: '그루브 · 필인', render(el, p) { GH.pages['/technique/:inst'].render(el, { inst: 'drums', query: p.query || {}, only: ['d-groove', 'd-fill'], title: '그루브 · 필인', desc: '8비트 · 16비트 · 셔플 · 스윙 · 보사노바 같은 장르 그루브와 필인 · 손발 독립 연습. 드럼 보표와 킷 그림으로 따라 쳐요.' }); } };
+
   /* ============ 연습 화면 ============ */
   const play = { metronome: true, loop: true, countIn: true, trainer: false, every: 2, step: 4, view: 'both' };
-  const tempos = {};                                          /* 연습 id → { bpm, rh, max } */
+  const tempos = loadJSON(TEMPO_KEY);                         /* 연습 id → { bpm, rh, max } (마지막으로 쓴 템포에서 다시 시작) */
   GH.pages['/technique/:inst/:id'] = {
     title: '기본기 연습',
     staff: true,
@@ -305,7 +312,7 @@
       if (!t) t = tempos[ex.id] = { bpm: scaleTempo(ex.tempo[0], tbase, o.rh), rh: o.rh, max: scaleTempo(ex.tempo[1], tbase, o.rh) };
       if (t.rh !== o.rh) { t.bpm = scaleTempo(t.bpm, t.rh, o.rh); t.max = scaleTempo(t.max, t.rh, o.rh); t.rh = o.rh; }
       const goalLo = scaleTempo(ex.tempo[0], tbase, o.rh), goalHi = scaleTempo(ex.tempo[1], tbase, o.rh);
-      const keep = {}; ['routine', 'step', 'fret', 'string', 'key', 'box', 'pos', 'perm', 'pick', 'rh', 'hands', 'oct', 'mode', 'kick', 'voice', 'steps', 'syl', 'guide'].forEach(k => { if (qy[k] != null) keep[k] = qy[k]; });
+      const keep = {}; ['routine', 'step', 'fret', 'string', 'key', 'box', 'pos', 'perm', 'pick', 'rh', 'hands', 'oct', 'mode', 'kick', 'voice', 'steps', 'syl', 'guide', 'q'].forEach(k => { if (qy[k] != null) keep[k] = qy[k]; });
       const setQ = patch => GH.router.go('/technique/' + ex.inst + '/' + ex.id, Object.assign({}, keep, patch));
 
       el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/technique' }, '기본기 연습'), ' › ', h('a', { href: '#/technique/' + I.id }, I.ko), ' › ', cat.ko));
@@ -342,6 +349,7 @@
       if (o.perm != null) setBar.appendChild(h('div', { class: 'tech-perm' }, h('span', { class: 'tech-lab' }, '손가락 순서'), chips({ options: GH.data.techPerms.map(p => ({ value: p, label: p.split('').join('-') })), value: o.perm, onChange: v => setQ({ perm: v }) })));
       if (o.kick != null) setBar.appendChild(h('div', { class: 'tech-perm' }, h('span', { class: 'tech-lab' }, '킥 모양'), chips({ options: Object.entries(GH.data.techKickVariants).map(([v, l]) => ({ value: v, label: l })), value: o.kick, onChange: v => setQ({ kick: v }) })));
       if (o.key != null) lab('키', o.keys ? select({ options: o.keys.map(k => ({ value: k, label: N.pretty(k) })), value: o.key, onChange: v => setQ({ key: v }) }) : A.rootSelect(o.key, v => setQ({ key: v })));
+      if (o.q != null) lab('코드', select({ options: [['maj', '메이저'], ['min', '마이너'], ['maj7', 'maj7'], ['m7', 'm7'], ['7', '7 (도미넌트)'], ['m7b5', 'm7b5 (하프 디미니시드)']].map(([v, l]) => ({ value: v, label: l })), value: o.q, onChange: v => setQ({ q: v }) }));
       if (o.mode != null) lab('장조 · 단조', select({ options: [{ value: 'major', label: '메이저 (장조)' }, { value: 'minor', label: '마이너 (단조)' }], value: o.mode, onChange: v => setQ({ mode: v }) }));
       if (o.box != null) lab('박스', select({ options: [1, 2, 3, 4, 5].map(b => ({ value: b, label: b + '번 박스' })), value: o.box, onChange: v => setQ({ box: v }) }));
       if (o.pos != null) lab('포지션', select({ options: [1, 2, 3, 4, 5, 6, 7].map(b => ({ value: b, label: b + '번 포지션' })), value: o.pos, onChange: v => setQ({ pos: v }) }));
@@ -367,7 +375,8 @@
       const tabR = B.kind === 'fretted' ? tabRows(B.notes, o.rh, width, B.NS) : null;
       const view = viewFor(ex, B);
       const status = h('div', { class: 'tech-status', role: 'status', 'aria-live': 'polite' }, '▶ 시작을 누르면 “하나 둘 셋 넷” 뒤에 시작해요.');
-      const tempoIn = GH.ui.rangeNumber({ value: t.bpm, min: 30, max: 240, suffix: 'BPM', label: '템포', onInput: v => { t.bpm = v; } });
+      const keepTempo = () => saveJSON(TEMPO_KEY, tempos);
+      const tempoIn = GH.ui.rangeNumber({ value: t.bpm, min: 30, max: 240, suffix: 'BPM', label: '템포', onInput: v => { t.bpm = v; keepTempo(); } });
       const gap = Math.round((Math.ceil(beats / 4 - 1e-6) * 4 - beats) * 1000) / 1000;
       const keyTxt = tr => N.pretty(N.noteName(N.mod(B.V.root + tr, 12), 'sharp')) + ' 메이저' + (tr ? ' (반음 +' + tr + ')' : ' (처음 키)');
       const start = () => {
@@ -382,7 +391,7 @@
             if (tabR) tabR.highlight(i);
             if (view) view.highlight(i < 0 ? null : ev);
           },
-          onStop: () => { status.classList.remove('count'); status.textContent = '멈췄어요. 깨끗하게 쳤다면 아래에 기록을 남겨 보세요.'; }
+          onStop: () => { status.classList.remove('count'); status.textContent = '멈췄어요. 편하게 됐다면 템포를 조금 올려 보세요.'; keepTempo(); }
         });
       };
       const chk = (label, key, extra) => h('label', { class: 'tech-chk' }, h('input', { type: 'checkbox', checked: play[key], onchange: e => { play[key] = e.target.checked; if (extra) extra(); } }), label);
@@ -403,23 +412,8 @@
         h('div', { class: 'toolbar tech-play-opts' }, chk('메트로놈', 'metronome'), chk('반복', 'loop'), chk('시작 전 4박 세기', 'countIn'), chk('스피드 트레이너', 'trainer', () => { trainerBox.hidden = !play.trainer; }),
           tabR ? h('label', null, '보기', select({ options: [{ value: 'both', label: '오선 + TAB' }, { value: 'staff', label: '오선만' }, { value: 'tab', label: 'TAB만' }], value: play.view, onChange: v => { play.view = v; paintNotation(); } })) : null),
         trainerBox, status, noteBox,
-        h('p', { class: 'muted tech-note' }, B.kind === 'fretted' ? '오선의 음은 실제 소리보다 한 옥타브 높게 적는 ' + (ex.inst === 'bass' ? '베이스' : '기타') + ' 표기 관례를 따라요. TAB 숫자는 누를 프렛, 위의 작은 글자는 손가락 · 피킹.' + (ex.inst === 'bass' ? ' x 는 데드 노트.' : '') : B.kind === 'drums' ? '드럼 보표: 맨 위 x 크래시 · 그 아래 x 하이햇 · 라이드, 가운데 칸 스네어, 아래 킥, 맨 아래 x 는 하이햇 페달.' : B.kind === 'keys' ? '위는 오른손(높은음자리표), 아래는 왼손(낮은음자리표). 음표 위 숫자는 손가락 번호.' : '악보는 처음 키로 적었어요. 반복할 때마다 피아노 화음이 새 키를 알려 줘요.')));
-      if (view) el.appendChild(section(B.kind === 'keys' ? '건반' : B.kind === 'drums' ? '드럼 킷' : '지판', view.el, h('p', { class: 'muted' }, view.note)));
-
-      /* 기록 */
-      const recBox = h('div', { class: 'tech-record-list' });
-      const paintRec = () => {
-        GH.ui.clear(recBox);
-        const r = records()[ex.id]; const b = bestOf(ex.id);
-        if (!b) { recBox.appendChild(h('p', { class: 'muted' }, '아직 기록이 없어요. 틀리지 않고 한 바퀴를 마쳤다면 기록해 보세요.')); return; }
-        recBox.appendChild(h('p', null, h('b', null, '최고 ' + recLabel(b)), h('span', { class: 'muted' }, ' · ' + dateKo(b.at))));
-        recBox.appendChild(h('div', { class: 'row', style: 'gap:6px' }, r.log.slice(-6).reverse().map(e => h('span', { class: 'badge' }, dateKo(e.at) + ' ' + e.bpm + (e.rh !== ex.rh && RH[e.rh] ? ' (' + RH[e.rh].ko + ')' : '')))));
-      };
-      const saved = h('span', { class: 'bug-copied', role: 'status', 'aria-live': 'polite' });
-      el.appendChild(section('내 기록', h('div', { class: 'tech-record' },
-        h('div', { class: 'row', style: 'gap:8px' }, h('button', { class: 'btn small', type: 'button', onclick: () => { addRecord(ex.id, t.bpm, o.rh); paintRec(); saved.textContent = t.bpm + ' BPM 기록했어요.'; } }, GH.icon('check'), '지금 템포로 기록 (깨끗하게 쳤을 때)'), saved),
-        recBox, h('p', { class: 'muted', style: 'font-size:.8rem' }, '기록은 이 브라우저에만 저장돼요.'))));
-      paintRec();
+        h('p', { class: 'muted tech-note' }, B.kind === 'fretted' ? '오선의 음은 실제 소리보다 한 옥타브 높게 적는 ' + (ex.inst === 'bass' ? '베이스' : '기타') + ' 표기 관례를 따라요. TAB 숫자는 누를 프렛, 위의 작은 글자는 손가락 · 피킹.' + (ex.inst === 'bass' ? ' x 는 데드 노트.' : '') : B.kind === 'drums' ? (ex.handsOnly ? '스네어 한 가지 소리만 적었어요. 음표 아래 글자가 스티킹(R 오른손 · L 왼손), > 는 액센트예요.' : '드럼 보표: 맨 위 x 크래시 · 그 아래 x 하이햇 · 라이드, 가운데 칸 스네어, 아래 킥, 맨 아래 x 는 하이햇 페달.') : B.kind === 'keys' ? '위는 오른손(높은음자리표), 아래는 왼손(낮은음자리표). 음표 위 숫자는 손가락 번호.' : '악보는 처음 키로 적었어요. 반복할 때마다 피아노 화음이 새 키를 알려 줘요.')));
+      if (view) el.appendChild(section(B.kind === 'keys' ? '건반' : B.kind === 'drums' ? (ex.handsOnly ? '스네어' : '드럼 킷') : '지판', view.el, h('p', { class: 'muted' }, view.note)));
 
       el.appendChild(section('도움말', h('ul', { class: 'tech-tips' }, ex.tips.map(x => h('li', null, x))), ex.src ? h('p', { class: 'tech-src' }, h('b', null, '참고: '), ex.src) : null));
       const same = GH.data.technique.filter(e => e.cat === ex.cat && e.id !== ex.id);
@@ -427,5 +421,5 @@
       el.appendChild(section('다음에 해 볼 것', h('div', { class: 'toc' }, same.map(e => h('a', { href: exHref(e) }, e.ko)).concat(extra, [h('a', { href: '#/technique/' + I.id }, I.ko + ' 기본기 목록'), h('a', { href: '#/rhythm' }, '메트로놈 · 리듬 연습')]))));
     }
   };
-  GH.technique = { build, options, bestOf, rhOptions, RH };
+  GH.technique = { build, options, rhOptions, RH };
 })();

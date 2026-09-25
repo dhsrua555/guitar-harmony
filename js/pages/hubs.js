@@ -57,7 +57,7 @@
 
   function hub(id, extra) {
     return {
-      title: { guitar: '기타', theory: '화성학', practice: '연습' }[id],
+      title: { guitar: '기타', bass: '베이스', keys: '키보드', drums: '드럼', vocal: '보컬', theory: '화성학', practice: '연습' }[id],
       render(el) {
         const A = GH.app; const sec = A.SECTIONS.find(x => x.id === id);
         el.appendChild(hubHead(sec, sec.label, sec.desc));
@@ -78,6 +78,17 @@
     el.appendChild(section('바로 가기', h('div', { class: 'toc' },
       h('a', { href: A.voicingsHref(key, 'maj', 'basic') }, GH.notes.pretty(key) + ' 기본 코드 폼'), h('a', { href: A.scaleHref('minor_pent', key) }, GH.notes.pretty(key) + ' 마이너 펜타토닉'), h('a', { href: A.scaleHref('ionian', key) }, GH.notes.pretty(key) + ' 메이저 스케일'), h('a', { href: '#/guitar/licks?genre=blues' }, '블루스 릭'), h('a', { href: A.voicingsHref(key, '7', 'advanced') + '&types=drop2' }, '도미넌트 7th 드롭 2'))));
   });
+  /* 세션 허브: 오늘의 루틴 바로 가기 + 자주 쓰는 연습 */
+  const sessionHub = (id, links) => hub(id, el => {
+    const R = (GH.data.techRoutines || []).filter(r => r.inst === id);
+    const exs = (GH.data.technique || []).filter(e => e.inst === id);
+    el.appendChild(section('오늘의 루틴', h('div', { class: 'toc' }, R.map(r => h('a', { href: GH.router.href('/technique/' + id, { r: r.id }) }, r.ko + ' ' + r.min + '분')))));
+    el.appendChild(section('처음이라면 이것부터', h('div', { class: 'toc' }, exs.filter(e => e.level <= 2).slice(0, 6).map(e => h('a', { href: '#/technique/' + id + '/' + e.id }, e.ko)).concat((links || []).map(([href, t]) => h('a', { href }, t))))));
+  });
+  GH.pages['/bass'] = sessionHub('bass', [['#/bass/scales?scale=minor_pent', '마이너 펜타토닉 박스'], ['#/backing', '백킹 트랙 (베이스 끄고 치기)']]);
+  GH.pages['/keys'] = sessionHub('keys', [['#/keys/voicings/advanced?q=m7', '루트리스 보이싱'], ['#/backing', '백킹 트랙 (컴핑 끄고 치기)']]);
+  GH.pages['/drums'] = sessionHub('drums', [['#/rhythm', '메트로놈'], ['#/backing', '백킹 트랙 (드럼 끄고 치기)']]);
+  GH.pages['/vocal'] = sessionHub('vocal', [['#/ear?tab=interval', '인터벌 청음 퀴즈'], ['#/ear?tab=degree', '계이름 퀴즈']]);
   GH.pages['/theory'] = hub('theory', el => {
     const A = GH.app; const key = A.key(); const N = GH.notes;
     const dia = GH.chords.diatonic(key, 'ionian', true);

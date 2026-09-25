@@ -5,6 +5,7 @@
   const { h, section, table, kv, callout } = GH.ui; const N = GH.notes;
   GH.pages['/chord/:root/:q'] = {
     title: '코드 상세',
+    staff: true,
     render(el, params) {
       const A = GH.app;
       const root = N.normalize(params.root); const qId = params.q;
@@ -21,6 +22,10 @@
       /* 시각 */
       const on = {}; chord.notes.forEach(n => { on[n.pc] = { label: n.iv, cls: n.cls }; });
       el.appendChild(section('구성음', h('div', { class: 'split' }, h('div', null, GH.render.piano({ from: 48, to: 76, on })), h('div', null, GH.render.fretboard({ pcMap: on, pref, to: 22 }).el)), h('div', { style: 'margin-top:6px' }, A.ivLegend())));
+      /* 악기별 (키보드 · 베이스 · 보컬) */
+      /* 고른 세션(베이스 · 키보드 · 보컬)이 있으면 그 세션으로 보는 조각도 */
+      const sess = GH.guide && GH.guide.sessions ? GH.guide.sessions() : [];
+      if (GH.instView) sess.forEach(id => { const sec = GH.instView.chordSection(chord, pref, id); if (sec) el.appendChild(sec); });
       /* 보이싱 */
       const vs = GH.voicings.forChord(root, qId, ['open', 'caged', 'shell', 'jazz', 'drop2']);
       const pick = []; const seenType = {};
@@ -59,6 +64,7 @@
       const A = GH.app; const pref = A.pref(); const tuning = GH.state.tuningMidi(); const capo = Number(GH.state.get().capo) || 0;
       if (capo) finder.frets = finder.frets.map(f => f != null && f < capo ? null : f);
       el.appendChild(h('h1', null, '코드 파인더'));
+      if (GH.instView) el.appendChild(GH.instView.switcher('finder', 'guitar'));
       el.appendChild(h('p', { class: 'muted' }, '지판을 눌러 잡은 모양의 코드 이름을 찾습니다. 같은 줄을 다시 누르면 지웁니다. ' + (capo ? '현재 카포 ' + capo + '프렛 기준이며, 개방현은 카포 프렛을 누르세요.' : '개방현은 0프렛 자리(너트 왼쪽)를 누르세요.')));
       const notes = finder.frets.map((f, i) => f == null ? null : { s: 6 - i, f, label: N.noteName((tuning[i] + f) % 12, pref), cls: 'iv-1' }).filter(Boolean);
       const fb = GH.render.fretboard({ notes, pref, to: 22, labelMode: 'name', onClick: (s, f) => { const i = 6 - s; finder.frets[i] = finder.frets[i] === f ? null : f; GH.router.rerender(); } });

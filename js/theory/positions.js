@@ -18,9 +18,9 @@
     const pcs = new Set(GH.scales.pcs(rootPc, scaleId));
     const lm = GH.scales.labelMap(rootPc, scaleId);
     const notes = [];
-    for (let i = 0; i < 6; i++) for (let f = Math.max(0, lo); f <= hi; f++) {
+    for (let i = 0; i < tun.length; i++) for (let f = Math.max(0, lo); f <= hi; f++) {
       const m = tun[i] + f; const pc = mod(m, 12);
-      if (pcs.has(pc)) notes.push({ s: 6 - i, f, midi: m, pc, label: lm[pc] });
+      if (pcs.has(pc)) notes.push({ s: tun.length - i, f, midi: m, pc, label: lm[pc] });
     }
     return notes;
   }
@@ -30,12 +30,13 @@
     const pcs = new Set(GH.scales.pcs(rootPc, scaleId));
     const lm = GH.scales.labelMap(rootPc, scaleId);
     const seq = [];
-    for (let m = tun[0] + f0; m < tun[5] + MAXF + 12 && seq.length < 6 * n; m++) if (pcs.has(mod(m, 12))) seq.push(m);
+    const NS = tun.length;                       /* 줄 수 (기타 6 · 베이스 4) */
+    for (let m = tun[0] + f0; m < tun[NS - 1] + MAXF + 12 && seq.length < NS * n; m++) if (pcs.has(mod(m, 12))) seq.push(m);
     const notes = [];
-    for (let i = 0; i < 6; i++) for (let k = 0; k < n; k++) {
+    for (let i = 0; i < NS; i++) for (let k = 0; k < n; k++) {
       const m = seq[i * n + k]; if (m == null) return null;
       const f = m - tun[i]; if (f < 0 || f > MAXF + 3) return null;
-      notes.push({ s: 6 - i, f, midi: m, pc: mod(m, 12), label: lm[mod(m, 12)] });
+      notes.push({ s: NS - i, f, midi: m, pc: mod(m, 12), label: lm[mod(m, 12)] });
     }
     return notes;
   }

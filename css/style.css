@@ -909,6 +909,11 @@ details.page-guide>summary:hover .pg-toggle { color:var(--fg); transform:rotate(
   .hang-tab { padding-inline:13px; }
   .search { width:clamp(170px,20vw,260px); }
 }
+/* 메뉴 여덟 개가 한 줄에 들어가도록: 글자만, 좁은 간격 */
+.mainnav a { padding-inline:9px; gap:5px; }
+.mainnav a::after { right:9px; left:9px; }
+.mainnav a .ic { display:none; }
+.search { width:clamp(170px,17vw,240px); }
 @media (max-width:1040px) {
   .topbar-inner { gap:12px; }
   .topbar-leading { gap:10px; }
@@ -917,8 +922,8 @@ details.page-guide>summary:hover .pg-toggle { color:var(--fg); transform:rotate(
   .mainnav a .ic { display:none; }
   .hero-grid { grid-template-columns:minmax(0,1fr) minmax(0,.8fr); }
 }
-/* 모바일 머리: [메뉴] [로고] [검색] + 전체 화면 메뉴 */
-@media (max-width:900px) {
+/* 좁은 화면 머리: [메뉴] [로고] [검색] + 전체 화면 메뉴 (메뉴 항목이 여덟 개라 1240px 아래부터) */
+@media (max-width:1240px) {
   :root { --header-h:60px; }
   .topbar-inner { justify-content:space-between; gap:8px; padding:0 12px; }
   .menu-btn { display:inline-flex; }
@@ -1185,7 +1190,7 @@ details.page-guide>summary:hover .pg-toggle { color:var(--fg); transform:rotate(
 .coach-fab.nudge { animation:gh-coach-bob 1s ease-in-out 4; }
 @keyframes gh-coach-bob { 50% { transform:translateY(-6px); } }
 .coach-nudge { position:fixed; right:16px; bottom:calc(72px + env(safe-area-inset-bottom)); z-index:77; max-width:min(280px,calc(100vw - 32px)); padding:10px 14px; border:1.5px solid var(--ink); border-radius:14px 14px 4px 14px; background:var(--bg-elev); box-shadow:var(--shadow); font-size:.86rem; line-height:1.5; cursor:pointer; animation:gh-pop .2s ease both; }
-body.panel-open .coach-fab,body.menu-open .coach-fab,body.panel-open .coach-nudge { display:none; }
+body.panel-open .coach-fab,body.menu-open .coach-fab,body.panel-open .coach-nudge,body.menu-open .coach-nudge { display:none; }
 .footer { padding-bottom:84px; }
 /* 홈 카드: 지금 할 일 */
 .guide-now-tag { justify-self:start; padding:2px 10px; border-radius:var(--pill); background:var(--ink); color:var(--ball); font-size:.72rem; font-weight:700; }
@@ -1404,3 +1409,34 @@ svg.mgrid .mg-play { stroke:#D8452C; stroke-width:2.2; pointer-events:none; }
   .mg-prog-meta .btn { margin-left:0; }
   .mg-fit { margin-left:0; }
 }
+.tech-kit.pad { max-width:260px; }
+/* 기본기 목록: 분류 접었다 폈다 */
+.tech-cats-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin:26px 0 6px; }
+.tech-cats-bar h2 { margin:0; }
+.tech-cats-bar h2 .muted { font-size:.9rem; font-weight:500; }
+details.tech-cat { margin:10px 0; border:1px solid var(--line); border-radius:var(--radius); background:var(--bg-elev); overflow:hidden; }
+details.tech-cat[open] { border-color:var(--ink); }
+details.tech-cat > summary { list-style:none; cursor:pointer; padding:12px 16px; }
+details.tech-cat > summary::-webkit-details-marker { display:none; }
+details.tech-cat > summary:hover { background:var(--bg-soft); }
+details.tech-cat > p { margin:0 16px 10px; }
+details.tech-cat > .grid { margin:0 16px 16px; }
+.tech-cat-title { display:grid; gap:1px; min-width:0; }
+.tech-cat-title b { font-size:1.08rem; }
+.tech-cat-title small { color:var(--fg-muted); font-size:.78rem; }
+.tech-cat-chev { flex:none; display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--bg-soft); transition:transform .2s ease; }
+.tech-cat-chev .ic { width:14px; height:14px; }
+details.tech-cat[open] .tech-cat-chev { transform:rotate(90deg); }
+.tech-cat-en { margin-left:auto; }
+/* 악기 전환 */
+.inst-switch { display:grid; gap:6px; margin:4px 0 14px; }
+.inst-switch .chips { gap:6px; }
+.inst-switch .chip { display:inline-flex; align-items:center; gap:6px; }
+.inst-switch .chip .ic { width:15px; height:15px; }
+.inst-switch .chip.active { border-color:var(--ink); background:var(--ink); color:var(--bg); }
+.inst-note { margin:0; font-size:.84rem; }
+.inst-card { display:grid; gap:8px; align-content:start; }
+.inst-card p { margin:0; font-size:.86rem; }
+.inst-piano svg.piano { max-width:420px; }
+.inst-piano.wide svg.piano { max-width:760px; }
+.inst-hands { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.86rem; }

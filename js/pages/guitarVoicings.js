@@ -20,6 +20,7 @@
   function renderLanding(el) {
     const A = GH.app; const root = A.key();
     el.appendChild(h('h1', null, '코드 보이싱'));
+    if (GH.instView) el.appendChild(GH.instView.switcher('voicings', 'guitar'));
     el.appendChild(h('p', { class: 'muted' }, '연주 목적에 맞게 기본 폼과 확장 보이싱을 나눌었습니다. 먼저 오픈 포지션과 CAGED를 익힌 뒤, 셸·드롭·텐션 보이싱으로 넘어가면 폼을 혼동하지 않고 찾을 수 있습니다.'));
     el.appendChild(h('div', { class: 'grid cols-2' },
       h('a', { class: 'card link', href: A.voicingsHref(root, 'maj', 'basic') },
@@ -47,6 +48,7 @@
     const chord = GH.chords.buildChord(root, qId);
     el.appendChild(breadcrumb(level));
     el.appendChild(h('h1', null, level === 'basic' ? '기본 코드 폼' : '재즈·확장 보이싱'));
+    if (GH.instView) el.appendChild(GH.instView.switcher('voicings', 'guitar'));
     if (level === 'basic' && GH.course) { const hint = GH.course.hint('openchords'); if (hint) el.appendChild(hint); }
     el.appendChild(h('p', { class: 'muted' }, level === 'basic'
       ? '오픈 포지션, CAGED 이동형 폼, 파워 코드를 코드 퀄리티와 루트에 맞춰 찾습니다.'
@@ -134,6 +136,6 @@
       renderLanding(el);
     }
   };
-  GH.pages['/guitar/voicings/basic'] = { title: '기본 코드 폼', render(el, params) { renderExplorer(el, params, 'basic'); } };
-  GH.pages['/guitar/voicings/advanced'] = { title: '재즈·확장 보이싱', render(el, params) { renderExplorer(el, params, 'advanced'); } };
+  GH.pages['/guitar/voicings/basic'] = { title: '기본 코드 폼', staff: true, render(el, params) { renderExplorer(el, params, 'basic'); } };
+  GH.pages['/guitar/voicings/advanced'] = { title: '재즈·확장 보이싱', staff: true, render(el, params) { renderExplorer(el, params, 'advanced'); } };
 })();

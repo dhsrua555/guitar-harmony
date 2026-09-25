@@ -24,7 +24,7 @@
       { sel: '.tech-notation', say: '악보예요. 연주하는 동안 지금 칠 음이 색으로 표시돼요.' },
       { sel: 'button', has: '▶ 시작', say: '▶ 시작을 누르면 "하나 둘 셋 넷"을 센 뒤 소리가 나요. 악기로 같이 따라 해 보세요.' },
       { sel: '.tech-tempo', say: '틀리지 않고 할 수 있는 템포로 맞춰요. 익숙해지면 5 BPM씩 올리거나 스피드 트레이너를 켜요.' },
-      { sel: '.tech-record', say: '깨끗하게 했다면 기록을 남겨요. 다음에 얼마나 늘었는지 볼 수 있어요.' }
+      { sel: '.tech-play-opts', say: '익숙해지면 스피드 트레이너를 켜 보세요. 몇 번 반복할 때마다 템포가 조금씩 올라가요. 마지막으로 쓴 템포는 다음에도 그대로 이어져요.' }
     ];
   const STEPS = {
     '/': [
@@ -81,7 +81,7 @@
     ],
     '/technique/': [
       { sel: '.tech-routine', say: '오늘 할 연습 순서예요. 수준에 맞는 루틴을 고르고 "루틴 시작"을 누르면 하나씩 안내하고 시간도 재 줘요.' },
-      { sel: '.tech-cat .tech-card', say: '연습을 하나만 골라도 돼요. 처음이라면 p(입문) 표시가 있는 것부터.' }
+      { sel: '.tech-cat summary', say: '분류를 눌러 펼치거나 접어요. 연습을 하나만 골라도 돼요. 처음이라면 p(입문) 표시가 있는 것부터.' }
     ],
     '/technique/guitar/': TECH_DETAIL,
     '/technique/bass/': TECH_DETAIL,

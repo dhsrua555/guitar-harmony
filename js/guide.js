@@ -28,7 +28,7 @@
   const SESSIONS = [
     { id: 'guitar', ko: '기타', icon: 'guitar', desc: '코드 폼 · 스케일 · 릭 · 기본기' },
     { id: 'bass', ko: '베이스', icon: 'bass', desc: '투핑거 · 코드톤 · 워킹 · 그루브' },
-    { id: 'keys', ko: '키보드', icon: 'piano', desc: '하논 · 스케일 · 카덴스 · 보이싱' },
+    { id: 'keys', ko: '키보드', icon: 'piano', desc: '하논 · 스케일 · 케이던스 · 보이싱' },
     { id: 'drums', ko: '드럼', icon: 'drum', desc: '루디먼트 · 그루브 · 필인' },
     { id: 'vocal', ko: '보컬', icon: 'mic', desc: '호흡 · 음정 · 시창 · 애드리브' }
   ];
@@ -78,7 +78,7 @@
     { id: 'bass-walk', title: '베이스: 워킹 베이스 ii–V–I', route: '/technique/bass/b-walk', goals: ['guitar', 'solo', 'theory'], lv: [3, 4], inst: ['bass'], desc: '코드톤 세 개와 반음 어프로치로 4분음표 라인을 만듭니다.' },
     { id: 'keys-five', title: '키보드 기본기: 다섯 손가락과 하논', route: '/technique/keys/k-five', goals: ['guitar'], lv: [0, 1], inst: ['keys'], desc: '다섯 손가락 자리에서 손 모양을 잡고, 하논 1번 음형으로 이어 갑니다.' },
     { id: 'keys-scale', title: '키보드: 엄지 넘기기 스케일 2옥타브', route: '/technique/keys/k-scale', goals: ['guitar', 'theory'], lv: [1, 2], inst: ['keys'], desc: 'C · G · D · F 메이저를 표준 운지로 한 손씩, 그다음 양손.' },
-    { id: 'keys-cadence', title: '키보드: I–IV–V–I 카덴스', route: '/technique/keys/k-cadence', goals: ['compose', 'theory', 'guitar'], lv: [1, 3], inst: ['keys'], desc: '가까운 전위로 코드를 잇는 반주의 기본. 12키로 옮겨 칩니다.' },
+    { id: 'keys-cadence', title: '키보드: I–IV–V–I 케이던스', route: '/technique/keys/k-cadence', goals: ['compose', 'theory', 'guitar'], lv: [1, 3], inst: ['keys'], desc: '가까운 전위로 코드를 잇는 반주의 기본. 12키로 옮겨 칩니다.' },
     { id: 'keys-251', title: '키보드: 재즈 ii–V–I 보이싱', route: '/technique/keys/k-251', goals: ['theory', 'compose'], lv: [3, 4], inst: ['keys'], desc: '3음 · 7음 가이드톤이 반음씩 움직이는 보이스 리딩을 익힙니다.' },
     { id: 'drum-single', title: '드럼 기본기: 싱글 · 더블 스트로크', route: '/technique/drums/d-single', goals: ['rhythm', 'guitar'], lv: [0, 1], inst: ['drums'], desc: '메트로놈에 맞춰 R L 을 고르게, 이어서 R R L L 더블 스트로크.' },
     { id: 'drum-8beat', title: '드럼: 8비트 기본 그루브', route: '/technique/drums/d-8beat', goals: ['rhythm'], lv: [0, 2], inst: ['drums'], desc: '하이햇 8분 · 스네어 2 · 4박 · 킥 1 · 3박을 합칩니다.' },

@@ -329,7 +329,7 @@
       const total = B.seq.reduce((a, s) => a + s.d, 0);
       let good = B.seq.length > 0 && total > 0 && B.seq.every((s, i) => i === 0 || s.at > B.seq[i - 1].at - 1e-9);
       if (B.kind === 'fretted') good = good && B.notes.every(n => n.s >= 1 && n.s <= B.NS && n.f >= 0 && n.f <= 17 && (typeof n.fg === 'string' || (n.fg >= 0 && n.fg <= 4)) && (n.t ? !n.pk : !!n.pk) && n.midi >= (ex.inst === 'bass' ? 28 : 40) && n.midi <= (ex.inst === 'bass' ? 70 : 88));
-      if (B.kind === 'keys') good = good && B.rh.concat(B.lh).every(n => n.m.length && n.fg.length === n.m.length && n.m.every(m => m >= 36 && m <= 96) && n.fg.every(f => f >= 1 && f <= 5));
+      if (B.kind === 'keys') good = good && B.rh.concat(B.lh).every(n => (n.rest ? !n.m.length : n.m.length) && n.fg.length === n.m.length && n.m.every(m => m >= 21 && m <= 108) && n.fg.every(f => f >= 1 && f <= 5)) && (B.rh.length === 0 || B.lh.length === 0 || Math.abs(B.rh.reduce((a, n) => a + n.d, 0) - B.lh.reduce((a, n) => a + n.d, 0)) < 1e-6);
       if (B.kind === 'drums') good = good && B.seq.every(s => s.hits.every(x => KIT.has(x.k))) && Math.abs(total / 4 - Math.round(total / 4)) < 1e-6;
       if (B.kind === 'vocal') good = good && B.seq.every(s => s.rest || (s.midi >= 40 && s.midi <= 84 && s.syl)) && Math.abs(total / 4 - Math.round(total / 4)) < 1e-6;
       if (!good) techBad.push(ex.id + (rh ? '/' + rh : ''));

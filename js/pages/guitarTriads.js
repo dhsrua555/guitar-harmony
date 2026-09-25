@@ -6,6 +6,7 @@
   const state = { pos: 0, labelMode: 'iv' };
   GH.pages['/guitar/triads'] = {
     title: '트라이어드 · 아르페지오',
+    staff: true,
     render(el, params) {
       const A = GH.app; const qy = params.query || {}; const st = GH.state.get();
       const root = N.parseNote(qy.root) ? N.normalize(qy.root) : A.key();
@@ -15,6 +16,7 @@
       const go = patch => GH.router.go('/guitar/triads', Object.assign({ root, q, arpQ }, patch));
       const pref = A.pref(root);
       el.appendChild(h('h1', null, '트라이어드와 아르페지오'));
+      if (GH.instView) el.appendChild(GH.instView.switcher('triads', 'guitar'));
       el.appendChild(h('p', { class: 'muted' }, '현 세트별 트라이어드 인버전은 네오소울, 컴핑, 코드 멜로디의 필수 어휘입니다. 아르페지오는 코드톤을 한 음씩 연주하는 것으로, 릭과 코드를 잇는 다리가 됩니다.'));
       if (!GH.state.isStandardTuning()) el.appendChild(GH.ui.notice('트라이어드 코드 폼은 스탠다드 튜닝 기준입니다. 아래 아르페지오 지판과 포지션은 현재 튜닝(' + GH.state.TUNINGS[st.tuning].label + ')에 맞춰 표시합니다.'));
       const tb = h('div', { class: 'toolbar' },

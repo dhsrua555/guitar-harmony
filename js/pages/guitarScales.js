@@ -20,25 +20,27 @@
     return [];
   }
 
-  GH.pages['/guitar/scales'] = {
-    title: '스케일 포지션',
-    render(el, params) {
+  /* 기타 · 베이스 스케일 포지션 (베이스는 /bass/scales, 4현 E A D G) */
+  GH.scalePositions = function (el, params, o) {
       const A = GH.app; const qy = params.query || {}; const st = GH.state.get();
+      const bass = !!(o && o.bass); const here = bass ? '/bass/scales' : '/guitar/scales';
       const root = qy.root || A.key(); const pref = A.pref(root); const rootPc = N.pcOf(root);
       if (qy.scale && GH.scales.get(qy.scale)) state.scale = qy.scale;
       const sc = GH.scales.get(state.scale);
-      const tuning = GH.state.tuningMidi();
+      const tuning = bass ? GH.data.techBassTuning : GH.state.tuningMidi();
       const cagedAvailable = GH.positions.supportsCaged(tuning);
       const systems = GH.positions.systemsFor(sc.id, tuning);
       if (!systems.some(s => s.id === state.system)) state.system = systems[0].id;
       const positions = GH.positions.positions(rootPc, sc.id, state.system, tuning);
       if (state.pos > positions.length) state.pos = 0;
+      if (bass) el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/bass' }, '베이스'), ' › 스케일 포지션'));
       el.appendChild(h('h1', null, '스케일 포지션'));
+      if (GH.instView) el.appendChild(GH.instView.switcher('scales', bass ? 'bass' : 'guitar', bass ? '4현 베이스 지판(E A D G). 7음 스케일은 줄당 3음(3NPS), 펜타토닉은 줄당 2음 박스예요.' : null));
       if (GH.course) { const hint = GH.course.hint('pentatonic'); if (hint) el.appendChild(hint); }
       el.appendChild(h('p', { class: 'muted' }, '키와 스케일을 고르면 지판 전체와 포지션별 박스가 나옵니다. 포지션 시스템은 스케일과 현재 튜닝에 맞게 CAGED, 3NPS, 펜타토닉 박스 중에서 고를 수 있습니다.'));
       const tb = h('div', { class: 'toolbar' },
-        h('label', null, '루트', A.rootSelect(root, v => GH.router.go('/guitar/scales', { root: v, scale: state.scale }))),
-        h('label', null, '스케일', A.scaleSelect(state.scale, v => { state.scale = v; state.pos = 0; GH.router.go('/guitar/scales', { root, scale: v }); })),
+        h('label', null, '루트', A.rootSelect(root, v => GH.router.go(here, { root: v, scale: state.scale }))),
+        h('label', null, '스케일', A.scaleSelect(state.scale, v => { state.scale = v; state.pos = 0; GH.router.go(here, { root, scale: v }); })),
         h('label', null, '시스템', select({ options: systems.map(s => ({ value: s.id, label: s.label })), value: state.system, onChange: v => { state.system = v; state.pos = 0; GH.router.rerender(); } })),
         h('label', null, '라벨', select({ options: [{ value: 'degree', label: '도수' }, { value: 'name', label: '음이름' }], value: st.labelMode, onChange: v => GH.state.set({ labelMode: v }) })),
         h('label', null, h('input', { type: 'checkbox', checked: state.showChordTones, onchange: e => { state.showChordTones = e.target.checked; GH.router.rerender(); } }), '코드톤 강조'));
@@ -62,24 +64,24 @@
       const pcMap = {};
       Object.keys(lm).forEach(pc => { const iv = lm[pc]; pcMap[pc] = { label: iv, cls: chordPcs ? (chordPcs.has(Number(pc)) ? N.ivClass(iv) : 'iv-x') : N.ivClass(iv) }; });
       const inPos = P ? new Set(P.notes.map(n => n.s + ':' + n.f)) : null;
-      const fb = GH.render.fretboard({ pcMap, pref, to: 22, capo: st.capo, window: P ? [P.lo, P.hi] : null, filter: P ? (s, f) => inPos.has(s + ':' + f) ? null : 'dim' : null });
+      const fb = GH.render.fretboard({ pcMap, pref, to: 22, capo: bass ? 0 : st.capo, tuning, sound: bass ? m => GH.audio.bass(m, GH.audio.now(), 1.2, {}) : null, window: P ? [P.lo, P.hi] : null, filter: P ? (s, f) => inPos.has(s + ':' + f) ? null : 'dim' : null });
       el.appendChild(fb.el);
       el.appendChild(h('div', { style: 'margin-top:6px' }, A.ivLegend()));
       /* 포지션 박스 */
       if (P) {
         const lo = Math.max(0, P.lo - 1), hi = P.hi + 1;
-        const box = GH.render.fretboard({ notes: P.notes.map(n => ({ s: n.s, f: n.f, label: n.label, cls: chordPcs ? (chordPcs.has(n.pc) ? N.ivClass(n.label) : 'iv-x') : N.ivClass(n.label) })), pref, from: lo, to: hi, showStringNames: true });
+        const box = GH.render.fretboard({ notes: P.notes.map(n => ({ s: n.s, f: n.f, label: n.label, cls: chordPcs ? (chordPcs.has(n.pc) ? N.ivClass(n.label) : 'iv-x') : N.ivClass(n.label) })), pref, from: lo, to: hi, showStringNames: true, tuning, capo: bass ? 0 : undefined });
         el.appendChild(section(P.name + ' 박스', h('div', { style: 'max-width:520px' }, box.el),
           h('p', { class: 'muted' }, '루트(빨강)의 위치를 먼저 외우고, 옆 포지션과 겹치는 음으로 이동합니다. ' + (state.system === 'caged' ? 'CAGED 포지션은 같은 이름의 코드 폼과 겹칩니다.' : state.system === '3nps' ? '한 줄에 세 음이라 손가락 패턴이 규칙적입니다.' : '한 줄에 두 음. 박스 1은 루트가 6번줄에 있는 모양입니다.'))));
       }
       /* 재생 */
-      const capo = Math.max(0, Number(st.capo) || 0);
-      const playableNotes = (P ? P.notes : GH.positions.inWindow(rootPc, sc.id, 0, 15)).filter(note => note.f >= capo);
+      const capo = bass ? 0 : Math.max(0, Number(st.capo) || 0);
+      const playableNotes = (P ? P.notes : GH.positions.inWindow(rootPc, sc.id, 0, 15, tuning)).filter(note => note.f >= capo);
       const seqNotes = oneOctave(playableNotes, rootPc, sc);
       const seq = GH.positions.pattern(seqNotes, state.pattern);
       const playButton = A.playBtn('▶ 재생', () => {
         if (!seq.length) return;
-        GH.player.playNotes(seq.map(n => n.midi), { tempo: state.tempo, onNote: i => { const n = seq[i]; fb.highlight(n ? n.s : null, n ? n.f : null); } });
+        GH.player.playNotes(seq.map(n => n.midi), { tempo: state.tempo, inst: bass ? 'bass' : null, onNote: i => { const n = seq[i]; fb.highlight(n ? n.s : null, n ? n.f : null); } });
       }, 'primary');
       playButton.disabled = !seq.length;
       el.appendChild(section('연습 패턴 재생',
@@ -95,7 +97,7 @@
         h('p', { class: 'muted' }, seq.length ? (P ? '선택한 포지션에서 루트부터 한 옥타브를 패턴대로 재생하며 지판에 표시합니다.' : '전체 지판에서 루트부터 한 옥타브를 패턴대로 재생합니다.') : '현재 카포와 포지션 범위에는 완전한 한 옥타브가 없습니다. 다른 포지션을 고르세요.')));
       /* 다른 스케일 빠른 이동 */
       const related = GH.scales.SCALES.filter(s => s.parent === sc.parent && s.id !== sc.id);
-      if (related.length) el.appendChild(section('같은 계열의 스케일', h('div', { class: 'toc' }, related.map(s => h('a', { href: A.scaleHref(s.id, root) }, s.ko)))));
-    }
+      if (related.length) el.appendChild(section('같은 계열의 스케일', h('div', { class: 'toc' }, related.map(s => h('a', { href: bass ? GH.router.href('/bass/scales', { scale: s.id, root }) : A.scaleHref(s.id, root) }, s.ko)))));
   };
+  GH.pages['/guitar/scales'] = { title: '스케일 포지션', render(el, params) { GH.scalePositions(el, params, { bass: false }); } };
 })();

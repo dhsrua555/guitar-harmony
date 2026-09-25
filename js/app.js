@@ -15,6 +15,31 @@
       ['/guitar/doublestops', '더블스탑', 4, '3도·6도·옥타브를 두 줄로 함께 치는 패턴'],
       ['/guitar/phrasing', '솔로 프레이즈 만들기', 4, '코드톤, 어프로치, 인클로저, 패싱 노트로 라인 만들기'],
       ['/guitar/licks', '릭', 3, 'TAB, 오선, 느린 재생, 도수 분석이 달린 프레이즈']] },
+    { id: 'bass', label: '베이스', en: 'BASS', icon: 'bass', color: 'olive', path: '/bass', desc: '4현 지판 위에서 코드톤 · 스케일 포지션을 찾고, 투핑거부터 워킹 · 슬랩까지 기본기를 연습합니다.', items: [
+      ['/technique/bass', '기본기 연습', 1, '투핑거 · 시만들 운지 · 스케일 · 코드톤 · 워킹 · 그루브 · 슬랩'],
+      ['/bass/chords', '코드톤 자리', 2, 'E · A 줄 루트로 1-3-5-7 을 짚는 아르페지오 모양'],
+      ['/bass/scales', '스케일 포지션', 2, '4현 지판의 펜타토닉 박스 · 3NPS 포지션과 연습 패턴'],
+      ['/bass/arpeggios', '트라이어드 · 아르페지오', 3, '트라이어드와 세븐 코드 아르페지오 자리'],
+      ['/bass/finder', '코드 파인더', 2, '4현 지판에서 고른 음들의 코드 이름 찾기']] },
+    { id: 'keys', label: '키보드', en: 'KEYS', icon: 'piano', color: 'sky', path: '/keys', desc: '건반 위에서 코드 보이싱 · 스케일 운지를 보고, 하논부터 재즈 보이싱까지 기본기를 연습합니다.', items: [
+      ['/technique/keys', '기본기 연습', 1, '하논 · 스케일 · 아르페지오 · 케이던스 · 보이싱 · 반주 패턴'],
+      ['/keys/voicings', '코드 보이싱', 2, '기본형 · 전위 · 팝 반주형 · 오픈 보이싱'],
+      ['/keys/voicings/advanced', '재즈 · 확장 보이싱', 4, '셸 · 루트리스 A/B · 드롭 2 · 쿼탈 · 어퍼 스트럭처'],
+      ['/keys/scales', '스케일 · 운지', 2, '건반과 큰보표로 보는 스케일, 메이저 스케일 표준 운지'],
+      ['/keys/arpeggios', '트라이어드 · 아르페지오', 3, '트라이어드 인버전과 2옥타브 아르페지오 운지'],
+      ['/keys/finder', '코드 파인더', 2, '건반을 눌러 코드 이름 찾기']] },
+    { id: 'drums', label: '드럼', en: 'DRUMS', icon: 'drum', color: 'pink', path: '/drums', desc: '스네어 하나로 하는 루디먼트부터 그루브 · 필인 · 손발 독립까지, 드럼 보표와 킷 그림으로 연습합니다.', items: [
+      ['/technique/drums', '기본기 연습', 1, '오늘의 루틴과 드럼 연습 전체'],
+      ['/drums/rudiments', '루디먼트 · 스틱 컨트롤', 1, '싱글 · 더블 · 패러디들 · 롤 · 액센트 (스네어만)'],
+      ['/drums/grooves', '그루브 · 필인', 2, '8비트 · 16비트 · 셔플 · 스윙 · 보사노바 · 필인 · 리니어'],
+      ['/rhythm', '메트로놈 · 리듬 연습', 1, '메트로놈, 리듬 따라 치기, 박 세기'],
+      ['/backing', '백킹 트랙', 2, '드럼을 끄고 베이스 · 코드 위에서 직접 쳐 보기']] },
+    { id: 'vocal', label: '보컬', en: 'VOCAL', icon: 'mic', color: 'sun', path: '/vocal', desc: '호흡 · 발성부터 스케일 · 시창 · 화음 · 애드리브까지, 악보와 피아노 가이드로 연습합니다.', items: [
+      ['/technique/vocal', '기본기 연습', 1, '롱톤 · 립 트릴 · 스케일 · 시창 · 화음 · 런'],
+      ['/vocal/scales', '스케일 부르기', 2, '음역에 맞춘 악보와 계이름으로 스케일 부르기'],
+      ['/vocal/arpeggios', '아르페지오 부르기', 2, '트라이어드 · 세븐 코드 음을 차례로 부르기'],
+      ['/vocal/chords', '코드톤 · 화음 나누기', 3, '코드 음을 계이름으로 부르고 4성부로 나누기'],
+      ['/ear', '음감 · 청음', 1, '인터벌 · 계이름 · 코드를 듣고 맞히기']] },
     { id: 'theory', label: '화성학', en: 'THEORY', icon: 'piano', color: 'sky', path: '/theory', desc: '코드와 스케일이 왜 그렇게 들리는지 이해합니다.', items: [
       ['/theory/intervals', '인터벌', 1, '두 음 사이의 거리. 모든 이론의 출발점'],
       ['/theory/chords', '코드', 2, '코드 빌더, 코드 퀄리티, 다이어토닉 코드, 표기법'],
@@ -34,9 +59,10 @@
       ['/glossary', '용어집', 1, '한글 · 영어 음악 용어 사전']] }
   ];
   function sectionOf(path) {
-    if (path === '/learn' || path.startsWith('/learn/')) return 'learn';
-    if (path.startsWith('/guitar') || path === '/technique/guitar' || path.startsWith('/technique/guitar/')) return 'guitar';
-    if (path === '/technique' || path.startsWith('/technique/')) return 'practice';
+    const under = p => path === p || path.startsWith(p + '/');
+    if (under('/learn')) return 'learn';
+    for (const id of ['guitar', 'bass', 'keys', 'drums', 'vocal']) if (under('/' + id) || under('/technique/' + id)) return id;
+    if (under('/technique')) return 'practice';
     if (path.startsWith('/theory') || path.startsWith('/chord/')) return 'theory';
     if (/^\/(songs|tools|ear|glossary|backing|practice|rhythm)/.test(path)) return 'practice';
     return null;
@@ -44,7 +70,7 @@
   function parentOf(path) {
     const parents = [
       '/theory/progressions', '/theory/reharm', '/theory/intervals', '/theory/modes', '/theory/scales',
-      '/guitar/voicings', '/guitar/licks', '/technique', '/technique/guitar', '/technique/bass', '/technique/keys', '/technique/drums', '/technique/vocal', '/songs', '/learn'
+      '/guitar/voicings', '/guitar/licks', '/technique/guitar', '/technique/bass', '/technique/keys', '/technique/drums', '/technique/vocal', '/keys/voicings', '/songs', '/learn'
     ].filter(p => path.startsWith(p + '/')).sort((a, b) => b.length - a.length);
     if (parents.length) {
       if (/^\/songs\/[^/]+\/bar\//.test(path)) return path.split('/').slice(0, 3).join('/');
@@ -62,7 +88,8 @@
     const S = SECTIONS.find(s => s.id === sec);
     if (S && S.items.length) {
       sub.appendChild(h('a', { href: '#' + S.path, class: 'hub' + (route.path === S.path ? ' active' : ''), 'aria-current': route.path === S.path ? 'page' : null }, S.label + ' 홈'));
-      S.items.forEach(([p, label, level]) => { const active = route && (route.path === p || route.path.startsWith(p + '/')); sub.appendChild(h('a', { href: '#' + p, class: (active ? 'active' : '') + ' lv' + level, 'aria-current': active ? 'page' : null, title: LEVEL_KO[level] }, label)); });
+      const match = S.items.map(it => it[0]).filter(p => route && (route.path === p || route.path.startsWith(p + '/'))).sort((a, b) => b.length - a.length)[0];   /* 가장 가까운 항목 하나만 */
+      S.items.forEach(([p, label, level]) => { const active = p === match; sub.appendChild(h('a', { href: '#' + p, class: (active ? 'active' : '') + ' lv' + level, 'aria-current': active ? 'page' : null, title: LEVEL_KO[level] }, label)); });
     }
     const back = document.getElementById('back-btn');
     if (back) back.hidden = !route || route.path === '/';
@@ -363,8 +390,8 @@
     GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); if (GH.coach) GH.coach.onRoute(r); motionScan(r); });
     GH.events.on('vexflow', () => { const r = GH.router.current(); if (r && r.page && r.page.staff) GH.router.rerender(); });
     const fl = document.getElementById('footer-links');
-    SECTIONS.forEach(s => fl.appendChild(h('a', { href: '#' + s.path }, s.label)));
-    [['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙'], ['#/rhythm', '메트로놈'], ['#/bug', '버그 제보']].forEach(([p, l]) => { fl.appendChild(h('a', { href: p }, l)); });
+    SECTIONS.forEach(x => fl.appendChild(h('a', { href: '#' + x.path }, x.label)));
+    [['#/glossary', '용어집'], ['#/tools/finder', '코드 파인더'], ['#/backing', '백킹 트랙'], ['#/rhythm', '메트로놈'], ['#/bug', '버그 제보']].forEach(([q, l]) => { fl.appendChild(h('a', { href: q }, l)); });
     document.addEventListener('keydown', e => {
       const tag = document.activeElement && document.activeElement.tagName;
       const settingsPanel = document.getElementById('settings-panel');

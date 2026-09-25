@@ -2,7 +2,7 @@
    spec: { kind: 'line' | 'grand' | 'drum', width, pref,
            line:  events [{at, d, m: [midi…] | null(쉼표), names?, fg?(위 줄 글자), lyric?(아래 줄 글자), stacc?, acc?, x?(데드 노트)}], clef 'treble'|'bass'|'treble8vb', written(표기 옥타브 이동)
            grand: rh, lh (위와 같은 형식)
-           drum:  slots [{at, d, hits:[{k, acc, ghost}], st?(스티킹)}] }
+           drum:  slots [{at, d, hits:[{k, acc, ghost}], st?(스티킹)}], handsOnly(발 성부 없이) }
    → { el, highlight(at | null) } 또는 VexFlow 가 없으면 null */
 (function () {
   'use strict';
@@ -127,7 +127,7 @@
       let staffs;                                     /* [{clef, measures:[[notes]], annot:{above, below}}] */
       if (spec.kind === 'drum') {
         const v = drumVoices(VF, spec.slots || []);
-        staffs = [{ clef: 'percussion', voices: [v.up, v.down], sticking: true }];
+        staffs = [{ clef: 'percussion', voices: spec.handsOnly ? [v.up] : [v.up, v.down], sticking: true }];
       } else if (spec.kind === 'grand') {
         staffs = [{ clef: 'treble', voices: [lineVoice(VF, spec.rh || [], { clef: 'treble', pref })] }, { clef: 'bass', voices: [lineVoice(VF, spec.lh || [], { clef: 'bass', pref })] }];
       } else {

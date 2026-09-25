@@ -47,14 +47,15 @@
     return ctl;
   }
   function playVoicing(v, opts) { return playChord(v.midi.filter(m => m != null), opts); }
-  /* 음 목록을 순서대로 (스케일, 아르페지오) */
+  /* 음 목록을 순서대로 (스케일, 아르페지오). opts.inst: 'bass' | 'piano' 면 그 악기 소리 */
   function playNotes(midis, opts) {
     opts = opts || {};
     const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
     const t0 = A.now() + 0.05; const step = opts.step || 60 / (opts.tempo || 160);
     midis.forEach((m, i) => {
       const accent = i % 4 === 0 ? 1 : i % 2 === 0 ? .94 : .88;
-      A.pluck(m, t0 + i * step + human(.0018), step * .92, { gain: .84 * accent * (1 + human(.025)) });
+      const t = t0 + i * step + human(.0018), g = .84 * accent * (1 + human(.025));
+      if (opts.inst === 'bass') A.bass(m, t, step * .92, { gain: g * 1.1 }); else A.pluck(m, t, step * .92, { gain: g, preset: opts.inst === 'piano' ? 'piano' : undefined });
       if (opts.onNote) schedule(() => opts.onNote(i, m), t0 + i * step);
     });
     schedule(() => { if (current === ctl) stop(); }, t0 + midis.length * step + 0.3);

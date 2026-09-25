@@ -64,7 +64,10 @@
   }
   /* 경로 → 아이콘 이름 (메뉴 · 허브 카드 · 미션에서 공통) */
   const ROUTE_ICONS = {
-    '/learn': 'learn', '/guitar': 'guitar', '/theory': 'piano', '/practice': 'metronome',
+    '/learn': 'learn', '/guitar': 'guitar', '/theory': 'piano', '/practice': 'metronome', '/bass': 'bass', '/keys': 'piano', '/drums': 'drum', '/vocal': 'mic',
+    '/technique': 'metronome', '/technique/guitar': 'pick', '/technique/bass': 'bass', '/technique/keys': 'piano', '/technique/drums': 'drum', '/technique/vocal': 'mic',
+    '/bass/chords': 'chord', '/bass/scales': 'fretboard', '/bass/arpeggios': 'triad', '/bass/finder': 'finder', '/keys/voicings': 'chord', '/keys/voicings/advanced': 'stack', '/keys/scales': 'scale', '/keys/arpeggios': 'triad', '/keys/finder': 'finder',
+    '/drums/rudiments': 'drum', '/drums/grooves': 'backing', '/vocal/scales': 'scale', '/vocal/arpeggios': 'triad', '/vocal/chords': 'harmony',
     '/guitar/voicings': 'chord', '/guitar/scales': 'fretboard', '/guitar/triads': 'triad', '/guitar/doublestops': 'doublestop', '/guitar/phrasing': 'melody', '/guitar/licks': 'pick',
     '/theory/intervals': 'interval', '/theory/chords': 'stack', '/theory/scales': 'scale', '/theory/progressions': 'progression', '/theory/modes': 'modes', '/theory/reharm': 'reharm',
     '/ear': 'headphones', '/backing': 'drum', '/rhythm': 'metronome', '/tools/finder': 'finder', '/tools/melody': 'notes', '/tools/harmony': 'harmony', '/songs': 'songs', '/glossary': 'book', '/chord': 'stack'
