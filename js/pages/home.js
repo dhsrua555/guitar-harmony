@@ -12,6 +12,56 @@
     { x: 280, y: 200, up: false, midi: 72 }, { x: 345, y: 190, up: false, midi: 74 },
     { x: 410, y: 180, up: false, midi: 76 }, { x: 470, y: 160, up: false, midi: 79 }
   ];
+  /* ---- 손그림 악보 조각 (글꼴 대신 펜으로 그은 선) ---- */
+  /* 점들을 조금씩 흔들어 두 번 긋는다: 굵은 선 한 번 + 가는 선 한 번 */
+  function penStroke(pts, seed, cls, amp) {
+    const r = K().rng(seed), a = amp == null ? 0.9 : amp;
+    const shake = () => pts.map(([x, y]) => [x + (r() - 0.5) * a * 2, y + (r() - 0.5) * a * 2]);
+    const g = svg('g', { class: cls });
+    g.appendChild(K().path(K().curve(shake(), false), 'pen-main'));
+    g.appendChild(K().path(K().curve(shake(), false), 'pen-hair'));
+    return g;
+  }
+  /* 높은음자리표: 꼬리 점 → 꼬리 → 기둥 → 위 고리 → 배 → G 줄(y=230)을 감는 소용돌이. 오선 간격 20 */
+  const CLEF = [[48, 280], [52, 290], [62, 292], [70, 282], [71, 262], [68, 230], [65, 200], [62, 168], [60, 142], [62, 124], [71, 114], [80, 121],
+    [80, 139], [71, 159], [59, 178], [45, 196], [35, 218], [36, 243], [48, 259], [66, 264], [84, 256], [92, 236], [85, 214], [70, 205], [55, 211],
+    [50, 227], [58, 239], [70, 236], [70, 227]];
+  const CLEF_BELLY = CLEF.slice(14, 23); /* 배 부분은 펜을 눌러 그은 듯 한 번 더 굵게 */
+  function sketchClef(dx, dy) {
+    const g = svg('g', { class: 'ha-clef', transform: 'translate(' + dx + ' ' + dy + ')' });
+    g.appendChild(penStroke(CLEF, 17, 'pen'));
+    g.appendChild(K().path(K().curve(CLEF_BELLY.map(([x, y]) => [x + 0.6, y + 0.4]), false), 'pen-weight'));
+    g.appendChild(K().path(K().blob(47, 279, 6.4, 5.8, { points: 8, wobble: 0.1 }), 'ha-clef-dot'));
+    return g;
+  }
+  /* 음표 머리: 칠은 살짝 어긋나고, 테두리는 한 바퀴를 조금 넘겨 그린다 */
+  function sketchHead(x, y, cls) {
+    const g = svg('g', { class: cls || '', transform: 'rotate(-22 ' + x + ' ' + y + ')' });
+    g.appendChild(K().path(K().blob(x + 1, y + 0.8, 12.4, 8.8, { points: 9, wobble: 0.1 }), 'ha-head'));
+    g.appendChild(K().path(K().ellipse(x, y, 13.2, 9.6, { points: 10, overshoot: 0.18, wobble: 0.1 }), 'ha-head-ink'));
+    return g;
+  }
+  /* 빔: 네 귀퉁이를 흔든 굵은 띠 + 위아래 가장자리를 한 번씩 긋기 */
+  function sketchBeam(x1, y1, x2, y2, t, seed) {
+    const r = K().rng(seed), w = () => (r() - 0.5) * 1.8;
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const g = svg('g', { class: 'ha-beam-g' });
+    g.appendChild(K().path(K().curve([[x1 + w(), y1 + w()], [mx + w(), my + w() - 0.6], [x2 + w(), y2 + w()], [x2 + w(), y2 + t + w()], [mx + w(), my + t + w() + 0.6], [x1 + w(), y1 + t + w()]], true), 'ha-beam'));
+    g.appendChild(K().path(K().line(x1, y1, x2, y2, { passes: 1, overshoot: 2.2, jitter: 1 }) + K().line(x1, y1 + t, x2, y2 + t, { passes: 1, overshoot: 2.2, jitter: 1 }), 'ha-beam-ink'));
+    return g;
+  }
+  /* 떠다니는 기호 (44 × 44 칸 안에 손으로) */
+  function sketchSymbol(name) {
+    const L = (a, b, c, d, o) => K().line(a, b, c, d, Object.assign({ passes: 2, jitter: 1, overshoot: 1.6 }, o));
+    const box = svg('svg', { width: 44, height: 44, viewBox: '0 0 44 44', overflow: 'visible' });
+    const ink = d => box.appendChild(K().path(d, 'ha-f-ink'));
+    const fill = d => box.appendChild(K().path(d, 'ha-f-fill'));
+    if (name === 'sharp') { ink(L(17, 6, 15, 40) + L(29, 4, 27, 38)); ink(L(8, 17, 36, 11, { bow: 1.6 }) + L(8, 30, 36, 24, { bow: 1.6 })); }
+    else if (name === 'flat') { ink(L(14, 3, 14, 40)); ink(K().curve([[14, 40], [26, 31], [30, 23], [24, 19], [14, 25]], false) + K().curve([[15, 39], [25, 31.5], [28.5, 23.5], [23.5, 20.5], [15, 26]], false)); }
+    else if (name === 'note') { fill(K().blob(15, 33, 8.5, 6, { points: 8, wobble: 0.12 })); ink(K().ellipse(14.4, 32.6, 9, 6.4, { points: 9, overshoot: 0.2 })); ink(L(22.5, 31, 23, 5)); ink(K().curve([[23, 5], [30, 12], [36, 17], [34, 26]], false)); }
+    else { fill(K().blob(10, 35, 7, 5, { points: 8, wobble: 0.12 }) + K().blob(31, 31, 7, 5, { points: 8, wobble: 0.12 })); ink(L(16.5, 34, 17, 8) + L(37.5, 30, 38, 4)); box.appendChild(K().path(K().curve([[17, 8], [27, 5.5], [38, 3.5], [38, 9], [27, 11], [17, 13.5]], true), 'ha-f-fill')); }
+    return box;
+  }
   function heroArt() {
     const el = svg('svg', { class: 'hero-art-svg', viewBox: '0 0 540 420', role: 'img', 'aria-label': '오선 위 여섯 음과 그 위를 튀는 공. 누르면 소리가 납니다' });
     /* 잉크로 그린 해: 칠은 살짝 어긋나고, 오른쪽 아래에 빗금 그림자 */
@@ -21,25 +71,25 @@
     el.appendChild(K().path(K().ellipse(300, 212, 206, 206, { points: 30, overshoot: 0.02, wobble: 0.01 }), 'ha-ring'));
     let staffD = ''; [170, 190, 210, 230, 250].forEach(y => { staffD += K().line(22, y, 522, y, { passes: 2, bow: 1.4, overshoot: 2 }); });
     el.appendChild(K().path(staffD, 'ha-line'));
-    el.appendChild(svg('text', { class: 'ha-clef', x: 34, y: 262 }, '\u{1D11E}'));
+    el.appendChild(sketchClef(0, 0));
     const heads = [];
     const beam = (a, b) => {
       const A = MELODY[a], B = MELODY[b];
       const sx = p => p.x + (p.up ? 11 : -11), ey = p => p.y + (p.up ? -62 : 62);
-      const t = A.up ? 9 : -9, j = K().rng(K().seedOf(A.x, B.x)), w = () => (j() - 0.5) * 1.6;
-      el.appendChild(svg('path', { class: 'ha-beam', d: `M${sx(A) - 1 + w()},${ey(A) + w()} L${sx(B) + 1.5 + w()},${ey(B) + w()} L${sx(B) + 1 + w()},${ey(B) + t + w()} L${sx(A) - 1.5 + w()},${ey(A) + t + w()} Z` }));
+      const t = A.up ? 9 : -9;
+      el.appendChild(sketchBeam(sx(A) - 1.5, ey(A), sx(B) + 1.5, ey(B), t, K().seedOf(A.x, B.x)));
     };
     MELODY.forEach(p => {
       const g = svg('g', { class: 'ha-note' });
       const stx = p.x + (p.up ? 11 : -11);
       g.appendChild(K().path(K().line(stx, p.y + (p.up ? -3 : 3), stx, p.y + (p.up ? -62 : 62), { passes: 2, overshoot: 1, jitter: 0.8 }), 'ha-stem'));
-      g.appendChild(K().path(K().blob(p.x, p.y, 13, 9.5, { points: 9, wobble: 0.08 }), 'ha-head', { transform: `rotate(-22 ${p.x} ${p.y})` }));
+      g.appendChild(sketchHead(p.x, p.y));
       el.appendChild(g); heads.push(g);
     });
     beam(0, 1); beam(2, 3); beam(4, 5);
     [['ha-f1', 470, 70, 'sharp', .22], ['ha-f2', 70, 330, 'flat', -.12], ['ha-f3', 510, 330, 'note', .3], ['ha-f4', 110, 70, 'notes', -.18]].forEach(([cls, x, y, name, speed]) => {
       const g = svg('g', { class: 'ha-float ' + cls, 'data-speed': speed });
-      const ic = I(name, { size: 44, stroke: 2 }); ic.setAttribute('x', x - 22); ic.setAttribute('y', y - 22);
+      const ic = sketchSymbol(name); ic.setAttribute('x', x - 22); ic.setAttribute('y', y - 22);
       g.appendChild(ic); el.appendChild(g);
     });
     const land = p => ({ x: p.x - (p.up ? 4 : 0), y: p.up ? p.y - 62 - 20 : p.y - 30 });
