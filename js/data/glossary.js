@@ -42,6 +42,24 @@
     { ko: '어퍼 스트럭처', en: 'Upper Structure Triad', def: '도미넌트 등의 위에 다른 트라이어드를 얹어 텐션을 한 번에 얻는 보이싱.', route: '#/theory/reharm' },
     { ko: 'CAGED', en: 'CAGED System', def: 'C, A, G, E, D 다섯 오픈 코드 폼으로 지판 전체를 나누는 시스템. 코드와 스케일 포지션의 기준.', route: '#/guitar/scales' },
     { ko: '3NPS', en: 'Three Notes Per String', def: '한 줄에 세 음씩 배치하는 스케일 포지션 시스템. 얼터네이트 피킹과 레가토 연습에 많이 쓴다.', route: '#/guitar/scales' },
+    { ko: '크로매틱 연습', en: 'Chromatic Exercise', def: '1-2-3-4 손가락으로 반음씩 차례로 짚는 워밍업. 한 손가락이 한 프렛을 맡는다.', route: '#/technique/guitar/chroma-1234' },
+    { ko: '신경분리 (손가락 독립)', en: 'Finger Independence', def: '손가락이 서로 딸려 움직이지 않고 따로 움직이게 하는 연습. 1-3-2-4 처럼 손가락 순서를 섞는 순열 연습이 대표적.', route: '#/technique/guitar/perm' },
+    { ko: '스파이더 연습', en: 'Spider Exercise', def: '두 줄 이상에 손가락을 1·3, 2·4 처럼 번갈아 놓으며 누른 손가락을 유지하는 신경분리 연습.', route: '#/technique/guitar/spider' },
+    { ko: '트릴', en: 'Trill', def: '두 음을 해머온 · 풀오프로 빠르게 반복하는 꾸밈. 손가락 힘과 독립성 연습에도 쓴다.', route: '#/technique/guitar/trill' },
+    { ko: '얼터네이트 피킹', en: 'Alternate Picking', def: '다운과 업 스트로크를 번갈아 치는 피킹. 줄을 옮겨도 순서를 지킨다.', route: '#/technique/guitar/pick-open' },
+    { ko: '바깥쪽 · 안쪽 피킹', en: 'Outside / Inside Picking', def: '두 줄을 오갈 때 피크가 두 줄의 바깥으로 돌면 바깥쪽, 두 줄 사이에서 움직이면 안쪽 피킹.', route: '#/technique/guitar/pick-cross' },
+    { ko: '스트링 스키핑', en: 'String Skipping', def: '가운데 줄을 건너뛰어 떨어진 줄을 오가며 치는 기법. 넓은 음정 도약을 만든다.', route: '#/technique/guitar/pick-skip' },
+    { ko: '레가토', en: 'Legato', def: '음을 끊지 않고 매끄럽게 잇는 연주. 기타에서는 피킹을 줄이고 해머온 · 풀오프 · 슬라이드로 이어 치는 것.', route: '#/technique/guitar/legato-3nps' },
+    { ko: '루디먼트', en: 'Rudiments', def: '드럼 스틱 기술의 기본 패턴. 국제 타악기 협회(PAS)가 정한 40가지가 표준이다 (싱글 · 더블 스트로크, 패러디들 등).', route: '#/technique/drums' },
+    { ko: '패러디들', en: 'Paradiddle', def: 'R L R R · L R L L 처럼 싱글 두 번과 더블 한 번을 묶은 루디먼트. 리드 손이 번갈아 바뀐다.', route: '#/technique/drums/d-para' },
+    { ko: '고스트 노트', en: 'Ghost Note', def: '들릴 듯 말 듯 아주 작게 치는 음. 드럼에서는 괄호로, 베이스 · 기타의 데드 노트는 x 로 적는다.', route: '#/technique/drums/d-ghost' },
+    { ko: '하논', en: 'Hanon', def: '샤를 루이 하논의 피아노 연습곡집 《The Virtuoso Pianist》(1873). 다섯 손가락의 힘과 고르기를 맞추는 음형 연습.', route: '#/technique/keys/k-hanon' },
+    { ko: '카덴스 (마침꼴)', en: 'Cadence', def: '곡이나 프레이즈를 끝맺는 코드 진행. I – IV – V – I 을 가까운 전위로 잇는 연습이 반주의 기본이다.', route: '#/technique/keys/k-cadence' },
+    { ko: '시만들 운지', en: 'Simandl Fingering', def: '베이스에서 검지 · 중지 · 새끼(1-2-4)로 세 프렛을 잡는 운지법. 콘트라베이스 교재에서 왔다.', route: '#/technique/bass/b-simandl' },
+    { ko: '슬랩', en: 'Slap', def: '베이스 줄을 엄지로 때리고(T) 검지로 튕겨(P) 타악기처럼 치는 주법.', route: '#/technique/bass/b-slap' },
+    { ko: '롱톤', en: 'Long Tone', def: '한 음을 오래, 같은 크기 · 같은 음높이로 유지하는 발성 · 관악기 기초 연습.', route: '#/technique/vocal/v-longtone' },
+    { ko: '시창', en: 'Sight-singing', def: '악보를 보고 바로 노래하는 것. 이동도 계이름(으뜸음 = 도)으로 인터벌을 부르는 연습이 기초다.', route: '#/technique/vocal/v-interval' },
+    { ko: '멜리스마 (런)', en: 'Melisma / Run', def: '한 음절에 여러 음을 빠르게 굴려 부르는 기법. R&B · 가스펠 보컬에서 많이 쓴다.', route: '#/technique/vocal/v-run' },
     { ko: '펜타토닉', en: 'Pentatonic', def: '5음 스케일. 메이저(1 2 3 5 6)와 마이너(1 b3 4 5 b7).', route: '#/theory/scales' },
     { ko: '블루노트', en: 'Blue Note', def: '블루스에서 쓰는 b3, b5, b7. 메이저 코드 위에서 마이너 색을 낸다.', route: '#/theory/scales' },
     { ko: '모드 (선법)', en: 'Mode', def: '특정 음을 중심음(토닉)으로 삼아 고유한 도수 구조와 중심감을 만드는 음계. 상대 모드와 평행 모드의 관점으로 비교할 수 있다.', route: '#/theory/modes' },
@@ -93,4 +111,17 @@
     { ko: '패드', en: 'Pad', def: '길게 울려 공간을 채우는 소리 (신스, 오르간, 스웰 기타 등). 워십에서는 곡 사이와 기도 시간에 키의 루트와 5음을 계속 깔아 두기도 한다.', route: '#/backing' }
 
   ];
+  /* 용어 분류: 용어집에서 카테고리별로 묶어 보여 준다 */
+  GH.data.glossaryCats = [
+    { id: 'basic', ko: '음 · 인터벌 · 키', terms: ['반음 · 온음', '샵 · 플랫', '루트', '키', '인터벌', '피치 클래스', '엔하모닉 (이명동음)', '트라이톤 (삼온음)', '조표', '5도권 (서클 오브 피프스)', '렐러티브 키 (나란한조)', '패러렐 키 (같은으뜸음조)'] },
+    { id: 'rhythm', ko: '리듬 · 박자', terms: ['박 · 템포 · BPM', '마디', '다운비트 · 업비트', '스윙 / 셔플'] },
+    { id: 'chord', ko: '코드 · 보이싱', terms: ['파워 코드', '오픈 코드', '바레 코드 (하이코드)', '코드 심벌', '트라이어드 (3화음)', '세븐 코드 (7화음)', '코드톤', '가이드 톤', '텐션 / 익스텐션', '사용 가능한 텐션', '어보이드 노트', '인버전 (전위)', '슬래시 코드', '보이싱', '클로즈 보이싱', '드롭 2', '드롭 3', '셸 보이싱', '쿼탈 보이싱', '스프레드 (오픈) 트라이어드', '어퍼 스트럭처', '아르페지오'] },
+    { id: 'scale', ko: '스케일 · 모드', terms: ['펜타토닉', '블루노트', '모드 (선법)', '특징음', '상대 접근 / 평행 접근', '코드 스케일 이론', '다이어토닉', '비밥 스케일', '알터드 스케일'] },
+    { id: 'harmony', ko: '화성 · 코드 진행', terms: ['하모나이제이션', '토닉 / 서브도미넌트 / 도미넌트', '케이던스 (종지)', '로마 숫자 표기', '내슈빌 넘버 시스템', 'ii-V-I', '턴어라운드', '뱀프', '리하모니제이션', '세컨더리 도미넌트', '트라이톤 대체', '모달 인터체인지 (차용 화음)', '백도어 도미넌트', '패싱 코드', '페달 포인트', '보이스 리딩', '콘스턴트 스트럭처', '콜트레인 체인지', '전조 (모듈레이션)', '아멘 종지 (플라갈 케이던스)', '키 업 (마지막 후렴 전조)'] },
+    { id: 'solo', ko: '솔로 · 즉흥', terms: ['릭', '인클로저', '크로매틱 어프로치', '사이드 스텝'] },
+    { id: 'guitar', ko: '기타 연주 · 기본기', terms: ['개방현', '프렛', '스트로크 (스트럼)', 'CAGED', '3NPS', '크로매틱 연습', '신경분리 (손가락 독립)', '스파이더 연습', '트릴', '얼터네이트 피킹', '바깥쪽 · 안쪽 피킹', '스트링 스키핑', '레가토', '벤딩', '해머링 온 / 풀링 오프', '더블스톱', '카포'] },
+    { id: 'session', ko: '베이스 · 키보드 · 드럼 · 보컬', terms: ['시만들 운지', '슬랩', '하논', '카덴스 (마침꼴)', '루디먼트', '패러디들', '고스트 노트', '롱톤', '시창', '멜리스마 (런)'] },
+    { id: 'band', ko: '합주 · 장르', terms: ['MR (백킹 트랙)', '컴핑', 'CCM · 워십', '빌드업', '패드'] }
+  ];
+  GH.data.glossary.forEach(g => { const c = GH.data.glossaryCats.find(x => x.terms.includes(g.ko)); g.cat = c ? c.id : 'band'; });
 })();

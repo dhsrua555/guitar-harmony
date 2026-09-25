@@ -19,6 +19,13 @@
     { sel: '.diagram-card', say: '코드 잡는 그림이에요. 세로줄이 기타 줄(왼쪽이 6번 줄), 점이 누를 곳이에요. 점을 누르면 그 줄 소리가 나요.' },
     { sel: '.diagram-card .play-btn', say: '▶ 듣기로 코드 전체를 들어 보세요. 기타로 똑같이 잡아서 같은 소리가 나면 성공이에요.' }
   ];
+  const TECH_DETAIL = [
+      { sel: '.tech-how', say: '먼저 어떻게 하는지 읽어요. 아래의 번호 · 기호 설명도 한 번 봐 두세요.' },
+      { sel: '.tech-notation', say: '악보예요. 연주하는 동안 지금 칠 음이 색으로 표시돼요.' },
+      { sel: 'button', has: '▶ 시작', say: '▶ 시작을 누르면 "하나 둘 셋 넷"을 센 뒤 소리가 나요. 악기로 같이 따라 해 보세요.' },
+      { sel: '.tech-tempo', say: '틀리지 않고 할 수 있는 템포로 맞춰요. 익숙해지면 5 BPM씩 올리거나 스피드 트레이너를 켜요.' },
+      { sel: '.tech-record', say: '깨끗하게 했다면 기록을 남겨요. 다음에 얼마나 늘었는지 볼 수 있어요.' }
+    ];
   const STEPS = {
     '/': [
       { sel: '.home-search', say: '궁금한 코드나 스케일 이름을 여기에 적으면 바로 찾아 줘요. 예: Cmaj7, 도리안, ii-V-I' },
@@ -69,6 +76,18 @@
       { sel: '.toolbar label', has: '진행', say: '빌더에서 진행과 키를 바꿔 보세요. 라인이 새로 만들어져요.' },
       { sel: 'button', has: '▶ 라인 듣기', say: '만든 라인을 듣고 따라 쳐 보세요.' }
     ],
+    '/technique': [
+      { sel: '.tech-insts', say: '연습할 세션(악기)을 골라요. 고른 세션은 "내 세션"으로 표시돼요.' }
+    ],
+    '/technique/': [
+      { sel: '.tech-routine', say: '오늘 할 연습 순서예요. 수준에 맞는 루틴을 고르고 "루틴 시작"을 누르면 하나씩 안내하고 시간도 재 줘요.' },
+      { sel: '.tech-cat .tech-card', say: '연습을 하나만 골라도 돼요. 처음이라면 p(입문) 표시가 있는 것부터.' }
+    ],
+    '/technique/guitar/': TECH_DETAIL,
+    '/technique/bass/': TECH_DETAIL,
+    '/technique/keys/': TECH_DETAIL,
+    '/technique/drums/': TECH_DETAIL,
+    '/technique/vocal/': TECH_DETAIL,
     '/guitar/licks': [
       { sel: '.toolbar label', has: '난이도', say: '난이도를 p 입문이나 mp 기초로 골라 보세요.' },
       { sel: '.list-item', say: '마음에 드는 릭을 누르세요. TAB · 악보 · 느린 재생이 들어 있어요.' }
@@ -140,10 +159,10 @@
       { sel: '.now-box', say: '지금 코드와 그 코드의 음이 지판에 보여요. 색 있는 음 위주로 쳐 보세요.' }
     ],
     '/tools/melody': [
-      { sel: '.toolbar label', has: '입력', say: '멜로디를 넣는 방법을 골라요. 건반, 기타 지판, 글자 중에서요.' },
-      { sel: 'svg.piano', say: '건반을 눌러 멜로디를 한 음씩 넣어요.' },
-      { sel: '.melody-seq', say: '넣은 멜로디가 여기 쌓여요. 음을 누르면 그 음이 지워져요.' },
-      { sel: 'button', has: '▶ 멜로디 + 코드', say: '자동으로 붙인 코드와 함께 들어 보세요.' }
+      { sel: '.mg-len', say: '찍을 음의 길이를 먼저 골라요. 4분음표가 한 박이에요.' },
+      { sel: '.mgrid-scroll', say: '격자를 눌러 멜로디를 찍어요. 가로는 시간, 세로는 음 높이예요. 예시를 불러와서 고쳐 봐도 좋아요.' },
+      { sel: '.mg-progs', say: '어울리는 코드 진행이 순위별로 나와요. 하나를 눌러 고르고 ▶ 로 들어 보세요.' },
+      { sel: '.mg-voices', say: '멜로디에 얹을 화음을 고르고 ▶ 모두 재생으로 멜로디 · 화음 · 코드 · 베이스를 함께 들어요.' }
     ],
     '/tools/harmony': [
       { sel: 'svg.piano', say: '건반을 눌러 멜로디를 넣어요.' },

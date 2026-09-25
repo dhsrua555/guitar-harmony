@@ -7,7 +7,8 @@
   /* 메뉴 구조: 섹션(허브) → 페이지. level: 1 기초, 2 중급, 3 고급 */
   const SECTIONS = [
     { id: 'learn', label: '배우기', en: 'LEARN', icon: 'learn', color: 'pink', path: '/learn', desc: '처음이라면 여기서부터. 레슨 한 장에 개념 하나씩 배우는 기초 코스와 로드맵.', items: [] },
-    { id: 'guitar', label: '기타', en: 'GUITAR', icon: 'guitar', color: 'sun', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾습니다.', items: [
+    { id: 'guitar', label: '기타', en: 'GUITAR', icon: 'guitar', color: 'sun', path: '/guitar', desc: '지판 위에서 코드, 스케일, 릭을 찾고 기본기를 연습합니다.', items: [
+      ['/technique/guitar', '기본기 연습', 1, '크로매틱, 손가락 신경분리, 펜타토닉, 피킹 · 레가토 연습과 오늘의 루틴'],
       ['/guitar/voicings', '코드 보이싱', 2, '기본 코드 폼과 재즈·확장 보이싱을 나눠서 탐색'],
       ['/guitar/scales', '스케일 포지션', 2, '펜타토닉 박스, CAGED, 3NPS 포지션과 연습 패턴'],
       ['/guitar/triads', '트라이어드 · 아르페지오', 3, '현 세트별 트라이어드 인버전과 코드톤 아르페지오'],
@@ -22,18 +23,20 @@
       ['/theory/modes', '모드', 5, '7모드의 밝기와 특징음, 멜로딕/하모닉 마이너 모드'],
       ['/theory/reharm', '리하모니제이션', 5, '멜로디는 두고 코드를 바꾸는 기법']] },
     { id: 'practice', label: '연습', en: 'PRACTICE', icon: 'headphones', color: 'olive', path: '/practice', desc: '귀와 손을 훈련하는 도구.', items: [
+      ['/technique', '세션별 기본기', 1, '기타 · 베이스 · 키보드 · 드럼 · 보컬 기본기 연습과 루틴'],
       ['/ear', '이어 트레이닝', 1, '계이름, 인터벌, 코드, 진행을 듣고 맞히는 퀴즈'],
       ['/backing', '백킹 트랙', 2, '드럼 · 베이스 · 컴핑 위에서 솔로 연습'],
       ['/rhythm', '리듬 연습', 1, '메트로놈, 리듬 따라 치기, 스트럼 패턴'],
       ['/tools/finder', '코드 파인더', 1, '지판을 눌러 잡은 모양의 코드 이름 찾기'],
-      ['/tools/melody', '멜로디 → 코드', 3, '멜로디를 넣으면 어울리는 코드를 제안'],
+      ['/tools/melody', '멜로디 → 코드', 3, '멜로디를 격자에 찍으면 코드 진행 · 화음을 추천하고 함께 재생'],
       ['/tools/harmony', '멜로디 화음 쌓기', 4, '멜로디 위아래에 3도·5도·6도 하모니 라인을 쌓아 듣기'],
       ['/songs', '곡 분석', 4, '마디별 코드에 스케일, 보이싱, 릭을 연결'],
       ['/glossary', '용어집', 1, '한글 · 영어 음악 용어 사전']] }
   ];
   function sectionOf(path) {
     if (path === '/learn' || path.startsWith('/learn/')) return 'learn';
-    if (path.startsWith('/guitar')) return 'guitar';
+    if (path.startsWith('/guitar') || path === '/technique/guitar' || path.startsWith('/technique/guitar/')) return 'guitar';
+    if (path === '/technique' || path.startsWith('/technique/')) return 'practice';
     if (path.startsWith('/theory') || path.startsWith('/chord/')) return 'theory';
     if (/^\/(songs|tools|ear|glossary|backing|practice|rhythm)/.test(path)) return 'practice';
     return null;
@@ -41,7 +44,7 @@
   function parentOf(path) {
     const parents = [
       '/theory/progressions', '/theory/reharm', '/theory/intervals', '/theory/modes', '/theory/scales',
-      '/guitar/voicings', '/guitar/licks', '/songs', '/learn'
+      '/guitar/voicings', '/guitar/licks', '/technique', '/technique/guitar', '/technique/bass', '/technique/keys', '/technique/drums', '/technique/vocal', '/songs', '/learn'
     ].filter(p => path.startsWith(p + '/')).sort((a, b) => b.length - a.length);
     if (parents.length) {
       if (/^\/songs\/[^/]+\/bar\//.test(path)) return path.split('/').slice(0, 3).join('/');
@@ -260,10 +263,10 @@
     if (GH.guide) {
       const G = GH.guide; const gp = G.profile();
       panel.appendChild(h('h3', { class: 'settings-group' }, '나의 학습'));
-      panel.appendChild(h('div', { class: 'field' }, h('label', null, '수준 · 목표'),
-        h('div', { class: 'row', style: 'gap:6px' }, h('span', { class: 'badge accent' }, G.levelKo()), (gp.goals || []).map(id => { const g = G.GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, g.ko) : null; })),
+      panel.appendChild(h('div', { class: 'field' }, h('label', null, '세션 · 수준 · 목표'),
+        h('div', { class: 'row', style: 'gap:6px' }, G.sessionChips(), h('span', { class: 'badge accent' }, G.levelKo()), (gp.goals || []).map(id => { const g = G.GOALS.find(x => x.id === id); return g ? h('span', { class: 'badge' }, g.ko) : null; })),
         h('div', { class: 'row', style: 'gap:6px;margin-top:8px' },
-          h('button', { class: 'btn small', type: 'button', onclick: () => { closeSettings(); G.openOnboarding({ onDone: () => GH.router.rerender() }); } }, gp.onboarded ? '다시 고르기' : '수준 · 목표 고르기'),
+          h('button', { class: 'btn small', type: 'button', onclick: () => { closeSettings(); G.openOnboarding({ onDone: () => GH.router.rerender() }); } }, gp.onboarded ? '다시 고르기' : '세션 · 수준 · 목표 고르기'),
           h('button', { class: 'btn small', type: 'button', onclick: () => { if (confirm('완료한 미션 기록을 모두 지울까요?')) { G.resetProgress(); renderSettings(); GH.router.rerender(); } } }, '진행 기록 초기화'))));
       panel.appendChild(h('div', { class: 'field' }, h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, h('input', { type: 'checkbox', checked: gp.showGuides !== false, onchange: e => { G.setProfile({ showGuides: e.target.checked }); GH.router.rerender(); } }), '페이지마다 사용법 가이드 보이기')));
     }

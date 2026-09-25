@@ -72,7 +72,7 @@
   /* 가로 스크롤 상자: 클래스 이름 + 같은 클래스 안에서 몇 번째인지로 짝을 맞춘다 */
   function innerScrolls(root) {
     const out = [];
-    root.querySelectorAll('.fretboard-scroll, .table-wrap, .staff-box, .rhythm-staff, .tabs, .prog-strip, .subnav, .toc').forEach(e => {
+    root.querySelectorAll('.fretboard-scroll, .table-wrap, .staff-box, .rhythm-staff, .tabs, .prog-strip, .subnav, .toc, .mgrid-scroll').forEach(e => {
       if (e.scrollLeft > 0) { const cls = e.classList[0]; out.push([cls, Array.prototype.indexOf.call(root.getElementsByClassName(cls), e), e.scrollLeft]); }
     });
     return out;

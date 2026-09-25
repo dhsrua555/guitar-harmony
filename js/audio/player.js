@@ -146,6 +146,42 @@
     pass();
     return ctl;
   }
+  /* 범용 연습 시퀀서 (기본기 연습: 기타 · 베이스 · 키보드 · 드럼 · 보컬)
+     events: [{d(박), ...}] 순서대로. opts: {tempo, loop, loopGap(반복 사이 박), metronome, beatsPerBar, countIn(박 수), onCount(k, n),
+       sound(ev, t, dur, pass, beat) 소리 내기, onNote(i, ev, pass), onPass(pass, tempo), nextTempo(pass, tempo) → 다음 반복 템포, onStop} */
+  function playSeq(events, opts) {
+    opts = opts || {};
+    const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
+    ctl.loop = !!opts.loop;
+    const bpb = opts.beatsPerBar || 4;
+    let tempo = opts.tempo || 80, beat = 60 / tempo;
+    let passStart = A.now() + 0.12, passNo = 0;
+    if (opts.countIn) {
+      for (let b = 0; b < opts.countIn; b++) { A.click(passStart + b * beat, b % bpb === 0); if (opts.onCount) { const k = b; schedule(() => opts.onCount(k, opts.countIn), passStart + b * beat); } }
+      passStart += opts.countIn * beat;
+    }
+    function pass() {
+      if (current !== ctl) return;
+      let pos = 0; const n = passNo, tp = tempo;
+      if (opts.onPass) schedule(() => opts.onPass(n, tp), passStart);
+      events.forEach((ev, i) => {
+        const t = passStart + pos * beat;
+        if (opts.sound) opts.sound(ev, t, ev.d * beat, n, beat);
+        if (opts.onNote) schedule(() => opts.onNote(i, ev, n), t);
+        pos += ev.d;
+      });
+      const gap = ctl.loop ? (opts.loopGap || 0) : 0;
+      if (opts.metronome) { const beats = Math.ceil(pos + gap - 1e-6); for (let b = 0; b < beats; b++) A.click(passStart + b * beat, b % bpb === 0); }
+      const end = passStart + (pos + gap) * beat;
+      if (ctl.loop) {
+        passNo++;
+        if (opts.nextTempo) { const nt = opts.nextTempo(passNo, tempo); if (nt && nt !== tempo) { tempo = nt; beat = 60 / tempo; } }
+        passStart = end; schedule(pass, end - 0.35);
+      } else schedule(() => { if (current === ctl) stop(); }, end + 0.4);
+    }
+    pass();
+    return ctl;
+  }
   function isPlaying() { return !!current; }
-  GH.player = { playChord, playVoicing, playNotes, playProgression, playLick, stop, isPlaying, PATTERNS };
+  GH.player = { playChord, playVoicing, playNotes, playProgression, playLick, playSeq, stop, isPlaying, PATTERNS };
 })();

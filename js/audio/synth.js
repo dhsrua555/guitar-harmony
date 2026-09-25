@@ -502,6 +502,14 @@
     } else if (type === 'shaker') {
       noiseHit(out, t0, .12 * v, .078, 'bandpass', 5150 + Math.random() * 400, .85, .2);
       noiseHit(out, t0 + .009, .045 * v, .045, 'highpass', 7800, .35, .26);
+    } else if (type === 'tom1' || type === 'tom2' || type === 'tom3') { /* 탐 (녹음이 없어 합성음): 높은 탐 · 미드 탐 · 플로어 탐 */
+      const f = type === 'tom1' ? 210 : type === 'tom2' ? 160 : 108;
+      oscHit(out, t0, 'sine', f * 1.55, f, .5 * v, .34 + (type === 'tom3' ? .16 : 0), 0);
+      oscHit(out, t0, 'triangle', f * 2.4, f * 1.7, .06 * v, .08, 0);
+      noiseHit(out, t0, .07 * v, .05, 'bandpass', f * 6, .8, 0);
+    } else if (type === 'crash') { /* 크래시 심벌 (합성음) */
+      metalHit('hat', out, t0, .2 * v, 1.3, .9);
+      noiseHit(out, t0, .12 * v, 1.1, 'highpass', 5200, .4, .5);
     } else if (type === 'tick') { /* 메트로놈 분할음: 작고 짧게 */
       oscHit(master, t0, 'sine', 880, 840, .05 * Math.min(1.6, v), .02, 0);
     } else if (type === 'wood') { /* 리듬 패턴용 우드블록 */

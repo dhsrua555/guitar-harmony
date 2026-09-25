@@ -19,12 +19,18 @@
     add('페이지', '리듬 연습', '연습', ['rhythm', '리듬', '메트로놈', 'metronome', '박자', '스트럼', 'strum', '싱코페이션', '셋잇단', '16분', '탭', '갭 트레이닝'], '#/rhythm');
     add('퀴즈', '리듬 듣고 맞히기', '이어 트레이닝', ['rhythm', '리듬 청음', '리듬 받아쓰기'], '#/ear?tab=rhythm');
     add('페이지', '멜로디 화음 쌓기', '연습 · 도구', ['harmony', 'harmonize', '화음', '보이스', '성부', '3도 화음', '6도', '하모니 라인', '코러스', '더블링', 'voice'], '#/tools/harmony');
-    add('페이지', '멜로디 → 코드 찾기', '연습 · 도구', ['melody', '멜로디', '코드 붙이기', '하모나이즈', '반주 만들기', '작곡'], '#/tools/melody');
+    add('페이지', '멜로디 → 코드 찾기', '연습 · 도구', ['melody', '멜로디', '코드 붙이기', '하모나이즈', '반주 만들기', '작곡', '격자', '피아노 롤', 'piano roll', '코드 진행 추천', '화음 넣기'], '#/tools/melody');
     add('페이지', '기본 코드 폼', '기타 · 보이싱', ['voicing', 'chord', '오픈 포지션', 'caged', '이동형', '바레', '파워 코드'], '#/guitar/voicings/basic');
     add('페이지', '재즈·확장 보이싱', '기타 · 보이싱', ['voicing', '드롭2', 'drop 2', '셸', '가이드 톤', '텐션', 'quartal'], '#/guitar/voicings/advanced');
     add('페이지', '트라이어드 · 아르페지오', '기타 탭', ['triad', 'arpeggio', '3화음'], '#/guitar/triads');
     add('페이지', '스케일 포지션', '기타 탭', ['scale', 'position', 'caged', '3nps', '펜타토닉 박스'], '#/guitar/scales');
     add('페이지', '릭', '기타 탭', ['lick', 'phrase', '프레이즈', '솔로'], '#/guitar/licks');
+    add('페이지', '세션별 기본기 연습', '연습', ['technique', 'exercise', '기본기', '워밍업', '손풀기', '손 풀기', '루틴', '연습 루틴', '입시', '음대'], '#/technique');
+    add('페이지', '기타 기본기', '기본기 연습', ['guitar', '기타', '크로매틱', 'chromatic', '1234', '신경분리', '손가락 독립', 'finger independence', '스파이더', 'spider', '트릴', '얼터네이트', 'alternate picking', '피킹', '레가토', 'legato'], '#/technique/guitar');
+    add('페이지', '베이스 기본기', '기본기 연습', ['bass', '베이스', '투핑거', '시만들', '워킹', 'walking', '슬랩', 'slap', '데드 노트'], '#/technique/bass');
+    add('페이지', '키보드 기본기', '기본기 연습', ['keys', 'piano', '키보드', '피아노', '하논', 'hanon', '카덴스', 'cadence', '스케일 운지', '아르페지오', '알베르티'], '#/technique/keys');
+    add('페이지', '드럼 기본기', '기본기 연습', ['drums', '드럼', '루디먼트', 'rudiment', '패러디들', 'paradiddle', '싱글 스트로크', '더블 스트로크', '그루브', '고스트 노트', '필인', '리니어'], '#/technique/drums');
+    add('페이지', '보컬 기본기', '기본기 연습', ['vocal', 'voice', '보컬', '노래', '발성', '호흡', '롱톤', '립 트릴', '시창', '멜리스마', '런', '화음'], '#/technique/vocal');
     add('페이지', '인터벌 (Interval)', '화성학', ['interval', '인터벌', '음정', '도수'], '#/theory/intervals');
     add('페이지', '코드 이론', '화성학 탭', ['chord', '다이어토닉', '텐션', '코드 빌더', '표기법'], '#/theory/chords');
     add('페이지', '스케일 이론', '화성학 탭', ['scale', '5도권', 'circle of fifths', '조표', '코드 스케일'], '#/theory/scales');
@@ -53,6 +59,7 @@
     GH.data.reharm.forEach(r => add('리하모니', r.ko, r.en, [r.id, r.summary], '#/theory/reharm/' + encodeURIComponent(r.id)));
     (GH.data.course || []).forEach(ch => ch.lessons.forEach(l => add('레슨', l.title, '기초 코스 ' + ch.n + '장 · ' + ch.title, [l.id, l.lead].concat((l.terms || []).map(t => t[0] + ' ' + t[1])), '#/learn/' + l.id)));
     GH.data.glossary.forEach(g => add('용어', g.ko, g.en, [g.def.slice(0, 40)], '#/glossary?q=' + encodeURIComponent(g.ko)));
+    (GH.data.technique || []).forEach(x => { const c = GH.data.techCats.find(k => k.id === x.cat); const I = GH.data.techInst.find(k => k.id === x.inst); add('기본기', x.ko, I.ko + ' 기본기 · ' + c.ko, [x.id, c.en, c.ko, I.ko, I.en, '기본기', '연습'], '#/technique/' + x.inst + '/' + x.id); });
     GH.data.songs.forEach(s => add('곡 분석', s.ko, s.key + ' ' + s.form, [s.id], '#/songs/' + encodeURIComponent(s.id)));
     return ix;
   }

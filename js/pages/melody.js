@@ -76,10 +76,22 @@
       playable.forEach((p, gi) => { const at = t0 + gi * groupSize * step; p.midi.forEach((mm, k) => A.pluck(mm, at + k * 0.025, groupSize * step * 0.98, { gain: 0.55, bus: 'chords' })); A.bass(p.bass - 12, at, groupSize * step * 0.95, { gain: 0.8 }); });
     }
   }
+  GH.melodyTheory = { guessKeys, judgeNote, candidates, scoreChord };
   GH.pages['/tools/melody'] = {
     title: '멜로디 → 코드',
+    staff: true,
     render(el, params) {
       const A = GH.app; const qy = params.query || {};
+      if (qy.mode === 'grid' || qy.mode === 'list') state.mode = qy.mode;
+      if (!state.mode) state.mode = qy.notes ? 'list' : 'grid';
+      const modeTabs = h('div', { class: 'mg-mode', role: 'tablist' }, [['grid', '격자 (리듬까지)'], ['list', '음 나열']].map(([v, l]) => h('button', { class: 'chip' + (state.mode === v ? ' active' : ''), type: 'button', role: 'tab', 'aria-selected': state.mode === v ? 'true' : 'false', onclick: () => { state.mode = v; GH.router.rerender(); } }, l)));
+      if (state.mode === 'grid' && GH.melodyGrid) {
+        el.appendChild(h('h1', null, '멜로디 → 코드 찾기'));
+        el.appendChild(h('p', { class: 'muted' }, '멜로디를 격자에 리듬째 찍으면, 어울리는 코드 진행을 순위별로 추천하고 그 진행 안에서 쓸 수 있는 음과 화음을 보여 줘요. 모두 함께 재생해 들어 볼 수 있어요.'));
+        el.appendChild(modeTabs);
+        GH.melodyGrid.render(el);
+        return;
+      }
       GH.melodyInput.applyQuery(state, qy);
       if (qy.key && qy.key !== state.keyParam) { state.keyParam = qy.key; state.key = qy.key; }
       const guesses = guessKeys(state.notes);
@@ -87,6 +99,7 @@
       const keyName = state.key === 'auto' ? N.niceName(keyPc) : N.normalize(state.key);
       const pref = A.pref(keyName);
       el.appendChild(h('h1', null, '멜로디 → 코드 찾기'));
+      el.appendChild(modeTabs);
       el.appendChild(h('p', { class: 'muted' }, '멜로디 음을 넣으면 가능한 키를 분석하고 함께 사용할 코드 후보를 제안합니다. 음별 후보를 비교하거나 자동으로 코드를 붙여 들어 볼 수 있습니다.'));
 
       /* ---- 입력 (공용 모듈) ---- */

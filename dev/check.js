@@ -313,6 +313,102 @@
     ok(longPlan.url.length <= 7000 && longPlan.paste && longPlan.paste.length >= 1500, 'bug long report → short url + paste (' + longPlan.url.length + ')');
     ok(B.openPlan(br, fakeForm).paste === null, 'bug short report → full url');
     ok(B.envLines().some(l => l.startsWith('기기: ')), 'bug env lines');
+    /* 기본기 연습 (세션 5개) */
+    const T = GH.technique, TD = GH.data.technique;
+    const byT = id => TD.find(e => e.id === id);
+    const B_ = (id, q) => { const ex = byT(id); return T.build(ex, T.options(ex, q || {})); };
+    ok(GH.data.techInst.length === 5 && GH.data.techInst.every(I => TD.filter(e => e.inst === I.id).length >= 9 && GH.data.techCats.some(c => c.inst === I.id) && GH.data.techRoutines.filter(r => r.inst === I.id).length === 3 && (GH.data.techSources[I.id] || []).length >= 3),
+      'technique: 5 sessions × (exercises, categories, 3 routines, sources) ' + GH.data.techInst.map(I => I.id + ' ' + TD.filter(e => e.inst === I.id).length).join(' · '));
+    ok(new Set(TD.map(e => e.id)).size === TD.length && TD.every(e => GH.data.techCats.some(c => c.id === e.cat && c.inst === e.inst) && e.src && e.how.length && e.tips.length && e.tempo.length === 2 && e.level >= 1 && e.level <= 5), 'technique metadata (unique ids, category, source, how, tips, tempo)');
+    ok([1, 2, 3, 4, 5].every(lv => TD.some(e => e.level === lv)), 'technique levels 1-5 all used');
+    ok(GH.data.techRoutines.every(r => r.steps.every(([id]) => { const e = byT(id); return e && e.inst === r.inst; })), 'technique routines reference own-session exercises');
+    const techBad = [];
+    const KIT = new Set(['kick', 'snare', 'hat', 'hatopen', 'pedal', 'ride', 'crash', 'tom1', 'tom2', 'tom3', 'rim']);
+    TD.forEach(ex => (T.rhOptions(ex) || [null]).forEach(rh => {
+      const B = T.build(ex, T.options(ex, rh ? { rh } : {}));
+      const total = B.seq.reduce((a, s) => a + s.d, 0);
+      let good = B.seq.length > 0 && total > 0 && B.seq.every((s, i) => i === 0 || s.at > B.seq[i - 1].at - 1e-9);
+      if (B.kind === 'fretted') good = good && B.notes.every(n => n.s >= 1 && n.s <= B.NS && n.f >= 0 && n.f <= 17 && (typeof n.fg === 'string' || (n.fg >= 0 && n.fg <= 4)) && (n.t ? !n.pk : !!n.pk) && n.midi >= (ex.inst === 'bass' ? 28 : 40) && n.midi <= (ex.inst === 'bass' ? 70 : 88));
+      if (B.kind === 'keys') good = good && B.rh.concat(B.lh).every(n => n.m.length && n.fg.length === n.m.length && n.m.every(m => m >= 36 && m <= 96) && n.fg.every(f => f >= 1 && f <= 5));
+      if (B.kind === 'drums') good = good && B.seq.every(s => s.hits.every(x => KIT.has(x.k))) && Math.abs(total / 4 - Math.round(total / 4)) < 1e-6;
+      if (B.kind === 'vocal') good = good && B.seq.every(s => s.rest || (s.midi >= 40 && s.midi <= 84 && s.syl)) && Math.abs(total / 4 - Math.round(total / 4)) < 1e-6;
+      if (!good) techBad.push(ex.id + (rh ? '/' + rh : ''));
+    }));
+    ok(!techBad.length, 'technique notes valid for every exercise × rhythm ' + techBad.join(','));
+    const pcsOf = (k, sc) => new Set(GH.scales.pcs(N.pcOf(k), sc));
+    const pentBad = [], npsBad = [];
+    N.SHARP_NAMES.forEach(k => {
+      const mp = pcsOf(k, 'minor_pent'), ae = pcsOf(k, 'aeolian');
+      for (let b = 1; b <= 5; b++) { const ns = B_('pent-box', { key: k, box: String(b) }).notes; const midis = ns.slice(0, 12).map(n => n.midi); if (ns.length !== 24 || !midis.every((m, i) => mp.has(m % 12) && (i === 0 || m > midis[i - 1]))) pentBad.push(k + b); }
+      for (let q = 1; q <= 7; q++) { const ns = B_('legato-3nps', { key: k, pos: String(q) }).notes; const midis = ns.slice(0, 18).map(n => n.midi); if (ns.length !== 36 || !midis.every((m, i) => ae.has(m % 12) && (i === 0 || m > midis[i - 1])) || ns.filter((n, i) => i < 18 && i % 3 === 0).some(n => n.t)) npsBad.push(k + q); }
+    });
+    ok(!pentBad.length, 'guitar pentatonic boxes 12 keys × 5 (in scale, ascending) ' + pentBad.join(','));
+    ok(!npsBad.length, 'guitar 3NPS 12 keys × 7 (in scale, picked first of each string) ' + npsBad.join(','));
+    ok(new Set(GH.data.techPerms).size === 24 && GH.data.techAllPerms.every(p => GH.data.techPerms.includes(p)), 'guitar 24 finger permutations');
+    ok(B_('pick-open').notes.every((n, i) => n.pk === (i % 2 ? 'u' : 'd')) && B_('pick-cross', { pick: 'u' }).notes[0].pk === 'u', 'guitar alternate picking d/u, start up');
+    const tr = B_('trill').notes;
+    ok(tr.length === 48 && tr.filter(n => n.pk).length === 6 && Math.abs(tr.reduce((a, e) => a + e.d, 0) - 12) < 1e-6, 'guitar trill: 6 pairs, one pick each, 3 bars');
+    const pm = B_('perm', { perm: '1423', fret: '7' }).notes;
+    ok(pm.slice(0, 4).map(n => n.fg).join('') === '1423' && pm.slice(0, 4).map(n => n.f).join(',') === '7,10,8,9', 'guitar perm 1-4-2-3 at fret 7');
+    /* 베이스 */
+    const bScaleBad = N.SHARP_NAMES.filter(k => { const ns = B_('b-major', { key: k }).notes; const r = ns[0].midi; return ns.slice(0, 8).map(n => n.midi - r).join(',') !== '0,2,4,5,7,9,11,12' || ns[0].fg !== 2 || !ns.every(n => n.fg >= 1 && n.fg <= 4); });
+    ok(!bScaleBad.length, 'bass major scale 12 keys (intervals, root on finger 2) ' + bScaleBad.join(','));
+    const arp7 = B_('b-arp7', { key: 'C' }).notes.map(n => N.mod(n.midi, 12));
+    ok(arp7.slice(0, 12).join(',') === '2,5,9,0,7,11,2,5,0,4,7,11', 'bass ii–V–I chord tones in C');
+    const walk = B_('b-walk', { key: 'F' }).notes;
+    ok([0, 1, 2, 3].every(b => { const nextRoot = walk[((b + 1) % 4) * 4].midi; return Math.abs(walk[b * 4 + 3].midi - nextRoot) === 1; }), 'bass walking: beat 4 is a half step from the next root');
+    ok(B_('b-open').notes.every((n, i) => n.pk === (i % 2 ? 'm' : 'i')) && B_('b-slap').notes.some(n => n.pk === 'T') && B_('b-dead').notes.some(n => n.x), 'bass i/m alternation, slap T/P, dead notes');
+    /* 키보드 */
+    const hn = B_('k-hanon', { hands: 'rh' }).rh;
+    ok(hn.slice(0, 8).map(n => n.m[0]).join(',') === '60,64,65,67,69,67,65,64' && hn.slice(0, 8).map(n => n.fg[0]).join('') === '12345432' && hn.length === 112, 'keys Hanon No.1 figure (C E F G A G F E, 1-2-3-4-5-4-3-2)');
+    const ks = B_('k-scale', { key: 'C', hands: 'both' });
+    ok(ks.rh.length === 29 && ks.rh.slice(0, 15).map(n => n.fg[0]).join('') === '123123412312345' && ks.lh.slice(0, 15).map(n => n.fg[0]).join('') === '543213214321321' && ks.rh[14].m[0] === 84, 'keys C major 2-octave scale fingering (RH · LH)');
+    ok(B_('k-scale', { key: 'F' }).rh.slice(0, 15).map(n => n.fg[0]).join('') === '123412312341234', 'keys F major RH fingering');
+    const cad = B_('k-cadence', { key: 'C' }).rh.map(n => n.m.join('-'));
+    ok(cad.join(' ') === '60-64-67 60-65-69 59-62-67 60-64-67' && B_('k-cadence', { key: 'C', mode: 'minor' }).rh[2].m.includes(59), 'keys cadence I–IV–V–I voicings, minor V with leading tone');
+    const kc = B_('k-chrom').rh; ok(kc.length === 48 && kc.every((n, i) => i === 0 || Math.abs(n.m[0] - kc[i - 1].m[0]) === 1) && kc[1].fg[0] === 3, 'keys chromatic scale (half steps, 3 on black keys)');
+    const alb = B_('k-alberti'); ok(Math.abs(alb.rh.reduce((a, n) => a + n.d, 0) - alb.lh.reduce((a, n) => a + n.d, 0)) < 1e-6 && alb.seq.length > 16, 'keys Alberti bass: hands same length, merged onsets');
+    /* 드럼 */
+    const para = B_('d-para', { rh: '16' }).seq;
+    ok(para.slice(0, 8).map(s => s.st).join('') === 'RLRRLRLL' && para[0].hits[0].acc && !para[1].hits[0].acc && para[4].hits[0].acc, 'drums paradiddle sticking & accents');
+    const b8 = B_('d-8beat').seq; ok(b8.length === 16 && b8[2].hits.some(x => x.k === 'snare') && b8[0].hits.some(x => x.k === 'kick') && b8.every(s => s.hits.some(x => x.k === 'hat')), 'drums 8-beat groove lanes');
+    const sw = B_('d-swing').seq; ok(Math.abs(sw[0].d - 1 / 3) < 1e-9 && sw[3].hits.some(x => x.k === 'pedal') && sw[5].hits.some(x => x.k === 'ride'), 'drums swing ride triplets + hi-hat 2 · 4');
+    const lin = B_('d-linear').seq; ok(lin.every(s => s.hits.length === 1), 'drums linear: one limb per slot');
+    /* 보컬 */
+    const v5 = B_('v-five', { voice: 'alto', steps: '5' });
+    ok(v5.seq[0].midi === 55 && v5.seq[0].syl === '도' && v5.seq[4].syl === '솔' && v5.trs.join(',') === '0,1,2,3,4,5,4,3,2,1', 'vocal 5-tone scale: root, solfège, key steps up & down');
+    ok(B_('v-five', { voice: 'bari' }).seq[0].midi === 43 && B_('v-five', { syl: 'vowel' }).seq[1].syl === '아', 'vocal voice range & vowel option');
+    const vh = B_('v-harmony').seq; ok(vh.slice(0, 8).every(s => s.gmidi != null && (s.midi - s.gmidi === 3 || s.midi - s.gmidi === 4)), 'vocal harmony: sung line a diatonic 3rd above the guide');
+    ok(B_('v-chrom').seq.slice(8).some(s => /♭/.test(s.syl)), 'vocal chromatic: flats on the way down');
+    /* 그림 · 악보 */
+    const kit = GH.render.drumkit(); kit.highlight([{ k: 'snare', st: 'L' }]);
+    ok(kit.el.querySelectorAll('.kit-pad').length === 9 && kit.el.querySelector('.kit-snare.cur .kit-hand').textContent === 'L', 'drum kit view: 9 pads, highlight with sticking');
+    const pno = GH.render.piano({ from: 48, to: 72 }); pno.highlightMany([60, 64]); ok(pno.querySelectorAll('g.current').length === 2, 'piano highlightMany');
+    const fb4 = GH.render.fretboard({ tuning: GH.data.techBassTuning, from: 0, to: 5, notes: [{ s: 4, f: 3, label: '1' }] }); ok(fb4.svg.querySelectorAll('.stringname').length === 4, 'fretboard with 4 strings (bass)');
+    const tab4 = GH.render.tab({ notes: B_('b-chroma').notes.slice(0, 8) }, { strings: 4 }); ok(tab4.el.querySelectorAll('.finger').length === 8, 'bass TAB (4 strings) with fingers');
+    const tabT = GH.render.tab({ notes: pm.slice(0, 8) }, {});
+    ok(tabT.el.querySelectorAll('.finger').length === 8 && tabT.el.querySelectorAll('.pick').length === 8, 'tab shows fingers and picks');
+    if (window.Vex) {
+      const shB = GH.render.sheet({ kind: 'drum', slots: B_('d-8beat').seq }); ok(!!shB, 'drum sheet renders');
+      const shK = GH.render.sheet({ kind: 'grand', rh: ks.rh.map(n => ({ at: n.at, d: n.d, m: n.m, fg: n.fg.join('') })), lh: ks.lh.map(n => ({ at: n.at, d: n.d, m: n.m })) }); ok(!!shK, 'grand staff renders');
+    }
+    ok(GH.search.query('신경분리').some(x => x.route === '#/technique/guitar/perm' || x.route === '#/technique/guitar'), 'search 신경분리');
+    ok(GH.search.query('하논').some(x => x.route === '#/technique/keys/k-hanon') && GH.search.query('패러디들').some(x => /technique\/drums/.test(x.route)), 'search 하논 · 패러디들');
+    /* 세션 설문 */
+    const GG = GH.guide;
+    ok(GG.SESSIONS.length === 5 && GG.plan({ level: 'new', goals: ['guitar', 'rhythm'], sessions: ['drums'] }).every(m => !m.inst || m.inst.includes('drums')) && GG.plan({ level: 'new', goals: ['guitar', 'rhythm'], sessions: ['drums'] }).some(m => m.inst && m.inst.includes('drums')), 'guide: drum session → drum missions, no guitar-only missions');
+    ok(GG.plan({ level: 'new', goals: ['guitar'], sessions: [] }).every(m => !m.inst || m.inst.includes('guitar')), 'guide: no session chosen → guitar (as before)');
+    ok(GG.levelText(GG.LEVELS[1], 'drums').ko === '기본 비트는 쳐요' && GG.levelText(GG.LEVELS[1], 'guitar').ko === '코드 몇 개는 잡아요', 'guide: level text per session');
+    /* 용어집 분류 */
+    ok(GH.data.glossaryCats.length >= 8 && GH.data.glossary.every(g => GH.data.glossaryCats.some(c => c.id === g.cat && c.terms.includes(g.ko))), 'glossary: every term in exactly a named category');
+    /* 멜로디 격자 → 코드 진행 추천 */
+    const MG = GH.melodyGrid; const ex = MG.EXAMPLES.twinkle.notes.map(([s, l, m]) => ({ s, l, m }));
+    const mst = MG.state(); Object.assign(mst, { bars: 4, res: 2, hr: 1, sevenths: false });
+    const gk = MG.guessKeys(ex); ok(gk[0].pc === 0, 'melody grid: key of 작은 별 = C');
+    const pr = MG.progressions(ex, 'C');
+    ok(pr.length === 5 && new Set(pr.map(p => p.chords.map(c => c.symbol).join(' '))).size === 5 && pr.every((p, i) => i === 0 || p.score <= pr[i - 1].score + 1e-9), 'melody grid: 5 distinct ranked progressions');
+    ok(pr[0].chords.length === 4 && pr[0].chords[0].symbol === 'C' && pr[0].chords[3].symbol === 'C' && pr[0].pct >= 70, 'melody grid: top progression starts and ends on C (' + pr[0].chords.map(c => c.symbol).join(' ') + ', ' + pr[0].pct + '%)');
+    Object.assign(mst, { hr: 2 }); ok(MG.progressions(ex, 'C')[0].chords.length === 8, 'melody grid: two chords per bar'); Object.assign(mst, { hr: 1 });
     /* render all pages */
     const samples = {
       '/chord/:root/:q': { root: 'F#', q: 'm7b5' },
@@ -323,7 +419,9 @@
       '/theory/modes/:id': { id: 'dorian' },
       '/theory/scales/:id': { id: 'ionian' },
       '/songs/:id': { id: 'autumn' },
-      '/songs/:id/bar/:bar': { id: 'autumn', bar: '2' }
+      '/songs/:id/bar/:bar': { id: 'autumn', bar: '2' },
+      '/technique/:inst/:id': { inst: 'guitar', id: 'chroma-1234' },
+      '/technique/:inst': { inst: 'guitar' }
     };
     Object.keys(GH.pages).forEach(path => {
       const div = document.createElement('div');
@@ -336,6 +434,9 @@
       ['/theory/modes', { query: { tab: 'parallel' } }], ['/theory/modes', { query: { tab: 'relative' } }], ['/theory/modes', { query: { tab: 'mm' } }], ['/theory/modes', { query: { tab: 'hm' } }], ['/theory/modes', { query: { tab: 'modal' } }],
       ['/guitar/scales', { query: { scale: 'ionian' } }], ['/guitar/scales', { query: { scale: 'hw_dim' } }], ['/guitar/voicings', { query: { q: '13', types: 'jazz,drop24,quartal' } }], ['/theory/progressions', { query: { id: 'coltrane' } }], ['/theory/reharm', { query: { id: 'coltrane' } }], ['/songs', { query: { id: 'fbluesjazz' } }], ['/ear', { query: { tab: 'degree' } }], ['/ear', { query: { tab: 'interval' } }], ['/ear', { query: { tab: 'root' } }], ['/ear', { query: { tab: 'chord' } }], ['/ear', { query: { tab: 'mode' } }], ['/ear', { query: { tab: 'prog' } }], ['/backing', { query: { id: 'blues12', key: 'A' } }], ['/backing', { query: { chords: 'Dm7 G7 | Cmaj7 | Xyz' } }], ['/backing', { query: { chords: 'C Am F G' } }], ['/tools/melody', { query: { notes: 'E D C D E E E' } }], ['/tools/harmony', { query: { notes: 'C4 D4 E4 F4 G4 C#4', key: 'C' } }], ['/tools/harmony', { query: { notes: 'A3 B3 C4 G#4', key: 'A', scale: 'harmonic_minor' } }], ['/rhythm', { query: { tab: 'tap' } }], ['/rhythm', { query: { tab: 'strum' } }], ['/ear', { query: { tab: 'rhythm' } }], ['/guitar/phrasing', { query: {} }], ['/guitar/doublestops', { query: {} }], ['/tools/melody', { query: { notes: 'A4 C5 E5 D5', key: 'C' } }], ['/theory/chords', { query: { tab: 'types', group: 'level' } }], ['/theory/reharm', { query: { id: 'tritone_sub' } }]];
     GH.data.licks.forEach(l => variants.push(['/guitar/licks/:id', { id: l.id, query: {} }]));
+    GH.data.technique.forEach(x => { variants.push(['/technique/:inst/:id', { inst: x.inst, id: x.id, query: {} }]); variants.push(['/technique/:inst/:id', { inst: x.inst, id: x.id, query: { rh: '16', key: 'E', box: '5', pos: '7', fret: '12', perm: '4312', pick: 'u', string: '4', hands: 'both', oct: '2', mode: 'minor', kick: 'v5', voice: 'bari', steps: '8', syl: 'vowel', guide: 'off' } }]); });
+    GH.data.techInst.forEach(I => variants.push(['/technique/:inst', { inst: I.id, query: {} }]));
+    variants.push(['/technique/:inst/:id', { inst: 'guitar', id: 'perm', query: { routine: 'g-mid', step: '2' } }], ['/technique/:inst/:id', { inst: 'guitar', id: 'nope', query: {} }], ['/technique/:inst', { inst: 'guitar', query: { r: 'g-hard' } }], ['/technique/:inst', { inst: 'nope', query: {} }], ['/technique/:inst/:id', { inst: 'bass', id: 'chroma-1234', query: {} }]);
     variants.forEach(([path, params]) => { const div = document.createElement('div'); try { GH.pages[path].render(div, params); ok(true, 'render ' + path + ' ' + JSON.stringify(params)); } catch (e) { fails++; log('FAIL render ' + path + ' ' + JSON.stringify(params) + ': ' + e.message + '\n' + (e.stack || '').split('\n').slice(0, 3).join('\n')); } });
     /* 12 키로 허브 렌더 */
     N.SHARP_NAMES.concat(N.FLAT_NAMES).forEach(rt => { ['maj7', '7', 'm7', 'm7b5', 'dim7', '7alt', '13sus4'].forEach(q => { const div = document.createElement('div'); try { GH.pages['/chord/:root/:q'].render(div, { root: rt, q, query: {} }); } catch (e) { fails++; log('FAIL hub ' + rt + ' ' + q + ': ' + e.message); } }); });
