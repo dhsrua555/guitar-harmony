@@ -302,13 +302,16 @@
     const B = GH.bug;
     ok(GH.search.query('버그').some(x => x.route === '#/bug'), 'search 버그 → #/bug');
     const br = { kind: 'sound', what: '드럼이 안 들려요\n둘째 줄', steps: '1. 재생', page: '백킹 트랙 (#/backing)', env: B.envLines().join('\n') };
-    const bu = B.issueUrl(br);
-    ok(bu.startsWith('https://github.com/dhsrua555/guitar-harmony/issues/new?template=bug.yml&') && /[?&]what=/.test(bu) && /[?&]env=/.test(bu) && !/ /.test(bu), 'bug issue url');
-    ok(decodeURIComponent(bu.match(/title=([^&]+)/)[1]) === '[버그] 소리: 드럼이 안 들려요', 'bug title ' + B.titleOf(br));
+    const fakeForm = { id: 'TESTID', entry: { kind: '11', what: '22', steps: '33', page: '44', env: '55' } };
+    const body = B.formBody(br, fakeForm);
+    ok(body.get('entry.11') === '소리가 안 나거나 이상해요' && body.get('entry.22') === br.what && body.get('entry.44') === br.page && body.get('entry.55').startsWith('기기: '), 'bug form body');
+    ok(!B.formBody({ what: 'x' }, fakeForm).has('entry.11') && !B.formBody({ what: 'x' }, fakeForm).has('entry.33'), 'bug form body skips empty');
+    const pu = B.prefillUrl(br, fakeForm);
+    ok(pu.startsWith('https://docs.google.com/forms/d/e/TESTID/viewform?usp=pp_url&entry.') && !/ /.test(pu) && decodeURIComponent(pu.match(/entry\.22=([^&]+)/)[1]) === br.what, 'bug prefill url');
     ok(B.reportText(br).includes('드럼이 안 들려요') && B.reportText(br).includes('기기 정보'), 'bug report text');
-    const longPlan = B.sendPlan(Object.assign({}, br, { what: '가'.repeat(1500) }));
+    const longPlan = B.openPlan(Object.assign({}, br, { what: '가'.repeat(1500) }), fakeForm);
     ok(longPlan.url.length <= 7000 && longPlan.paste && longPlan.paste.length >= 1500, 'bug long report → short url + paste (' + longPlan.url.length + ')');
-    ok(B.sendPlan(br).paste === null, 'bug short report → full url');
+    ok(B.openPlan(br, fakeForm).paste === null, 'bug short report → full url');
     ok(B.envLines().some(l => l.startsWith('기기: ')), 'bug env lines');
     /* render all pages */
     const samples = {

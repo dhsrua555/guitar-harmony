@@ -1220,6 +1220,7 @@ body.panel-open .coach-fab,body.menu-open .coach-fab,body.panel-open .coach-nudg
 .bug-check input { flex:none; margin-top:2px; }
 .bug-env { margin:0; padding:10px 14px; border:1px dashed var(--line-strong); border-radius:12px; background:var(--bg-soft); color:var(--fg-soft); font-family:inherit; font-size:.8rem; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
 .bug-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.bug-send.busy { opacity:.6; pointer-events:none; }
 .bug-copied { color:var(--brand); font-size:.84rem; font-weight:700; }
 .bug-help { margin:0; color:var(--fg-muted); font-size:.84rem; line-height:1.65; }
 .bug-more summary { cursor:pointer; color:var(--fg-soft); font-size:.88rem; font-weight:700; }

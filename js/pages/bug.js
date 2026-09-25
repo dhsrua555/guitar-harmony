@@ -1,12 +1,13 @@
-/* 도움 › 버그 제보함: 제보 글을 만들어 GitHub 이슈로 보내거나 복사한다 */
+/* 도움 › 버그 제보함: 제보 글을 만들어 구글 폼으로 보내거나 복사한다 */
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
   GH.pages = GH.pages || {};
   const { h, clear } = GH.ui;
-  const REPO = 'https://github.com/dhsrua555/guitar-harmony';
+  /* 구글 폼 (dev/bug_form.gs 로 만든 폼): 게시 주소의 id 와 질문마다의 entry 번호 */
+  const FORM = { id: '1FAIpQLSdWYB5ltqLB7tLdHptknigTRAVunEfROBblxish5TJvxN4gZQ', entry: { kind: '1419174521', what: '83820666', steps: '1646830685', page: '656988949', env: '1377571847' } };
   const DRAFT_KEY = 'gh.bug.draft';
-  const MAX_URL = 7000;     /* GitHub 가 받는 주소 길이에 여유를 둔 값 */
+  const MAX_URL = 7000;     /* 미리 채운 폼 주소 길이에 여유를 둔 값 */
   const KINDS = [
     { value: 'sound', label: '소리가 안 나거나 이상해요', short: '소리' },
     { value: 'screen', label: '화면이 깨지거나 이상해요', short: '화면' },
@@ -86,12 +87,6 @@
 
   /* ---- 제보 글 ---- */
   const kindOf = v => KINDS.find(k => k.value === v);
-  function titleOf(r) {
-    const k = kindOf(r.kind);
-    const first = (r.what || '').trim().split('\n')[0].replace(/\s+/g, ' ');
-    const cut = first.length > 48 ? first.slice(0, 47) + '…' : first;
-    return '[버그] ' + (k ? k.short + ': ' : '') + (cut || '제목 없음');
-  }
   function reportText(r) {
     const k = kindOf(r.kind);
     return ['[기타 & 화성학 버그 제보]',
@@ -101,20 +96,27 @@
       r.steps && r.steps.trim() ? '\n다시 생기는 방법\n' + r.steps.trim() : null,
       r.env ? '\n기기 정보\n' + r.env : null].filter(x => x != null).join('\n');
   }
-  function issueUrl(r, short) {
+  /* ---- 구글 폼으로 보내기 ---- */
+  const ready = f => !!(f && f.id && f.entry && f.entry.what);
+  const formBase = f => 'https://docs.google.com/forms/d/e/' + f.id;
+  function pairs(r, f, short) {
     const k = kindOf(r.kind);
-    const q = [['template', 'bug.yml'], ['title', titleOf(r)], ['kind', k ? k.short : ''], ['page', r.page || '']];
-    if (short) q.push(['what', '(내용이 길어서 복사해 두었어요. 여기에 붙여넣기 해 주세요.)']);
-    else q.push(['what', (r.what || '').trim()], ['steps', (r.steps || '').trim()]);
-    q.push(['env', r.env || '']);
-    return REPO + '/issues/new?' + q.filter(p => p[1]).map(p => p[0] + '=' + encodeURIComponent(p[1])).join('&');
+    const v = { kind: k ? k.label : '', what: (r.what || '').trim(), steps: (r.steps || '').trim(), page: r.page || '', env: r.env || '' };
+    if (short) { v.what = '(내용이 길어서 복사해 두었어요. 여기에 붙여넣기 해 주세요.)'; v.steps = ''; }
+    return Object.keys(v).filter(x => v[x] && f.entry[x]).map(x => ['entry.' + f.entry[x], v[x]]);
   }
-  /* 주소가 너무 길면 짧은 주소 + 복사할 글을 따로 준다 */
-  function sendPlan(r) {
-    const full = issueUrl(r, false);
+  function formBody(r, f) { const p = new URLSearchParams(); pairs(r, f || FORM).forEach(([k, v]) => p.append(k, v)); return p; }
+  /* 사이트에서 바로 제출 (로그인 필요 없음). 응답 내용은 읽을 수 없어서 전송만 확인한다 */
+  function submit(r, f) { f = f || FORM; return fetch(formBase(f) + '/formResponse', { method: 'POST', mode: 'no-cors', body: formBody(r, f) }); }
+  /* 새 창에서 제출할 미리 채운 폼 주소. 너무 길면 짧은 주소 + 붙여넣을 글을 따로 준다 */
+  function prefillUrl(r, f, short) { f = f || FORM; return formBase(f) + '/viewform?usp=pp_url&' + pairs(r, f, short).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&'); }
+  function openPlan(r, f) {
+    const full = prefillUrl(r, f, false);
     if (full.length <= MAX_URL) return { url: full, paste: null };
-    return { url: issueUrl(r, true), paste: [(r.what || '').trim(), r.steps && r.steps.trim() ? '\n다시 생기는 방법\n' + r.steps.trim() : ''].join('\n').trim() };
+    return { url: prefillUrl(r, f, true), paste: [(r.what || '').trim(), r.steps && r.steps.trim() ? '\n다시 생기는 방법\n' + r.steps.trim() : ''].join('\n').trim() };
   }
+  /* 아티팩트 안에서는 보안 정책이 바로 제출을 막으므로 새 창으로 연다 */
+  const canPost = () => typeof fetch === 'function' && /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
   async function copyText(text) {
     try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; } } catch (e) { /* 아래 방법으로 */ }
     const back = document.activeElement;
@@ -141,8 +143,8 @@
       const cur = () => ({ kind: st.kind, what: st.what, steps: st.steps, page: st.page.trim(), env: st.withEnv ? envLines().join('\n') : '' });
 
       el.appendChild(h('h1', null, '버그 제보함'));
-      el.appendChild(h('p', { class: 'muted' }, '이상한 점을 알려 주시면 고칠게요. 칸 두 개만 채우면 돼요.'));
-      el.appendChild(GH.ui.notice(h('b', null, '보낸 제보는 GitHub에 공개로 올라가요. '), '이름 · 전화번호 · 이메일 같은 개인정보는 적지 말아 주세요.'));
+      el.appendChild(h('p', { class: 'muted' }, '이상한 점을 알려 주시면 고칠게요. 칸 두 개만 채우면 되고 로그인은 필요 없어요. 보낸 내용은 사이트 운영자만 봐요.'));
+      const post = canPost(), live = ready(FORM);
 
       const done = h('div', { class: 'bug-done', hidden: !st.sent, role: 'status', 'aria-live': 'polite' });
       const form = h('div', { class: 'bug-form' });
@@ -174,23 +176,39 @@
         h('label', { class: 'bug-check' }, envChk, '기기 · 설정 정보 함께 보내기 (고치는 데 큰 도움이 돼요)'), envBox));
 
       /* 보내기 */
-      const send = h('a', { class: 'btn primary', href: REPO + '/issues/new?template=bug.yml', target: '_blank', rel: 'noopener', onclick: onSend }, GH.icon('arrow'), 'GitHub으로 보내기');
+      const sendLabel = h('span', null, '보내기');
+      const send = h('a', { class: 'btn primary bug-send', href: '#/bug', target: post ? null : '_blank', rel: 'noopener', hidden: !live, onclick: onSend }, GH.icon('arrow'), sendLabel);
       const copy = h('button', { class: 'btn', type: 'button', onclick: onCopy }, '내용 복사하기');
       const copyMsg = h('span', { class: 'bug-copied', role: 'status', 'aria-live': 'polite' });
       form.appendChild(h('div', { class: 'bug-actions' }, send, copy, copyMsg));
-      form.appendChild(h('p', { class: 'bug-help' }, 'GitHub으로 보내려면 GitHub 계정(무료)이 필요해요. 새 창에 제보가 채워져 열리면 초록색 ', h('b', null, 'Create'), ' 버튼을 눌러야 접수돼요. 계정이 없다면 ', h('b', null, '내용 복사하기'), '를 눌러 사이트를 알려 준 사람에게 메시지로 보내 주세요.'));
+      form.appendChild(h('p', { class: 'bug-help' }, !live ? ['제보 창구를 준비하고 있어요. 지금은 ', h('b', null, '내용 복사하기'), '를 눌러 사이트를 알려 준 사람에게 메시지로 보내 주세요.']
+        : post ? ['누르면 바로 접수돼요. 잘 안 되면 ', h('b', null, '내용 복사하기'), '로 복사해서 사이트를 알려 준 사람에게 메시지로 보내 주세요.']
+        : ['누르면 내용이 채워진 구글 폼이 새 창으로 열려요. 거기서 ', h('b', null, '제출'), '을 눌러야 접수돼요.']));
       const previewTxt = h('pre', { class: 'bug-env bug-preview' });
       form.appendChild(h('details', { class: 'bug-more' }, h('summary', null, '보낼 내용 미리 보기'), previewTxt));
-      form.appendChild(h('p', { class: 'bug-help' }, h('a', { href: REPO + '/issues?q=label%3Abug', target: '_blank', rel: 'noopener' }, '다른 사람이 보낸 제보 보기'), ' · 적던 내용은 이 브라우저에 잠깐 저장돼요.'));
+      form.appendChild(h('p', { class: 'bug-help' }, '적던 내용은 보낼 때까지 이 브라우저에 잠깐 저장돼요.'));
 
       el.appendChild(done); el.appendChild(form);
-      function showDone(paste) {
+      function showDone(kind) {
         clear(done); done.hidden = false;
+        const again = h('button', { class: 'btn small', type: 'button', onclick: () => { st = null; stFrom = null; dropDraft(); GH.router.rerender(); window.scrollTo(0, 0); } }, '새 제보 쓰기');
+        const back = lastSeen ? h('a', { class: 'btn small ghost', href: lastSeen.hash }, '보던 페이지로 돌아가기') : null;
+        if (kind === 'posted') {
+          form.hidden = true;
+          done.append(h('b', null, '보냈어요! 고마워요.'), h('p', null, '확인하고 고칠게요. 다른 문제도 있다면 하나씩 따로 보내 주세요.'), h('div', { class: 'bug-actions' }, again, back));
+          return;
+        }
+        if (kind === 'failed') {
+          const plan = openPlan(cur());
+          done.append(h('b', null, '바로 보내지 못했어요.'), h('p', null, '인터넷 연결을 확인하거나, 아래 버튼으로 구글 폼을 열어 제출해 주세요. 적은 내용이 그대로 채워져요.'),
+            h('div', { class: 'bug-actions' }, h('a', { class: 'btn small primary', href: plan.url, target: '_blank', rel: 'noopener', onclick: () => { if (plan.paste) copyText(plan.paste); st.sent = plan.paste ? 'paste' : 'opened'; setTimeout(() => showDone(st.sent), 0); } }, '구글 폼 열어서 보내기')));
+          return;
+        }
         done.append(h('b', null, '고마워요! 거의 다 됐어요.'),
-          h('p', null, paste ? '내용이 길어서 따로 복사해 두었어요. 열린 GitHub 창의 “무엇이 이상했나요?” 칸에 붙여넣기 한 뒤 Create 를 눌러 주세요.' : '열린 GitHub 창에서 내용을 확인하고 초록색 Create 버튼을 누르면 접수돼요. 창이 안 열렸다면 아래 “내용 복사하기”를 써 주세요.'),
-          h('div', { class: 'bug-actions' }, h('button', { class: 'btn small', type: 'button', onclick: () => { st = null; stFrom = lastSeen; dropDraft(); GH.router.rerender(); window.scrollTo(0, 0); } }, '새 제보 쓰기'), lastSeen ? h('a', { class: 'btn small ghost', href: lastSeen.hash }, '보던 페이지로 돌아가기') : null));
+          h('p', null, kind === 'paste' ? '내용이 길어서 따로 복사해 두었어요. 열린 구글 폼의 “무엇이 이상했나요?” 칸에 붙여넣기 한 뒤 제출을 눌러 주세요.' : '열린 구글 폼에서 내용을 확인하고 제출을 누르면 접수돼요. 창이 안 열렸다면 아래 “내용 복사하기”를 써 주세요.'),
+          h('div', { class: 'bug-actions' }, again, back));
       }
-      if (st.sent) showDone(st.sent === 'paste');
+      if (st.sent) showDone(st.sent);
 
       function changed() {
         saveDraft(st);
@@ -198,18 +216,31 @@
         count.textContent = st.what.length ? st.what.length + ' / 2000' : '';
         envBox.hidden = !st.withEnv; envBox.textContent = r.env;
         previewTxt.textContent = reportText(r);
-        send.href = sendPlan(r).url;
+        if (live && !post) send.href = openPlan(r).url;
       }
+      let sending = false;
       function onSend(e) {
+        if (post || !st.what.trim()) e.preventDefault();
         if (!st.what.trim()) {
-          e.preventDefault(); whatErr.hidden = false; what.classList.add('bad');
+          whatErr.hidden = false; what.classList.add('bad');
           what.focus({ preventScroll: true }); what.scrollIntoView({ block: 'center', behavior: 'smooth' }); return;
         }
-        const plan = sendPlan(cur());
-        send.href = plan.url;
-        if (plan.paste) copyText(plan.paste);
-        st.sent = plan.paste ? 'paste' : 'sent';
-        showDone(!!plan.paste);
+        if (!post) {
+          const plan = openPlan(cur());
+          send.href = plan.url;
+          if (plan.paste) copyText(plan.paste);
+          st.sent = plan.paste ? 'paste' : 'opened';
+          showDone(st.sent);
+          return;
+        }
+        if (sending) return;
+        sending = true; send.classList.add('busy'); send.setAttribute('aria-disabled', 'true'); sendLabel.textContent = '보내는 중…';
+        submit(cur()).then(() => {
+          dropDraft();
+          st = Object.assign({ kind: '', what: '', steps: '', withEnv: true }, { page: st.page, sent: 'posted' });
+          showDone('posted'); window.scrollTo(0, 0);
+        }, () => { st.sent = 'failed'; showDone('failed'); done.scrollIntoView({ block: 'center', behavior: 'smooth' }); })
+          .then(() => { sending = false; send.classList.remove('busy'); send.removeAttribute('aria-disabled'); sendLabel.textContent = '보내기'; });
       }
       async function onCopy() {
         const ok = await copyText(reportText(cur()));
@@ -219,5 +250,5 @@
       changed();
     }
   };
-  GH.bug = { KINDS, issueUrl, sendPlan, reportText, titleOf, envLines, device, errors };
+  GH.bug = { FORM, KINDS, ready, formBody, prefillUrl, openPlan, reportText, envLines, device, errors };
 })();
