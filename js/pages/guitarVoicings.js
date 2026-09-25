@@ -60,7 +60,7 @@
     tb.appendChild(h('label', null, '코드 퀄리티', A.qualitySelect(qId, v => { state.q[level] = v; navigate({ q: v }); })));
     tb.appendChild(h('label', null, '다이어그램 표기', select({ options: [{ value: 'iv', label: '도수' }, { value: 'finger', label: '손가락 번호' }, { value: 'name', label: '음이름' }], value: state.labelMode, onChange: v => { state.labelMode = v; GH.router.rerender(); } })));
     tb.appendChild(h('label', null, '현 세트', select({ options: [{ value: 'all', label: '전체' }, '6-5-4-3', '5-4-3-2', '4-3-2-1', '6-4-3-2', '5-3-2-1'], value: state.strSet, onChange: v => { state.strSet = v; GH.router.rerender(); } })));
-    tb.appendChild(h('label', null, '전위 (Inversion)', select({ options: [{ value: 'all', label: '전체' }, { value: '0', label: '기본위치' }, { value: '1', label: '1전위' }, { value: '2', label: '2전위' }, { value: '3', label: '3전위' }], value: state.inv, onChange: v => { state.inv = v; GH.router.rerender(); } })));
+    tb.appendChild(h('label', null, '인버전', select({ options: [{ value: 'all', label: '전체' }, { value: '0', label: '기본위치' }, { value: '1', label: '1전위' }, { value: '2', label: '2전위' }, { value: '3', label: '3전위' }], value: state.inv, onChange: v => { state.inv = v; GH.router.rerender(); } })));
     el.appendChild(tb);
     el.appendChild(h('div', { style: 'margin:0 0 12px' }, h('span', { class: 'muted', style: 'margin-right:8px' }, '보이싱 타입'), chips({ options: allowed.map(k => ({ value: k, label: GH.data.voicingTypes[k] })), value: state.types[level], multi: true, onChange: v => { state.types[level] = v; navigate({ types: v.join(',') }); } })));
 

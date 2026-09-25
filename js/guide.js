@@ -92,7 +92,9 @@
   const profile = () => data.profile;
   function setProfile(patch) { Object.assign(data.profile, patch); save(); GH.events.emit('guide', data); }
   const levelIdx = () => Math.max(0, LEVELS.findIndex(l => l.id === data.profile.level));
-  const missionHref = m => GH.router.href(m.route, m.q || null);
+  const missionHref = (m, extra) => GH.router.href(m.route, Object.assign({}, m.q || {}, extra || {}));
+  /* 미션 페이지의 따라 하기 단계 (coach.js) */
+  function missionSteps(m) { const S = GH.coach && GH.coach.stepsFor({ path: m.route, query: m.q || {} }); return S ? S.map(x => x.say) : []; }
 
   /* 맞춤 순서: 지금 수준과 한 단계 위, 목표가 겹치는 미션을 쉬운 것부터 */
   function plan(p) {
@@ -176,13 +178,20 @@
     if (!data.profile.onboarded) {
       return h('section', { class: 'guide-card start' },
         h('div', null, h('span', { class: 'eyebrow' }, 'MY GUIDE'), h('h2', null, '나에게 맞는 순서를 추천받으세요'), h('p', { class: 'muted' }, '음악 지식 수준과 목표를 두 번의 선택으로 알려 주시면, 쉬운 것부터 차례로 할 일을 골라 드립니다.')),
-        h('button', { class: 'btn primary', type: 'button', onclick: () => openOnboarding({ onDone: rerender }) }, '30초 설문 시작 →'));
+        h('div', { class: 'guide-start-btns' },
+          h('button', { class: 'btn primary', type: 'button', onclick: () => openOnboarding({ onDone: rerender }) }, '30초 설문 시작 →'),
+          h('a', { class: 'btn', href: '#/learn/notes?coach=1' }, '설문 없이 첫 레슨부터')));
     }
     const list = plan(); const n = next();
     return h('section', { class: 'guide-card' },
       h('div', { class: 'guide-card-head' }, h('div', null, h('span', { class: 'eyebrow' }, 'MY GUIDE'), h('h2', null, n ? '다음에 할 일' : '추천 미션을 모두 마쳤어요')),
         h('div', { class: 'row', style: 'gap:6px' }, h('span', { class: 'badge accent' }, levelKo()), goalChips(), h('button', { class: 'btn small', type: 'button', onclick: () => openOnboarding({ onDone: rerender }) }, '수정'))),
-      n ? h('a', { class: 'guide-next', href: missionHref(n) }, h('b', null, n.title), h('span', { class: 'muted' }, n.desc), h('span', { class: 'guide-go', 'aria-hidden': 'true' }, GH.icon('arrow')))
+      n ? h('a', { class: 'guide-next', href: missionHref(n, { coach: 1 }) },
+          h('span', { class: 'guide-now-tag' }, '지금 할 일 하나'),
+          h('b', null, n.title), h('span', { class: 'muted' }, n.desc),
+          missionSteps(n).length ? h('ol', { class: 'guide-steps' }, missionSteps(n).slice(0, 3).map(t => h('li', null, t))) : null,
+          h('span', { class: 'guide-start' }, GH.icon('play', { size: 14 }), '누르면 페이지로 가서 하나씩 짚어 드려요'),
+          h('span', { class: 'guide-go', 'aria-hidden': 'true' }, GH.icon('arrow')))
         : h('p', null, '수준을 한 단계 올리거나 목표를 추가하면 새 미션이 나옵니다.'),
       progressBar(list),
       h('a', { class: 'guide-all', href: '#/learn' }, '전체 추천 경로 보기 →'));
@@ -213,14 +222,16 @@
     const beginner = (!data.profile.onboarded || levelIdx() <= 1) && (data.visits[route.path] || 0) <= 2;
     const open = openState[route.path] != null ? openState[route.path] : beginner;
     const n = next();
+    const S = GH.coach && GH.coach.stepsFor(route); const coachSteps = S ? S.map(x => x.say) : null;
     const box = h('details', { class: 'page-guide', open: open ? true : null, ontoggle: e => { openState[route.path] = e.currentTarget.open; } },
-      h('summary', null, h('span', { class: 'guide-dot', 'aria-hidden': 'true' }, GH.icon('note')), h('span', null, mission ? '미션 · ' + mission.title : '이 페이지 사용법'), mission && isDone(mission.id) ? h('span', { class: 'badge accent' }, '완료') : null, h('span', { class: 'pg-toggle', 'aria-hidden': 'true' }, GH.icon('sharp', { cls: 'when-closed' }), GH.icon('natural', { cls: 'when-open' }))),
+      h('summary', null, h('span', { class: 'guide-dot', 'aria-hidden': 'true' }, GH.icon('note')), h('span', null, mission ? '미션 · ' + mission.title : '이 페이지에서 할 일'), mission && isDone(mission.id) ? h('span', { class: 'badge accent' }, '완료') : null, h('span', { class: 'pg-toggle', 'aria-hidden': 'true' }, GH.icon('sharp', { cls: 'when-closed' }), GH.icon('natural', { cls: 'when-open' }))),
       h('div', { class: 'page-guide-body' },
         info ? h('p', null, info[1]) : null,
-        info ? h('ol', null, info[2].map(t => h('li', null, t))) : null,
+        coachSteps ? h('ol', null, coachSteps.map(t => h('li', null, t))) : info ? h('ol', null, info[2].map(t => h('li', null, t))) : null,
         mission ? h('p', { class: 'muted' }, mission.desc) : null,
         h('div', { class: 'row', style: 'gap:6px' },
-          mission ? h('button', { class: 'btn small' + (isDone(mission.id) ? '' : ' primary'), type: 'button', onclick: () => { toggleDone(mission.id); decorate(GH.router.current()); } }, isDone(mission.id) ? '완료 취소' : [GH.icon('check'), '미션 완료']) : null,
+          coachSteps ? h('button', { class: 'btn small primary', type: 'button', onclick: () => GH.coach.start() }, GH.icon('play', { size: 14 }), '따라 하기 (하나씩 짚어 드려요)') : null,
+          mission ? h('button', { class: 'btn small', type: 'button', onclick: () => { toggleDone(mission.id); decorate(GH.router.current()); } }, isDone(mission.id) ? '완료 취소' : [GH.icon('check'), '미션 완료']) : null,
           n && (!mission || n.id !== mission.id) ? h('a', { class: 'btn small', href: missionHref(n) }, '다음 미션: ' + n.title + ' →') : null,
           !data.profile.onboarded ? h('button', { class: 'btn small', type: 'button', onclick: () => openOnboarding({ onDone: () => GH.router.rerender() }) }, '맞춤 추천 받기') : null,
           h('button', { class: 'btn small ghost', type: 'button', onclick: () => { setProfile({ showGuides: false }); decorate(GH.router.current()); } }, '가이드 숨기기'))));

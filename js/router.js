@@ -57,7 +57,7 @@
     const samePage = !!prev && prev.path === path && !options.focus;
     const keep = samePage ? { y: window.scrollY, inner: innerScrolls(app) } : null;
     GH.ui.clear(app);
-    current = { path, query, params: m.params, page: m.page };
+    current = { path, query, params: m.params, page: m.page, samePage: !!keep };
     stamp(options.replace, !prev);
     try { m.page.render(app, Object.assign({}, m.params, { query })); }
     catch (e) { console.error(e); app.appendChild(GH.ui.notice('페이지를 그리는 중 오류가 났습니다: ' + e.message)); }

@@ -117,18 +117,29 @@
 
   /* ---- 스크롤 등장 · 시차 (움직임 줄이기 설정이면 끔) ---- */
   const reduceMotion = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  let revealIO = null, pxEls = [], pxRaf = 0;
-  function revealScan() {
-    const els = document.querySelectorAll('#app .reveal:not(.in)');
+  let revealIO = null, hideIO = null, pxEls = [], pxRaf = 0;
+  /* 섹션 안의 카드 · 목록은 하나씩 차례로 (촤라락) */
+  const RV_ITEMS = '.grid > *, .path-grid > *, .home-more-grid > *, .hub-grid > *, .roadmap > li, .course-chapters > *, .mission-list > li, .prog-strip > *, .list > *';
+  /* 화면에 들어오면 나타나고, 완전히 벗어나면 다시 숨겨 둔다 → 위아래로 몇 번을 오가도 매번 움직인다.
+     같은 페이지를 다시 그릴 때(건반 누르기 등)는 지금 보이는 것은 움직이지 않고 바로 보인다 */
+  function revealScan(instant) {
+    const els = document.querySelectorAll('#app .reveal:not([data-rv])');
     if (!revealIO) { els.forEach(e => e.classList.add('in')); return; }
-    els.forEach(e => revealIO.observe(e));
+    const vh = innerHeight; const quick = [];
+    els.forEach(e => {
+      e.setAttribute('data-rv', '1');
+      e.querySelectorAll(RV_ITEMS).forEach((c, i) => { c.classList.add('rv-item'); c.style.setProperty('--ri', Math.min(i, 9)); });
+      if (instant) { const r = e.getBoundingClientRect(); if (r.bottom > 0 && r.top < vh) { e.classList.add('in', 'rv-instant'); quick.push(e); } }
+      revealIO.observe(e); hideIO.observe(e);
+    });
+    if (quick.length) requestAnimationFrame(() => requestAnimationFrame(() => quick.forEach(e => e.classList.remove('rv-instant'))));
   }
   function onScroll() {
     document.body.classList.toggle('scrolled', window.scrollY > 8);
     if (!pxEls.length || pxRaf) return;
     pxRaf = requestAnimationFrame(() => { pxRaf = 0; const y = window.scrollY; pxEls.forEach(e => { e.style.transform = 'translateY(' + (y * Number(e.dataset.speed)).toFixed(1) + 'px)'; }); });
   }
-  function motionScan() { revealScan(); pxEls = reduceMotion() ? [] : Array.from(document.querySelectorAll('#app [data-speed]')); onScroll(); }
+  function motionScan(route) { revealScan(!!(route && route.samePage)); pxEls = reduceMotion() ? [] : Array.from(document.querySelectorAll('#app [data-speed]')); onScroll(); }
   /* 난이도는 셈여림 기호 다섯 단계 (ui.js 의 LEVELS): p 입문 · mp 기초 · mf 중급 · f 중상급 · ff 고급 */
   const LEVEL_KO = {}; Object.keys(GH.ui.LEVELS).forEach(k => { LEVEL_KO[k] = GH.ui.LEVELS[k].dyn + ' ' + GH.ui.LEVELS[k].ko; });
 
@@ -317,7 +328,15 @@
     document.querySelectorAll('[data-icon]').forEach(el => { if (!el.querySelector('svg')) el.insertBefore(GH.icon(el.dataset.icon), el.firstChild); });
     if ('IntersectionObserver' in window && !reduceMotion()) {
       document.documentElement.classList.add('can-reveal');
-      revealIO = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+      revealIO = new IntersectionObserver(es => es.forEach(en => {
+        if (!en.isIntersecting || en.target.classList.contains('in')) return;
+        /* 들어오는 쪽에 맞춰 시작 위치를 정한 뒤 나타나게 (위에서 들어오면 위에서 내려온다) */
+        const t = en.target, fromTop = en.boundingClientRect.top < 0;
+        if (t.classList.contains('from-top') !== fromTop) { t.classList.toggle('from-top', fromTop); void t.offsetWidth; }
+        t.classList.add('in');
+      }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 });
+      /* 완전히 벗어나면 되돌린다. 위로 벗어났으면 다음에는 위에서 내려오도록 */
+      hideIO = new IntersectionObserver(es => es.forEach(en => { if (!en.isIntersecting && en.target.classList.contains('in')) { en.target.classList.toggle('from-top', en.boundingClientRect.bottom <= 0); en.target.classList.remove('in'); } }), { threshold: 0 });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     const menuBtn = document.getElementById('menu-btn');
@@ -335,7 +354,7 @@
     renderKeySelect();
     GH.events.on('settings', () => { renderKeySelect(); GH.router.rerender(); });
     GH.events.on('route', renderNav);
-    GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); motionScan(); });
+    GH.events.on('route', r => { if (GH.guide) GH.guide.decorate(r); if (GH.coach) GH.coach.onRoute(r); motionScan(r); });
     GH.events.on('vexflow', () => { const r = GH.router.current(); if (r && r.page && r.page.staff) GH.router.rerender(); });
     const fl = document.getElementById('footer-links');
     SECTIONS.forEach(s => fl.appendChild(h('a', { href: '#' + s.path }, s.label)));
