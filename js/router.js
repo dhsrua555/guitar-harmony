@@ -51,8 +51,12 @@
     const m = match(path) || { page: GH.pages['/404'] || GH.pages['/'], params: {} };
     if (GH.player) GH.player.stop();
     const app = document.getElementById('app');
-    GH.ui.clear(app);
     const prev = current;
+    /* 같은 페이지 안에서 다시 그릴 때(건반 누르기, 선택 바꾸기, 탭 등 rerender · go)는 스크롤 위치를 그대로 둔다.
+       가로로 스크롤되는 지판 · 표도 제자리로. 링크를 눌러 온 경우(hashchange, focus)는 맨 위로 */
+    const samePage = !!prev && prev.path === path && !options.focus;
+    const keep = samePage ? { y: window.scrollY, inner: innerScrolls(app) } : null;
+    GH.ui.clear(app);
     current = { path, query, params: m.params, page: m.page };
     stamp(options.replace, !prev);
     try { m.page.render(app, Object.assign({}, m.params, { query })); }
@@ -61,10 +65,31 @@
     /* 진입 모션: 다른 페이지로 옮길 때만 */
     if (!prev || prev.path !== path) { app.classList.remove('page-enter'); void app.offsetWidth; app.classList.add('page-enter'); }
     GH.events.emit('route', current);
-    if (!query.noscroll) {
-      window.scrollTo(0, 0);
-      if (options.focus) app.focus({ preventScroll: true });
-    }
+    if (keep) restoreScroll(app, keep);
+    else if (!query.noscroll) window.scrollTo(0, 0);
+    if (options.focus && !keep) app.focus({ preventScroll: true });
+  }
+  /* 가로 스크롤 상자: 클래스 이름 + 같은 클래스 안에서 몇 번째인지로 짝을 맞춘다 */
+  function innerScrolls(root) {
+    const out = [];
+    root.querySelectorAll('.fretboard-scroll, .table-wrap, .staff-box, .rhythm-staff, .tabs, .prog-strip, .subnav, .toc').forEach(e => {
+      if (e.scrollLeft > 0) { const cls = e.classList[0]; out.push([cls, Array.prototype.indexOf.call(root.getElementsByClassName(cls), e), e.scrollLeft]); }
+    });
+    return out;
+  }
+  function restoreScroll(root, keep) {
+    const html = document.documentElement; const sb = html.style.scrollBehavior;
+    const put = () => { html.style.scrollBehavior = 'auto'; window.scrollTo(0, keep.y); html.style.scrollBehavior = sb; };
+    put();
+    keep.inner.forEach(([cls, i, x]) => { const e = root.getElementsByClassName(cls)[i]; if (e) e.scrollLeft = x; });
+    /* 악보처럼 늦게 그려지는 것 때문에 페이지가 잠깐 짧아졌다면 몇 프레임 동안 다시 맞춘다 (그사이 직접 스크롤하면 멈춤) */
+    let n = 0, last = window.scrollY;
+    const again = () => {
+      if (++n > 12 || Math.abs(window.scrollY - last) > 2) return;
+      if (Math.abs(window.scrollY - keep.y) > 2) put();
+      last = window.scrollY; requestAnimationFrame(again);
+    };
+    requestAnimationFrame(again);
   }
   /* 이동. 같은 경로 안에서의 변화(탭, 필터, 마디 선택)는 히스토리를 쌓지 않고 바꿔치기한다 */
   function go(path, query, opts) {
