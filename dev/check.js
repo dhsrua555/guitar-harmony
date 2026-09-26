@@ -377,6 +377,8 @@
     ok(!bScaleBad.length, 'bass major scale 12 keys (intervals, root on finger 2) ' + bScaleBad.join(','));
     const arp7 = B_('b-arp7', { key: 'C' }).notes.map(n => N.mod(n.midi, 12));
     ok(arp7.slice(0, 12).join(',') === '2,5,9,0,7,11,2,5,0,4,7,11', 'bass ii–V–I chord tones in C');
+    const lowBad = N.SHARP_NAMES.filter(k => ['b-root58', 'b-arp', 'b-walk', 'b-motown', 'b-boogie'].some(id => B_(id, { key: k }).notes.some(n => n.midi < 28 || n.midi > 52 || n.f < 0 || (n.f === 0) !== (n.fg === 0))));
+    ok(!lowBad.length, 'bass progressions sit in low position: roots on the lowest E · A fret, open strings get finger 0 ' + lowBad.join(','));
     const walk = B_('b-walk', { key: 'F' }).notes;
     ok([0, 1, 2, 3].every(b => { const nextRoot = walk[((b + 1) % 4) * 4].midi; return Math.abs(walk[b * 4 + 3].midi - nextRoot) === 1; }), 'bass walking: beat 4 is a half step from the next root');
     ok(B_('b-open').notes.every((n, i) => n.pk === (i % 2 ? 'm' : 'i')) && B_('b-slap').notes.some(n => n.pk === 'T') && B_('b-dead').notes.some(n => n.x), 'bass i/m alternation, slap T/P, dead notes');

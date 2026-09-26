@@ -29,6 +29,12 @@ window.GH_AUDIT = function () {
       const snd = sounded(ex, B, o, pass);
       if (B.kind === 'vocal') B.seq.forEach(n => { const a = snd.get(at3(n.at)); if (!n.rest && !a.includes(n.midi + tr)) a.push(n.midi + tr); });   /* 악보 = 피아노가 치는 음 + 내가 부를 음 */
       const sh = T.sheetFor(ex, B, 1000, o, tr); if (!sh) { bad.push(where + ': 악보 없음'); return; }
+      /* 0) 꼬리 묶음: 음높이 음표는 한 묶음 안에서 기둥 방향이 같고, 기둥이 너무 짧지 않다 */
+      (sh.beams || []).forEach((g, bi) => {
+        if (!g.every(x => x.auto)) return;
+        if (g.some(x => x.dir !== g[0].dir)) bad.push(where + ': 빔 ' + bi + ' 기둥 방향이 섞임');
+        const short = g.filter(x => !(x.len >= 20)); if (short.length) bad.push(where + ': 빔 ' + bi + ' 기둥이 짧음 ' + short.map(x => x.len && x.len.toFixed(1)).join(','));
+      });
       const wr = new Map(); sh.notes.forEach(n => { const k = at3(n.at); if (!wr.has(k)) wr.set(k, []); n.keys.forEach(x => { if (!/\/x/.test(x)) wr.get(k).push(keyMidi(x) - off); }); });
       /* 1) 소리 = 악보 (같은 시각에 같은 음들) */
       snd.forEach((ms, k) => {

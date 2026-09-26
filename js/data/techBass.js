@@ -16,6 +16,14 @@
     const ef = e < 3 ? e + 12 : e, af = a < 3 ? a + 12 : a;
     return Math.abs(ef - 6.5) <= Math.abs(af - 6.5) ? { s: 4, f: ef, midi: 28 + ef } : { s: 3, f: af, midi: 33 + af };
   }
+  /* 진행의 코드 루트: E · A 줄 1~12프렛에서 가장 낮은 음 (악보가 오선 안에 머물고 로우 포지션에서 치게),
+     같은 음이 두 자리면 앞 코드 자리에 가까운 쪽 */
+  function lowRoot(pc, near) {
+    const c = [];
+    [[4, 28], [3, 33]].forEach(([s, base]) => { for (let f = N().mod(pc - base, 12); f <= 12; f += 12) if (f >= 1) c.push({ s, f, midi: base + f }); });
+    c.sort((a, b) => a.midi - b.midi || Math.abs(a.f - near) - Math.abs(b.f - near) || b.s - a.s);
+    return c[0];
+  }
   /* 코드 루트: E · A 줄 중 near 프렛에 더 가까운 자리 (1프렛 이상) */
   function rootNear(pc, near) {
     const c = [];
@@ -32,7 +40,7 @@
     maj7: [[0, 0, 2, '1'], [-1, -1, 1, '3'], [-1, 2, 4, '5'], [-2, 1, 3, '7']],
     r58: [[0, 0, 1, '1'], [-1, 2, 3, '5'], [-2, 2, 3, '1']]
   };
-  const shapeAt = (root, q) => SHAPE[q].map(([ds, df, fg, lb]) => nt(root.s + ds, root.f + df, fg, { label: lb }));
+  const shapeAt = (root, q) => SHAPE[q].map(([ds, df, fg, lb]) => nt(root.s + ds, root.f + df, root.f + df === 0 ? 0 : fg, { label: lb }));   /* 개방현이면 손가락 0 */
   /* 창(P ~ P+3) 안에서 음 찾기: 낮은 줄 먼저 */
   function place(midi, P) {
     for (const [lo, hi] of [[P, P + 3], [P - 1, P + 4]]) {
@@ -46,7 +54,7 @@
   const DEG_IV = { 0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7' };
   const Q_ID = { maj: 'maj', min: 'min', m7: 'm7', dom7: '7', maj7: 'maj7' };
   const symOf = (key, deg, q) => GH.chords.symbol(N().spell(key, DEG_IV[N().mod(deg, 12)]), Q_ID[q] || q);
-  const chordsOf = (key, list) => { const kr = keyRoot(key); return list.map(([deg, q]) => ({ root: rootNear(N().mod(N().pcOf(key) + deg, 12), kr.f), q, sym: symOf(key, deg, q) })); };
+  const chordsOf = (key, list) => { let near = 3; return list.map(([deg, q]) => { const root = lowRoot(N().mod(N().pcOf(key) + deg, 12), near); near = root.f; return { root, q, sym: symOf(key, deg, q) }; }); };
   /* 코드가 바뀌는 첫 음에 코드 이름 (ch) — 악보 위에 적고, 연습 중 "지금 코드"로 보여 준다 */
   const tag = (out, i, sym) => { if (out[i]) out[i] = Object.assign({}, out[i], { ch: sym }); };
 
@@ -163,7 +171,7 @@
       goal: '코드마다 1-3-5-6-b7-6-5-3 을 8분음표로 오르내리는 부기 베이스. 12마디 블루스 폼을 몸에 익혀요.',
       how: ['I 네 마디 → IV 두 마디 → I 두 마디 → V · IV · I · V.', '셔플(스윙)로 치면 더 블루스다워요.'],
       tips: ['마디 수를 세면서 코드가 바뀌는 곳을 미리 봐 두세요.'],
-      gen: o => { const form = [0, 0, 0, 0, 5, 5, 0, 0, 7, 5, 0, 7]; const kr = keyRoot(o.key); const out = []; form.forEach(dg => { const at = out.length; const root = rootNear(N().mod(N().pcOf(o.key) + dg, 12), kr.f); const P = root.f - 1; [0, 4, 7, 9, 10, 9, 7, 4].forEach((x, i) => { const p = place(root.midi + x, P); out.push(Object.assign(p, { label: ['1', '3', '5', '6', 'b7', '6', '5', '3'][i] })); }); tag(out, at, symOf(o.key, dg, 'dom7')); }); return out; } },
+      gen: o => { const form = [0, 0, 0, 0, 5, 5, 0, 0, 7, 5, 0, 7]; const kr = lowRoot(N().pcOf(o.key), 3); const out = []; form.forEach(dg => { const at = out.length; const root = lowRoot(N().mod(N().pcOf(o.key) + dg, 12), kr.f); const P = root.f - 1; [0, 4, 7, 9, 10, 9, 7, 4].forEach((x, i) => { const p = place(root.midi + x, P); out.push(Object.assign(p, { label: ['1', '3', '5', '6', 'b7', '6', '5', '3'][i] })); }); tag(out, at, symOf(o.key, dg, 'dom7')); }); return out; } },
     { id: 'b-motown', cat: 'b-walk', level: 4, ko: '모타운 스타일 (코드톤 + 반음 어프로치 8분)', rh: '8', tempo: [80, 130], opts: { key: 'C', pluck: 'i' },
       goal: '8분음표로 코드톤을 돌다가 마디 끝에서 다음 루트로 반음 어프로치. 제임스 제머슨 식 모타운 베이스의 뼈대예요.',
       how: ['1-5-8-5-3-5-6 다음 마지막 음은 다음 루트의 반음 아래.', 'I–vi–ii–V 진행을 반복해요.'],

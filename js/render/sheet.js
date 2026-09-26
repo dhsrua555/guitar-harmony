@@ -62,7 +62,7 @@
         n = new VF.StaveNote({ keys: order.map(i => ks[i].key + (ev.x ? '/x2' : '')), duration: code.replace('d', ''), clef, auto_stem: true });
         if (!ev.x) order.forEach((i, idx) => { if (ks[i].acc) n.addModifier(new VF.Accidental(ks[i].acc), idx); });
         if (ev.soft) order.forEach((i, idx) => { if (ev.soft.includes(ev.m[i])) try { n.setKeyStyle(idx, { fillStyle: '#948d80', strokeStyle: '#948d80' }); } catch (e) { /* ignore */ } });   /* 회색: 피아노가 치는 음 */
-        n.__steps = ks.map(k => k.step);
+        n.__steps = ks.map(k => k.step); n.__auto = true;
         if (ev.stacc) try { n.addModifier(new VF.Articulation('a.').setPosition(VF.Modifier.Position.ABOVE), 0); } catch (e) { /* ignore */ }
         if (ev.acc) try { n.addModifier(new VF.Articulation('a>').setPosition(VF.Modifier.Position.ABOVE), 0); } catch (e) { /* ignore */ }
       }
@@ -166,7 +166,7 @@
       renderer.resize(totalW, y + 4);
       const ctx = renderer.getContext();
       const svg = div.querySelector('svg');
-      const drawn = [];                                /* {n, stave, staffIdx, line} */
+      const drawn = [], beamed = [];                   /* {n, stave, staffIdx, line} · 꼬리 묶음 (점검용) */
       const texts = [];
       const topStave = [];
       for (let mi = 0; mi < nMeasures; mi++) {
@@ -192,21 +192,22 @@
           const notes = v[mi] || [];
           if (!notes.length) return;
           /* 셋잇단 묶음: 음표 길이가 바뀌므로 목소리에 넣기 전에 만든다 (뒤에 만들면 두 목소리의 박 위치가 어긋난다) */
+          /* 꼬리 묶음을 먼저: 한 묶음의 기둥 방향을 하나로 맞춘다 (음마다 따로 정하면 빔이 거꾸로 기울고 기둥이 짧아진다) */
+          const beams = beamsFor(VF, notes);
           const tuplets = (v[mi] && v[mi].__tuplets) || [];
           const trips = tuplets.length ? tuplets : groupTriplets(notes);
           const tupletObjs = trips.map(g => { try { const down = g[0].getStemDirection && g[0].getStemDirection() < 0; return new VF.Tuplet(g, { num_notes: 3, notes_occupied: 2, bracketed: g.some(n => n.__rest) || g.length < 3, ratioed: false, location: down ? -1 : 1 }); } catch (e) { return null; } }).filter(Boolean);
           const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
           voice.addTickables(notes);
-          allVoices.push({ voice, notes, stave: staves[k], k, tupletObjs });
+          allVoices.push({ voice, notes, stave: staves[k], k, tupletObjs, beams });
         }));
         const fmt = new VF.Formatter();
         staffs.forEach((s, k) => { const vs = allVoices.filter(a => a.k === k).map(a => a.voice); if (vs.length) fmt.joinVoices(vs); });
         const width = staves[0].getNoteEndX() - staves[0].getNoteStartX() - 14;
         if (allVoices.length) fmt.format(allVoices.map(a => a.voice), width);
         allVoices.forEach(av => {
-          const beams = beamsFor(VF, av.notes);
           av.voice.draw(ctx, av.stave);
-          beams.forEach(b => b.setContext(ctx).draw());
+          av.beams.forEach(b => { b.setContext(ctx).draw(); beamed.push(b); });
           av.tupletObjs.forEach(t => t.setContext(ctx).draw());
           av.notes.forEach(n => drawn.push({ n, stave: av.stave, k: av.k, line, mi }));
         });
@@ -251,6 +252,7 @@
         el: div,
         /* 적힌 음 (점검용): 시각 · 보표 · VexFlow 키 */
         notes: drawn.filter(x => !x.n.__rest).map(({ n, k }) => ({ at: n.__at, staff: k, keys: n.getKeys ? n.getKeys() : [] })),
+        beams: beamed.map(b => b.getNotes().map(n => ({ dir: n.getStemDirection(), auto: !!n.__auto, len: (() => { try { const e = n.getStemExtents(); return Math.abs(e.topY - e.baseY); } catch (e) { return null; } })() }))),
         highlight(at) {
           cur.forEach(e => e.classList.remove('cur')); cur = [];
           if (at == null || at < 0) return;
@@ -286,7 +288,7 @@
       groups.get(b).push(n);
     });
     const out = [];
-    groups.forEach(g => { if (g.length >= 2) { try { out.push(new VF.Beam(g)); } catch (e) { /* ignore */ } } });
+    groups.forEach(g => { if (g.length >= 2) { try { out.push(new VF.Beam(g, g.every(n => n.__auto))); } catch (e) { /* ignore */ } } });   /* 음높이 음표는 묶음 전체로 기둥 방향 (드럼은 윗 · 아랫 목소리 그대로) */
     return out;
   }
   function noteEl(div, n) {

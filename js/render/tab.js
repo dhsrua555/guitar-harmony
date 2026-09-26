@@ -12,7 +12,8 @@
     const NS = opts.strings || 6;                     /* 줄 수 (기타 6 · 베이스 4) */
     const hasFg = lick.notes.some(e => e.fg > 0 || typeof e.fg === 'string'), hasPick = lick.notes.some(e => e.pk);
     const isTrip = e => Math.abs(e.d - 1 / 3) < 1e-3, hasTrip = lick.notes.some(isTrip);
-    const PPB = opts.ppb || 52, LEFT = 34, TOP = 30 + (hasFg && hasPick ? 12 : 0), LH = 13, BOT = 34 + (hasTrip ? 10 : 0);
+    const hasCh = lick.notes.some(e => e.ch), rows2 = hasFg && hasPick;   /* 손가락 · 오른손 두 줄이면 코드 이름은 그 위 한 줄 더 */
+    const PPB = opts.ppb || 52, LEFT = 34, TOP = 30 + (rows2 ? 12 : 0) + (rows2 && hasCh ? 12 : 0), LH = 13, BOT = 34 + (hasTrip ? 10 : 0);
     const tr = opts.transpose || 0;
     const total = lick.notes.reduce((a, e) => a + e.d, 0);
     const W = LEFT + total * PPB + 24, H = TOP + (NS - 1) * LH + BOT;
@@ -34,7 +35,7 @@
     lick.notes.forEach((ev, i) => {
       const x = LEFT + pos * PPB + 10;
       const g = svg('g', { class: 'ev', 'data-idx': i });
-      if (ev.ch) el.appendChild(svg('text', { class: 'chordname', x: x - 6, y: TOP - 18 }, ev.ch));
+      if (ev.ch) el.appendChild(svg('text', { class: 'chordname', x: x - 6, y: TOP - (rows2 ? 33 : 18) }, ev.ch));
       if (ev.rest) {
         g.appendChild(svg('rect', { x: x - 4, y: sy((NS + 1) / 2) - 3, width: 8, height: 6, fill: 'var(--fg-muted)', opacity: .6, rx: 1 }));
       } else {
