@@ -162,8 +162,8 @@
       el.appendChild(h('section', { class: 'home-hero' },
         h('div', { class: 'wrap hero-grid' },
           h('div', { class: 'hero-copy' },
-            h('span', { class: 'eyebrow' }, 'BAND · HARMONY · EAR TRAINING'),
-            h('h1', { class: 'hero-title' }, h('span', { class: 'ln' }, '화성학과'), h('span', { class: 'ln hot' }, '악기')),
+            h('span', { class: 'eyebrow' }, 'GUITAR · BASS · KEYS · DRUMS · VOCAL'),
+            h('h1', { class: 'hero-title en', lang: 'en', 'aria-label': 'Band Harmony' }, h('span', { class: 'ln' }, 'BAND'), h('span', { class: 'ln hot' }, 'HARMONY')),
             h('p', { class: 'hero-lead' }, '기타 · 베이스 · 키보드 · 드럼 · 보컬 기본기부터 코드 진행, 스케일, 음감 훈련까지. 쉬운 것은 앞에, 어려운 것은 안쪽에 두었습니다.'),
             h('div', { class: 'home-search', role: 'search' }, h('span', { class: 'search-icon', 'aria-hidden': 'true' }, I('search')), input, results)),
           heroArt())));

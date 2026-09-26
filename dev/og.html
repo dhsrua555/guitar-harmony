@@ -4,23 +4,23 @@
 <meta charset="utf-8">
 <title>공유 미리보기 이미지 (1200×630)</title>
 <!-- 링크 미리보기용 og-image.png 를 만드는 페이지. 1200×630 으로 캡처해 저장소 맨 위에 둔다 -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bayon&family=Black+Han+Sans&family=Kalam:wght@700&family=Noto+Sans+KR:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bayon&family=Black+Han+Sans&family=Noto+Sans+KR:wght@500;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&text=%F0%9D%84%9E&display=swap">
 <style>
   html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #F3F1E6; }
   body { position: relative; font-family: "Noto Sans KR", sans-serif; color: #1F1B17; }
-  .copy { position: absolute; left: 76px; top: 62px; width: 600px; }
-  .eyebrow { margin: 0 0 18px; color: #D2372A; font-family: Bayon, sans-serif; font-size: 26px; letter-spacing: .16em; }
-  h1 { margin: 0; font-family: "Black Han Sans", sans-serif; font-weight: 400; font-size: 118px; line-height: 1.02; letter-spacing: -.01em; }
-  h1 .amp { color: #D2372A; }
-  .sub { margin: 22px 0 0; font-size: 34px; font-weight: 700; letter-spacing: -.03em; color: #48423A; }
-  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
-  .chip { position: relative; z-index: 0; padding: 8px 18px 9px; font-size: 22px; font-weight: 700; }
-  .chip svg { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; overflow: visible; }
-  .art { position: absolute; right: 26px; top: 40px; width: 560px; height: 440px; }
-  .band { position: absolute; left: -40px; right: -40px; bottom: 24px; height: 66px; background: #D2372A; transform: rotate(-1.6deg); display: flex; align-items: center; gap: 30px; padding-left: 70px; color: #FFF9EE; font-family: Bayon, sans-serif; font-size: 40px; letter-spacing: .05em; white-space: nowrap; }
+  .copy { position: absolute; left: 72px; top: 52px; width: 620px; }
+  .kicker { margin: 0; font-family: "Black Han Sans", sans-serif; font-size: 38px; line-height: 1; }
+  .kicker .amp { color: #D2372A; }
+  h1 { margin: 14px 0 0; font-family: Bayon, sans-serif; font-weight: 400; font-size: 176px; line-height: .8; letter-spacing: .01em; }
+  h1 .hot { display: block; color: #D2372A; }
+  .sub { margin: 30px 0 0; font-size: 29px; font-weight: 700; line-height: 1.45; letter-spacing: -.03em; color: #48423A; }
+  .sub b { color: #1F1B17; }
+  .art { position: absolute; right: 18px; top: 26px; width: 520px; height: 500px; }
+  .band { position: absolute; left: -40px; right: -40px; bottom: 22px; height: 64px; background: #D2372A; transform: rotate(-1.6deg); display: flex; align-items: center; gap: 28px; padding-left: 70px; color: #FFF9EE; font-family: Bayon, sans-serif; font-size: 38px; letter-spacing: .05em; white-space: nowrap; }
   .band .dot { width: 12px; height: 12px; border-radius: 50%; background: #FFE24F; }
-  .ink { fill: none; stroke: #1F1B17; stroke-linecap: round; }
+  .ink { fill: none; stroke: #1F1B17; stroke-linecap: round; stroke-linejoin: round; }
+  .lab { font-family: "Noto Sans KR", sans-serif; font-weight: 700; font-size: 22px; text-anchor: middle; }
   .grain { mix-blend-mode: multiply; opacity: .45; }
 </style>
 </head>
@@ -30,51 +30,61 @@
   <pattern id="gh-grain-pat" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" filter="url(#gh-noise)"/></pattern>
 </defs></svg>
 <div class="copy">
-  <p class="eyebrow">BAND · HARMONY · EAR TRAINING</p>
-  <h1>밴드 <span class="amp">&amp;</span><br>화성학</h1>
-  <p class="sub">보고, 듣고, 직접 연주해 보는 화성학</p>
-  <div class="chips" id="chips"></div>
+  <p class="kicker">밴드 <span class="amp">&amp;</span> 화성학</p>
+  <h1>BAND<span class="hot">HARMONY</span></h1>
+  <p class="sub"><b>기타 · 베이스 · 키보드 · 드럼 · 보컬</b><br>기본기와 화성학을 보고, 듣고, 직접 연주해요</p>
 </div>
-<svg class="art" id="art" viewBox="0 0 540 420"></svg>
-<div class="band"><span>CHORDS</span><i class="dot"></i><span>SCALES</span><i class="dot"></i><span>PROGRESSIONS</span><i class="dot"></i><span>EAR TRAINING</span><i class="dot"></i><span>RHYTHM</span><i class="dot"></i><span>LICKS</span></div>
+<svg class="art" id="art" viewBox="0 0 520 500"></svg>
+<div class="band"><span>CHORDS</span><i class="dot"></i><span>SCALES</span><i class="dot"></i><span>GROOVES</span><i class="dot"></i><span>VOICINGS</span><i class="dot"></i><span>EAR TRAINING</span><i class="dot"></i><span>RHYTHM</span></div>
 <svg width="1200" height="630" style="position:absolute;inset:0;pointer-events:none"><rect class="grain" width="1200" height="630" fill="url(#gh-grain-pat)"/></svg>
 <script>window.GH = {};</script>
 <script src="../js/ui.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/render/sketch.js"></script>
 <script>
+  /* 다섯 세션 스티커: 손으로 그린 동그라미 + 세션 아이콘 + 이름. 노란 공이 스티커 사이를 튀어 다닌다 */
   const K = GH.sketch, S = GH.ui.svg, art = document.getElementById('art');
-  const add = (tag, attrs) => { const e = S(tag, attrs); art.appendChild(e); return e; };
-  add('path', { d: K.blob(303, 215, 187, 186, { points: 14, wobble: 0.02 }), fill: '#F4C3BE' });
-  add('path', { d: K.hatchCircle(300, 212, 184, { gap: 7, from: 0.62 }), class: 'ink', 'stroke-width': 1.2, opacity: .22 });
-  add('path', { d: K.ellipse(300, 212, 188, 188, { points: 26, overshoot: 0.05, wobble: 0.012 }), class: 'ink', 'stroke-width': 2, opacity: .85 });
-  add('path', { d: K.ellipse(300, 212, 206, 206, { points: 30, overshoot: 0.02, wobble: 0.01 }), class: 'ink', 'stroke-width': 1.3, 'stroke-dasharray': '2 9', opacity: .55 });
-  let staff = ''; [170, 190, 210, 230, 250].forEach(y => { staff += K.line(22, y, 522, y, { passes: 2, bow: 1.4, overshoot: 2 }); });
-  add('path', { d: staff, class: 'ink', 'stroke-width': 1.8 });
-  add('text', { x: 34, y: 262, 'font-size': 112, 'font-family': '"Noto Music", serif', fill: '#1F1B17' }).textContent = '\u{1D11E}';
-  const M = [{ x: 150, y: 230, up: 1 }, { x: 215, y: 220, up: 1 }, { x: 280, y: 200 }, { x: 345, y: 190 }, { x: 410, y: 180 }, { x: 470, y: 160 }];
-  M.forEach((p, i) => {
-    const sx = p.x + (p.up ? 11 : -11);
-    add('path', { d: K.line(sx, p.y + (p.up ? -3 : 3), sx, p.y + (p.up ? -62 : 62), { passes: 2, overshoot: 1, jitter: 0.8 }), class: 'ink', 'stroke-width': 2.4 });
-    add('path', { d: K.blob(p.x, p.y, 13, 9.5, { points: 9, wobble: 0.08 }), fill: i === 2 ? '#D2372A' : '#1F1B17', transform: `rotate(-22 ${p.x} ${p.y})` });
+  const add = (tag, attrs, parent) => { const e = S(tag, attrs); (parent || art).appendChild(e); return e; };
+  /* 뒤에 깔리는 오선 */
+  let staff = ''; [214, 234, 254, 274, 294].forEach(y => { staff += K.line(-10, y, 530, y - 18, { passes: 2, bow: 2, overshoot: 2 }); });
+  add('path', { d: staff, class: 'ink', 'stroke-width': 1.6, opacity: .5 });
+  add('text', { x: 4, y: 318, 'font-size': 118, 'font-family': '"Noto Music", serif', fill: '#1F1B17', opacity: .5 }).textContent = '\u{1D11E}';
+  const STICKERS = [
+    { ic: 'guitar', ko: '기타', x: 150, y: 116, r: 78, fill: '#F4C3BE', rot: -8 },
+    { ic: 'bass', ko: '베이스', x: 360, y: 98, r: 70, fill: '#FFE24F', rot: 6 },
+    { ic: 'piano', ko: '키보드', x: 424, y: 290, r: 74, fill: '#2B6786', ink: '#F6F2E6', rot: -5 },
+    { ic: 'drum', ko: '드럼', x: 232, y: 330, r: 80, fill: '#BCB65C', rot: 7 },
+    { ic: 'mic', ko: '보컬', x: 80, y: 404, r: 60, fill: '#FCF9EF', rot: -10 }
+  ];
+  /* 공이 지나간 길 (점선) */
+  const hop = STICKERS.map(s => [s.x, s.y - s.r - 10]);
+  let trail = '';
+  for (let i = 0; i + 1 < hop.length; i++) {
+    const [x1, y1] = hop[i], [x2, y2] = hop[i + 1], mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 46;
+    trail += `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}`;
+  }
+  add('path', { d: trail, class: 'ink', 'stroke-width': 2, 'stroke-dasharray': '3 10', opacity: .55 });
+  STICKERS.forEach((s, i) => {
+    const g = add('g', { transform: `rotate(${s.rot} ${s.x} ${s.y})` });
+    add('path', { d: K.blob(s.x + 4, s.y + 5, s.r, s.r * 0.98, { points: 12, wobble: 0.03 }), fill: '#1F1B17', opacity: .9 }, g);            /* 그림자 */
+    add('path', { d: K.blob(s.x, s.y, s.r, s.r * 0.98, { points: 12, wobble: 0.03 }), fill: s.fill }, g);
+    add('path', { d: K.ellipse(s.x, s.y, s.r + 1, s.r, { points: 16, overshoot: 0.12, wobble: 0.02 }), class: 'ink', 'stroke-width': 2.6 }, g);
+    const size = s.r * 0.95, ic = GH.icon(s.ic, { size, stroke: 1.5 });
+    ic.setAttribute('x', s.x - size / 2); ic.setAttribute('y', s.y - size / 2 - s.r * 0.16);
+    ic.style.color = s.ink || '#1F1B17';
+    g.appendChild(ic);
+    add('text', { x: s.x, y: s.y + s.r * 0.62, class: 'lab', fill: s.ink || '#1F1B17', 'font-size': Math.round(s.r * 0.3) }, g).textContent = s.ko;
   });
-  [[0, 1], [2, 3], [4, 5]].forEach(([a, b]) => {
-    const A = M[a], B = M[b], sx = p => p.x + (p.up ? 11 : -11), ey = p => p.y + (p.up ? -62 : 62), t = A.up ? 9 : -9;
-    add('path', { d: `M${sx(A) - 1},${ey(A)} L${sx(B) + 1.5},${ey(B)} L${sx(B) + 1},${ey(B) + t} L${sx(A) - 1.5},${ey(A) + t} Z`, fill: '#1F1B17' });
-  });
-  const bx = 342, by = 118;
+  /* 노란 공: 키보드 스티커 위로 막 떨어지는 중 */
+  const [bx, by] = [hop[2][0] - 34, hop[2][1] - 8];
   add('path', { d: K.blob(bx + 0.8, by + 0.6, 17, 16.6, { points: 9, wobble: 0.05 }), fill: '#FFE24F' });
   add('path', { d: K.ellipse(bx, by, 17.4, 17, { points: 11 }), class: 'ink', 'stroke-width': 2.2 });
   add('path', { d: `M${bx - 7} ${by - 9}C${bx - 3} ${by - 12} ${bx + 3} ${by - 12} ${bx + 7} ${by - 9}`, fill: 'none', stroke: '#fff', 'stroke-width': 2.2, 'stroke-linecap': 'round' });
-  /* 손으로 그린 알약 모양 칩 */
-  const chips = document.getElementById('chips');
-  ['기타', '베이스', '키보드', '드럼', '보컬'].forEach((t, i) => {
-    const c = document.createElement('span'); c.className = 'chip'; c.textContent = t; chips.appendChild(c);
-    requestAnimationFrame(() => {
-      const w = c.offsetWidth, h = c.offsetHeight, s = S('svg', { viewBox: `0 0 ${w} ${h}` });
-      s.appendChild(S('path', { d: K.curve([[h / 2, 1], [w - h / 2, 1.5], [w - 1, h / 2], [w - h / 2, h - 1], [h / 2, h - 1.5], [1.5, h / 2]], true), class: 'ink', 'stroke-width': 2, style: i === 0 ? 'fill:#FFE24F' : '' }));
-      c.insertBefore(s, c.firstChild);
-    });
-  });
+  /* 떠다니는 샵 · 8분음표 */
+  const L = (a, b, c, d) => K.line(a, b, c, d, { passes: 2, jitter: 1, overshoot: 1.6 });
+  add('path', { d: L(480, 150, 478, 190) + L(494, 146, 492, 186) + L(468, 164, 504, 158) + L(468, 178, 504, 172), class: 'ink', 'stroke-width': 2.6, stroke: '#D2372A' });
+  add('path', { d: K.blob(330, 460, 10, 7, { points: 8, wobble: 0.12 }), fill: '#1F1B17', transform: 'rotate(-22 330 460)' });
+  add('path', { d: L(339, 457, 340, 420) + K.curve([[340, 420], [350, 428], [357, 434], [354, 446]], false), class: 'ink', 'stroke-width': 2.4 });
 </script>
 </body>
 </html>
