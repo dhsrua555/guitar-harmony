@@ -42,6 +42,8 @@
       if (qy.key && N.pcOf(qy.key) != null) state.key = N.normalize(qy.key);
       if (qy.style && S[qy.style]) state.style = qy.style;
       if (qy.tempo && Number(qy.tempo) > 0) state.tempo = Number(qy.tempo);
+      /* off=bass · drums · comp: 내 악기 파트를 끄고 연주 (마이너스 원) */
+      if (qy.off) { const off = String(qy.off).split(','); ['drums', 'bass', 'comp'].forEach(k => { state[k] = !off.includes(k); }); }
       const key = state.key || A.key(); const pref = A.pref(key);
       const P = GH.data.progressions.find(p => p.id === state.id) || GH.data.progressions[0];
       let chords = [], bad = [];

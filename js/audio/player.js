@@ -21,14 +21,14 @@
 
   const STRUM = 0.024;
   const human = amount => (Math.random() * 2 - 1) * amount;
-  function chordAt(midis, when, dur, gain, dir) {
+  function chordAt(midis, when, dur, gain, dir, preset) {   /* preset 'piano' 면 거의 동시에 (스트럼 없이) */
     const list = dir === 'up' ? midis.slice().reverse() : midis;
     const gap = STRUM * (dir === 'up' ? .72 : 1) * (list.length > 5 ? .88 : 1);
     const base = gain == null ? .8 : gain;
     list.forEach((m, i) => {
       /* 다운 스트로크는 저음, 업 스트로크는 고음에 자연스러운 악센트를 둔다. */
       const contour = dir === 'up' ? .8 + i * .035 : 1 - i * .025;
-      A.pluck(m, when + i * gap + human(.0025), dur, { gain: base * contour * (1 + human(.035)) });
+      A.pluck(m, when + i * (preset === 'piano' ? 0.006 : gap) + human(.0025), dur, { gain: base * contour * (1 + human(.035)), preset });
     });
   }
   function playChord(midis, opts) {
@@ -36,12 +36,12 @@
     const ctl = begin({ onStop: opts.onStop });
     const t0 = A.now() + 0.05;
     if (opts.arpeggio) {
-      midis.forEach((m, i) => A.pluck(m, t0 + i * 0.22 + human(.003), 1.25, { gain: .76 * (1 + human(.035)) }));
+      midis.forEach((m, i) => A.pluck(m, t0 + i * 0.22 + human(.003), 1.25, { gain: .76 * (1 + human(.035)), preset: opts.preset }));
       const total = midis.length * 0.22 + 1.0;
-      chordAt(midis, t0 + total, 2.2, 0.8);
+      chordAt(midis, t0 + total, 2.2, 0.8, null, opts.preset);
       schedule(() => { if (current === ctl) stop(); }, t0 + total + 2.3);
     } else {
-      chordAt(midis, t0, opts.dur || 2.2, 0.85);
+      chordAt(midis, t0, opts.dur || 2.2, 0.85, null, opts.preset);
       schedule(() => { if (current === ctl) stop(); }, t0 + (opts.dur || 2.2) + 0.2);
     }
     return ctl;

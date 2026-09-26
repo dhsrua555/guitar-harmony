@@ -458,5 +458,5 @@
       el.appendChild(section('다음에 해 볼 것', h('div', { class: 'toc' }, same.map(e => h('a', { href: exHref(e) }, e.ko)).concat(extra, [h('a', { href: '#/technique/' + I.id }, I.ko + ' 기본기 목록'), h('a', { href: '#/rhythm' }, '메트로놈 · 리듬 연습')]))));
     }
   };
-  GH.technique = { build, options, rhOptions, RH, soundFor, sheetFor, vocalLabels };
+  GH.technique = { build, options, rhOptions, RH, soundFor, sheetFor, viewFor, vocalLabels };
 })();

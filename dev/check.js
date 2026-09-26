@@ -274,6 +274,28 @@
       const counts = G.LEVELS.map(l => G.plan({ level: l.id, goals: ['theory', 'guitar', 'ear', 'solo', 'compose', 'rhythm'] }).length);
       ok(counts.every(c => c >= 5), 'guide plan per level ' + counts.join(','));
       ok(G.GOALS.every(g => G.plan({ level: 'chords', goals: [g.id] }).length >= 2), 'guide plan per goal');
+      /* 세션별 기초 코스: 여섯 장, 레슨 · 위젯 · 문제가 모두 있고, 세션에 안 맞는 말(기타 지판 설명)이 없다 */
+      const C = GH.course; const BAN = { bass: /기타로|기타에서|기타 줄|카포|6번 줄|5번 줄/, keys: /기타|프렛|번 줄|지판|카포/, drums: /기타|프렛|번 줄|지판|카포/, vocal: /기타|프렛|번 줄|지판|카포/ };
+      const sessBad = [];
+      C.SESSIONS.forEach(sid => {
+        const chs = C.chapters(sid); if (chs.length !== 6) sessBad.push(sid + ': ' + chs.length + '장');
+        chs.forEach(ch => ch.lessons.forEach(l => {
+          if (!l || !l.id || !l.title || !l.lead || !(l.body || []).length || !(l.try || []).length) { sessBad.push(sid + '/' + (l && l.id) + ': 빈 레슨'); return; }
+          if (l.widget && !C.WIDGETS[l.widget.type]) sessBad.push(sid + '/' + l.id + ': 위젯 ' + l.widget.type);
+          if (l.widget && l.widget.type === 'practice' && !GH.data.technique.some(e => e.id === l.widget.id)) sessBad.push(sid + '/' + l.id + ': 연습 ' + l.widget.id);
+          if (l.quiz && !(l.quiz.answer >= 0 && l.quiz.answer < l.quiz.options.length)) sessBad.push(sid + '/' + l.id + ': 문제');
+          const txt = [l.title, l.lead, l.remember || ''].concat(l.body, l.try).join(' ');
+          if (BAN[sid] && BAN[sid].test(txt)) sessBad.push(sid + '/' + l.id + ': ' + txt.match(BAN[sid])[0]);
+        }));
+      });
+      ok(!sessBad.length, 'course per session: 6 chapters, lessons · widgets · quizzes, session wording ' + sessBad.slice(0, 6).join(', '));
+      const firsts = C.SESSIONS.map(sid => { const pl = G.plan({ level: 'new', goals: ['theory', 'rhythm'], sessions: [sid] }); return pl[0] && pl[0].course && pl[0].inst.includes(sid) && pl.filter(m => m.inst && m.inst.includes(sid)).length >= 4 && pl.every(m => !m.inst || m.inst.includes(sid)); });
+      ok(firsts.every(Boolean), 'guide: beginners start with their own session course, other sessions stay out ' + firsts.join(','));
+      const adv = C.SESSIONS.map(sid => G.plan({ level: 'player', goals: ['rhythm', 'solo'], sessions: [sid] }).filter(m => m.inst && m.inst.includes(sid)).length);
+      ok(adv.every(n => n >= 4), 'guide: advanced plans lean on session missions ' + adv.join(','));
+      const two = G.plan({ level: 'new', goals: ['ear'], sessions: ['vocal', 'keys'] });
+      ok(two[0].inst.includes('vocal') && two.some(m => m.inst && m.inst.includes('keys')), 'guide: first session leads, second session mixed in');
+      ok(G.MISSIONS.filter(m => m.course).every(m => { const sid = m.inst[0]; return C.chapters(sid).some(ch => '/learn/' + ch.lessons[0].id === m.route && C.missionIdOf(sid, ch) === m.id); }), 'guide: course missions match each session chapter');
     })();
     /* 음악 아이콘 · 리얼북 코드 심볼 */
     (function () {

@@ -70,6 +70,8 @@
     GH.data.licks.forEach(l => add('릭', l.ko, l.over + ' · ' + GH.data.lickGenres[l.genre], [l.id, l.genre, l.key, l.scale].concat(l.qIds || []), '#/guitar/licks/' + l.id));
     GH.data.reharm.forEach(r => add('리하모니', r.ko, r.en, [r.id, r.summary], '#/theory/reharm/' + encodeURIComponent(r.id)));
     (GH.data.course || []).forEach(ch => ch.lessons.forEach(l => add('레슨', l.title, '기초 코스 ' + ch.n + '장 · ' + ch.title, [l.id, l.lead].concat((l.terms || []).map(t => t[0] + ' ' + t[1])), '#/learn/' + l.id)));
+    /* 세션 코스에만 있는 레슨 (베이스 · 키보드 · 드럼 · 보컬) */
+    (GH.data.courseLessons || []).forEach(l => { const C = (GH.data.courseSessions || {})[l.sess] || {}; add('레슨', l.title, '기초 코스 · ' + (C.ko || ''), [l.id, l.lead, C.ko || ''].concat((l.terms || []).map(t => t[0] + ' ' + t[1])), '#/learn/' + l.id + '?s=' + l.sess); });
     GH.data.glossary.forEach(g => add('용어', g.ko, g.en, [g.def.slice(0, 40)], '#/glossary?q=' + encodeURIComponent(g.ko)));
     (GH.data.technique || []).forEach(x => { const c = GH.data.techCats.find(k => k.id === x.cat); const I = GH.data.techInst.find(k => k.id === x.inst); add('기본기', x.ko, I.ko + ' 기본기 · ' + c.ko, [x.id, c.en, c.ko, I.ko, I.en, '기본기', '연습'], '#/technique/' + x.inst + '/' + x.id); });
     GH.data.songs.forEach(s => add('곡 분석', s.ko, s.key + ' ' + s.form, [s.id], '#/songs/' + encodeURIComponent(s.id)));

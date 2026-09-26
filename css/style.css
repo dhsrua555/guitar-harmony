@@ -1441,3 +1441,28 @@ details.tech-cat[open] .tech-cat-chev { transform:rotate(90deg); }
 .inst-piano svg.piano { max-width:420px; }
 .inst-piano.wide svg.piano { max-width:760px; }
 .inst-hands { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:.86rem; }
+
+/* ---- 기초 코스 · 세션별 ---- */
+.course-sess { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin:4px 0 16px; }
+.course-sess-lab { margin-right:2px; color:var(--fg-muted); font-size:.82rem; font-weight:700; }
+.course-sess .chip { display:inline-flex; align-items:center; gap:5px; }
+.course-sess .chip .chip-ic { width:15px; height:15px; }
+.lesson-piano.wide svg.piano, .lesson-stack > .lesson-piano svg.piano { max-width:560px; }
+.lesson-practice-bar { gap:10px; align-items:center; flex-wrap:wrap; }
+.lesson-practice-bar > b { margin-right:4px; }
+.lesson-practice-status { min-width:3em; font-weight:700; }
+.lesson-practice-view { max-width:560px; }
+.lesson-practice-view.kit { max-width:460px; }
+.lesson-kit { max-width:460px; }
+.lesson-keychords { gap:10px; }
+.lesson-keychord { padding:10px 12px; }
+.lesson-keychord .lesson-piano svg.piano { max-width:100%; }
+.range-grid { display:flex; flex-wrap:wrap; gap:5px; }
+.range-note { min-width:3.2em; justify-content:center; font-variant-numeric:tabular-nums; }
+.range-note.pick { border-color:var(--brand); background:var(--brand); color:var(--brand-ink); }
+.range-note.in { background:color-mix(in srgb,var(--brand) 16%,var(--bg-elev)); }
+.range-result { margin:0; font-weight:700; }
+.hub-course { display:grid; gap:6px; margin:0 0 18px; padding:16px 18px; border:1.5px dashed var(--ink-line); background:color-mix(in srgb,var(--ball) 22%,var(--bg-elev)); }
+.hub-course .title { font-size:1.08rem; }
+.hub-course .btn { justify-self:start; }
+.lesson-quiz-none { margin:8px 0 0; }

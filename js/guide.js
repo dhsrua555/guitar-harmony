@@ -72,24 +72,75 @@
     { id: 'tap5', title: '리듬 따라 치기 4 · 5단계 (싱코페이션 · 셋잇단)', route: '/rhythm', q: { tab: 'tap' }, goals: ['rhythm', 'ear'], lv: [2, 4], desc: '당김음과 셋잇단 패턴을 듣고 따라 쳐서 80점 이상을 목표로 합니다.' },
     { id: 'funk16', title: '펑크 16비트 스트럼과 칩', route: '/rhythm', q: { tab: 'strum' }, goals: ['rhythm', 'guitar'], lv: [3, 4], desc: '손은 16분음표로 쉬지 않고, 칩(짧게 끊기)으로 2 · 4박 백비트를 만듭니다.' },
     { id: 'swingcomp', title: '스윙 MR 위에서 컴핑하기', route: '/backing', q: { id: 'ii-V-I', style: 'swing' }, goals: ['rhythm', 'guitar', 'compose'], lv: [3, 4], desc: '투파이브원 스윙 MR을 틀고 2 · 4박에 짧게 코드를 넣어 드럼 · 베이스와 그루브를 맞춥니다.' },
-    { id: 'bass-open', title: '베이스 기본기: 투핑거와 크로매틱', route: '/technique/bass/b-open', goals: ['guitar', 'rhythm'], lv: [0, 1], inst: ['bass'], desc: '검지 · 중지를 번갈아 개방현을 치고, 한 손가락 한 프렛 크로매틱으로 이어 갑니다.' },
-    { id: 'bass-major', title: '베이스: 고정 포지션 메이저 스케일', route: '/technique/bass/b-major', goals: ['guitar', 'theory'], lv: [1, 2], inst: ['bass'], desc: '루트를 중지에 두는 모양으로 12키 메이저 스케일을 칩니다.' },
+    /* ---- 세션 줄: 고른 세션마다 쉬운 것부터 (기초 코스 장은 아래에서 세션마다 만든다) ---- */
+    { id: 'bass-open', title: '베이스 기본기: 투핑거와 개방현', route: '/technique/bass/b-open', goals: ['guitar', 'rhythm'], lv: [0, 1], inst: ['bass'], desc: '검지 · 중지를 번갈아(i · m) 개방현 네 줄을 고르게 칩니다.' },
+    { id: 'bass-chroma', title: '베이스: 크로매틱 1-2-3-4', route: '/technique/bass/b-chroma', goals: ['guitar'], lv: [0, 1], inst: ['bass'], desc: '한 손가락이 한 프렛씩. 5프렛 근처에서 E 줄부터 G 줄까지 올라갔다 내려와요.' },
+    { id: 'bass-chords', title: '베이스 코드톤 자리 (E · A 줄 루트)', route: '/bass/chords', goals: ['theory', 'guitar', 'compose'], lv: [0, 2], inst: ['bass'], desc: '코드를 고르면 E · A 줄 루트에서 시작하는 1-3-5 모양이 지판에 나와요. ▶ 아르페지오로 들어 봐요.' },
     { id: 'bass-root58', title: '베이스: 루트 · 5도 · 옥타브 그루브', route: '/technique/bass/b-root58', goals: ['rhythm', 'guitar'], lv: [1, 2], inst: ['bass'], desc: '1-6-4-5 진행 위에서 1-5-8-5 를 8분음표로.' },
+    { id: 'bass-major', title: '베이스: 고정 포지션 메이저 스케일', route: '/technique/bass/b-major', goals: ['guitar', 'theory'], lv: [1, 2], inst: ['bass'], desc: '루트를 중지에 두는 모양으로 12키 메이저 스케일을 칩니다.' },
+    { id: 'bass-pent', title: '베이스: 마이너 펜타토닉 박스', route: '/technique/bass/b-pent', goals: ['solo', 'guitar'], lv: [1, 3], inst: ['bass'], desc: 'E 줄 5프렛에서 시작하는 네 줄 박스로 리프와 필을 만들어요.' },
+    { id: 'bass-backing', title: 'MR 위에서 루트 치기 (베이스 끄고)', route: '/backing', q: { id: 'I-V-vi-IV', off: 'bass' }, goals: ['rhythm', 'guitar', 'compose'], lv: [1, 3], inst: ['bass'], desc: '베이스를 끈 1-5-6-4 MR 위에서 킥 드럼에 맞춰 루트를 8분음표로 칩니다.' },
+    { id: 'bass-octave', title: '베이스: 디스코 옥타브', route: '/technique/bass/b-octave', goals: ['rhythm'], lv: [1, 3], inst: ['bass'], desc: '루트와 옥타브를 8분음표로 오가며 춤추는 그루브를 만들어요.' },
+    { id: 'bass-arp', title: '베이스: 코드톤 아르페지오 1-3-5-8', route: '/technique/bass/b-arp', goals: ['theory', 'guitar', 'compose'], lv: [2, 3], inst: ['bass'], desc: '진행의 코드마다 1-3-5-8. 메이저 · 마이너 두 손 모양을 익혀요.' },
+    { id: 'bass-boogie', title: '베이스: 12마디 블루스 부기', route: '/technique/bass/b-boogie', goals: ['rhythm', 'solo'], lv: [2, 3], inst: ['bass'], desc: '코드마다 1-3-5-6-b7-6-5-3 을 8분음표로. 블루스 폼을 몸에 익혀요.' },
+    { id: 'bass-routine', title: '베이스 기본기 루틴 15분', route: '/technique/bass', q: { r: 'b-mid' }, goals: ['guitar', 'rhythm'], lv: [2, 4], inst: ['bass'], desc: '루틴 타이머에 맞춰 운지 · 코드톤 · 그루브 연습을 이어서 합니다.' },
     { id: 'bass-walk', title: '베이스: 워킹 베이스 ii–V–I', route: '/technique/bass/b-walk', goals: ['guitar', 'solo', 'theory'], lv: [3, 4], inst: ['bass'], desc: '코드톤 세 개와 반음 어프로치로 4분음표 라인을 만듭니다.' },
+    { id: 'bass-funk', title: '베이스: 16비트 옥타브 펑크', route: '/technique/bass/b-funkoct', goals: ['rhythm', 'solo'], lv: [3, 4], inst: ['bass'], desc: '고스트 노트를 섞은 16비트 옥타브로 펑크 그루브를 칩니다.' },
+    { id: 'bass-slap', title: '베이스: 슬랩 기초 (엄지 T · 팝 P)', route: '/technique/bass/b-slap', goals: ['guitar', 'rhythm'], lv: [4, 4], inst: ['bass'], desc: '엄지로 때리고 검지로 튕기는 슬랩의 기본 모양.' },
+
     { id: 'keys-five', title: '키보드 기본기: 다섯 손가락과 하논', route: '/technique/keys/k-five', goals: ['guitar'], lv: [0, 1], inst: ['keys'], desc: '다섯 손가락 자리에서 손 모양을 잡고, 하논 1번 음형으로 이어 갑니다.' },
+    { id: 'keys-voicings', title: '키보드 코드 보이싱 (기본형 · 전위)', route: '/keys/voicings', goals: ['theory', 'compose', 'guitar'], lv: [0, 2], inst: ['keys'], desc: '코드를 고르면 건반에서 누를 자리와 전위가 나와요. ▶ 듣기로 소리를 비교해요.' },
+    { id: 'keys-pop', title: '키보드: 8비트 반주 (왼손 루트 · 오른손 코드)', route: '/technique/keys/k-pop-comp', goals: ['rhythm', 'compose', 'guitar'], lv: [1, 2], inst: ['keys'], desc: 'I–V–vi–IV 위에서 왼손 루트, 오른손 8분 코드로 밴드 반주를 합니다.' },
     { id: 'keys-scale', title: '키보드: 엄지 넘기기 스케일 2옥타브', route: '/technique/keys/k-scale', goals: ['guitar', 'theory'], lv: [1, 2], inst: ['keys'], desc: 'C · G · D · F 메이저를 표준 운지로 한 손씩, 그다음 양손.' },
+    { id: 'keys-inv', title: '키보드: 트라이어드 전위', route: '/technique/keys/k-inv', goals: ['theory', 'guitar'], lv: [1, 2], inst: ['keys'], desc: '기본형 · 1전위 · 2전위를 오르내리며 가까운 자리를 익혀요.' },
     { id: 'keys-cadence', title: '키보드: I–IV–V–I 케이던스', route: '/technique/keys/k-cadence', goals: ['compose', 'theory', 'guitar'], lv: [1, 3], inst: ['keys'], desc: '가까운 전위로 코드를 잇는 반주의 기본. 12키로 옮겨 칩니다.' },
+    { id: 'keys-backing', title: 'MR 위에서 반주하기 (컴핑 끄고)', route: '/backing', q: { id: 'I-V-vi-IV', off: 'comp' }, goals: ['rhythm', 'compose'], lv: [1, 3], inst: ['keys'], desc: '코드 반주를 끈 1-5-6-4 MR 위에서 왼손 루트 + 오른손 코드로 채웁니다.' },
+    { id: 'keys-hanon', title: '키보드: 하논 1번 음형', route: '/technique/keys/k-hanon', goals: ['guitar'], lv: [1, 3], inst: ['keys'], desc: '다섯 손가락이 고르게 움직이도록 한 음형을 올라갔다 내려와요.' },
+    { id: 'keys-ballad', title: '키보드: 발라드 분산 반주', route: '/technique/keys/k-ballad', goals: ['compose', 'rhythm'], lv: [2, 3], inst: ['keys'], desc: '왼손 1-5-8-10 분산화음 위에 오른손 코드. 발라드 반주의 기본이에요.' },
+    { id: 'keys-routine', title: '키보드 기본기 루틴 15분', route: '/technique/keys', q: { r: 'k-mid' }, goals: ['guitar', 'theory'], lv: [2, 4], inst: ['keys'], desc: '루틴 타이머에 맞춰 손가락 · 스케일 · 코드 연습을 이어서 합니다.' },
     { id: 'keys-251', title: '키보드: 재즈 ii–V–I 보이싱', route: '/technique/keys/k-251', goals: ['theory', 'compose'], lv: [3, 4], inst: ['keys'], desc: '3음 · 7음 가이드톤이 반음씩 움직이는 보이스 리딩을 익힙니다.' },
-    { id: 'drum-single', title: '드럼 기본기: 싱글 · 더블 스트로크', route: '/technique/drums/d-single', goals: ['rhythm', 'guitar'], lv: [0, 1], inst: ['drums'], desc: '메트로놈에 맞춰 R L 을 고르게, 이어서 R R L L 더블 스트로크.' },
+    { id: 'keys-advanced', title: '키보드 재즈 보이싱 (셸 · 루트리스 · 드롭 2)', route: '/keys/voicings/advanced', goals: ['theory', 'compose'], lv: [3, 4], inst: ['keys'], desc: '셸 · 루트리스 A/B · 드롭 2 · 쿼탈 보이싱을 코드마다 비교합니다.' },
+    { id: 'keys-rootless', title: '키보드: 루트리스 A · B형 (4키 순환)', route: '/technique/keys/k-v-rootless', goals: ['theory', 'solo'], lv: [4, 4], inst: ['keys'], desc: '루트를 베이스에 맡기고 3 · 7 · 9 · 13 으로 ii–V–I 을 4키에서 칩니다.' },
+
+    { id: 'drum-single', title: '드럼 기본기: 싱글 스트로크', route: '/technique/drums/d-single', goals: ['rhythm', 'guitar'], lv: [0, 1], inst: ['drums'], desc: '메트로놈에 맞춰 R L 을 고르게. 4분 → 8분 → 16분으로 바꿔 가며.' },
     { id: 'drum-8beat', title: '드럼: 8비트 기본 그루브', route: '/technique/drums/d-8beat', goals: ['rhythm'], lv: [0, 2], inst: ['drums'], desc: '하이햇 8분 · 스네어 2 · 4박 · 킥 1 · 3박을 합칩니다.' },
+    { id: 'drum-double', title: '드럼: 더블 스트로크 (R R L L)', route: '/technique/drums/d-double', goals: ['guitar', 'rhythm'], lv: [1, 2], inst: ['drums'], desc: '두 번째 음이 첫 음만큼 크게. 손목 한 번 + 손가락 한 번.' },
+    { id: 'drum-8kick', title: '드럼: 8비트 킥 변형', route: '/technique/drums/d-8kick', goals: ['rhythm'], lv: [1, 2], inst: ['drums'], desc: '손은 그대로, 킥 자리만 바꾸는 손발 독립의 첫걸음.' },
     { id: 'drum-para', title: '드럼: 패러디들과 액센트', route: '/technique/drums/d-para', goals: ['rhythm', 'guitar'], lv: [1, 3], inst: ['drums'], desc: 'R L R R · L R L L 에 액센트를 넣어 손을 고르게.' },
+    { id: 'drum-phrase', title: '드럼: 4마디 프레이즈와 필', route: '/technique/drums/d-phrase4', goals: ['rhythm', 'compose'], lv: [1, 3], inst: ['drums'], desc: '8비트 세 마디 + 필 한 마디, 그리고 크래시로 다시 시작.' },
+    { id: 'drum-backing', title: 'MR 위에서 드럼 치기 (드럼 끄고)', route: '/backing', q: { id: 'I-V-vi-IV', off: 'drums' }, goals: ['rhythm', 'compose'], lv: [1, 3], inst: ['drums'], desc: '드럼을 끈 1-5-6-4 MR 위에서 8비트를 치고, 4마디마다 필과 크래시.' },
+    { id: 'drum-shuffle', title: '드럼: 블루스 셔플', route: '/technique/drums/d-shuffle', goals: ['rhythm'], lv: [2, 3], inst: ['drums'], desc: '셋잇단 첫째 · 셋째 음으로 흔들리는 셔플 그루브.' },
+    { id: 'drum-16beat', title: '드럼: 16비트 그루브', route: '/technique/drums/d-16beat', goals: ['rhythm'], lv: [2, 3], inst: ['drums'], desc: '한 손 16분 하이햇에 8분 자리 액센트, R&B · 펑크 킥.' },
+    { id: 'drum-fill', title: '드럼: 16분 탐 필', route: '/technique/drums/d-fill', goals: ['rhythm', 'solo'], lv: [2, 3], inst: ['drums'], desc: '스네어 → 탐 → 플로어 탐을 돌고 크래시로 돌아와요.' },
+    { id: 'drum-routine', title: '드럼 기본기 루틴 15분', route: '/technique/drums', q: { r: 'd-mid' }, goals: ['rhythm', 'guitar'], lv: [2, 4], inst: ['drums'], desc: '루틴 타이머에 맞춰 루디먼트 · 조합 · 그루브 · 필인을 이어서 합니다.' },
     { id: 'drum-ghost', title: '드럼: 고스트 노트 · 스윙', route: '/technique/drums/d-ghost', goals: ['rhythm', 'solo'], lv: [3, 4], inst: ['drums'], desc: '작은 고스트 노트로 펑크 그루브를, 라이드로 재즈 타임을.' },
+    { id: 'drum-chops', title: '드럼: 찹 · 컴비네이션', route: '/drums/chops', goals: ['guitar', 'solo'], lv: [3, 4], inst: ['drums'], desc: '식스 스트로크 · 버스트 같은 빠른 손 패턴과 R L K 손발 조합.' },
+    { id: 'drum-linear', title: '드럼: 리니어 16비트', route: '/technique/drums/d-linear', goals: ['rhythm', 'guitar'], lv: [4, 4], inst: ['drums'], desc: '두 소리가 겹치지 않게 킥 · 오른손 · 왼손이 한 칸씩.' },
+
     { id: 'vocal-long', title: '보컬 기본기: 롱톤과 립 트릴', route: '/technique/vocal/v-longtone', goals: ['guitar', 'ear'], lv: [0, 1], inst: ['vocal'], desc: '한 음을 4박 흔들림 없이, 입술 떨기로 목에 힘을 뺍니다.' },
     { id: 'vocal-five', title: '보컬: 5음 스케일 반음씩 올리기', route: '/technique/vocal/v-five', goals: ['ear', 'guitar'], lv: [0, 2], inst: ['vocal'], desc: '도-레-미-파-솔을 반복마다 반음씩 올려 음역을 넓힙니다.' },
+    { id: 'vocal-scale', title: '보컬: 장음계 한 옥타브', route: '/technique/vocal/v-scale', goals: ['ear', 'guitar'], lv: [1, 2], inst: ['vocal'], desc: '도레미파솔라시도. 미-파 · 시-도 반음 자리를 좁게.' },
+    { id: 'vocal-rhythm', title: '보컬: 리듬 시창', route: '/technique/vocal/v-rhythm', goals: ['rhythm', 'ear'], lv: [1, 2], inst: ['vocal'], desc: '한 음으로 4분 · 8분 · 점음표 · 쉼표를 "따"로 읽어요.' },
     { id: 'vocal-interval', title: '보컬: 인터벌 시창 (2도 ~ 8도)', route: '/technique/vocal/v-interval', goals: ['ear', 'theory'], lv: [1, 3], inst: ['vocal'], desc: '악보를 보고 음정을 바로 부르는 시창의 기초.' },
-    { id: 'vocal-run', title: '보컬: 3도 화음과 런', route: '/technique/vocal/v-harmony', goals: ['ear', 'solo', 'compose'], lv: [3, 4], inst: ['vocal'], desc: '피아노 선율 위에 3도 화음을 얹고, 블루스 스케일 런으로 이어 갑니다.' }
+    { id: 'vocal-scales', title: '스케일 부르기 (여러 키 · 모드)', route: '/vocal/scales', goals: ['ear', 'theory'], lv: [1, 3], inst: ['vocal'], desc: '루트와 스케일을 골라 내 음역에 맞춘 악보와 계이름으로 불러요.' },
+    { id: 'vocal-triads', title: '보컬: 다이어토닉 트라이어드 부르기', route: '/technique/vocal/v-triads', goals: ['ear', 'theory'], lv: [2, 3], inst: ['vocal'], desc: '음계 위의 3화음을 차례로 부르며 메이저 · 마이너의 색을 느껴요.' },
+    { id: 'vocal-chords', title: '코드톤 부르기 · 화음 나누기', route: '/vocal/chords', goals: ['ear', 'compose'], lv: [2, 3], inst: ['vocal'], desc: '코드 음을 부르고, 4성부(소프라노 · 알토 · 테너 · 베이스)로 나눠 봐요.' },
+    { id: 'vocal-sight', title: '보컬: 시창 2 (도약이 있는 멜로디)', route: '/technique/vocal/v-sight2', goals: ['ear', 'theory'], lv: [2, 4], inst: ['vocal'], desc: '3 · 4 · 5도 도약이 섞인 멜로디를 악보만 보고 불러요.' },
+    { id: 'vocal-routine', title: '보컬 기본기 루틴 15분', route: '/technique/vocal', q: { r: 'v-mid' }, goals: ['ear', 'guitar'], lv: [2, 4], inst: ['vocal'], desc: '루틴 타이머에 맞춰 호흡 · 스케일 · 시창 연습을 이어서 합니다.' },
+    { id: 'vocal-blues', title: '보컬: 블루스 스케일 런', route: '/technique/vocal/v-blues', goals: ['solo', 'ear'], lv: [3, 4], inst: ['vocal'], desc: 'R&B · 소울 애드리브의 재료가 되는 음들을 오르내려요.' },
+    { id: 'vocal-run', title: '보컬: 3도 화음 부르기', route: '/technique/vocal/v-harmony', goals: ['ear', 'solo', 'compose'], lv: [3, 4], inst: ['vocal'], desc: '피아노 선율 위에 3도 화음을 얹어 코러스 파트를 익힙니다.' },
+    { id: 'vocal-melisma', title: '보컬: 멜리스마 런 (16분)', route: '/technique/vocal/v-run', goals: ['solo'], lv: [4, 4], inst: ['vocal'], desc: '16분 하행 묶음을 한 숨에 굴려요. 빠를수록 소리는 작게.' }
   ];
-  ['finder', 'open', 'strum', 'pent', 'triads', 'ds', 'licks', 'drop2', 'funk16'].forEach(id => { const m = MISSIONS.find(x => x.id === id); if (m) m.inst = ['guitar']; });
+  ['finder', 'open', 'strum', 'pent', 'triads', 'ds', 'licks', 'drop2', 'funk16', 'phrase'].forEach(id => { const m = MISSIONS.find(x => x.id === id); if (m) m.inst = ['guitar']; });
+  { const m = MISSIONS.find(x => x.id === 'swingcomp'); if (m) m.inst = ['guitar', 'keys']; }
+  /* 기초 코스: 세션마다 여섯 장. 기타 코스 장(course-ch1 …)은 위 목록 그대로, 다른 세션 장은 courseSessions.js 에서 */
+  MISSIONS.filter(m => /^course-ch/.test(m.id)).forEach(m => { m.inst = ['guitar']; m.course = true; });
+  Object.keys(GH.data.courseSessions || {}).forEach(sid => {
+    const C = GH.data.courseSessions[sid]; if (!C.chapters) return;
+    const at = MISSIONS.findIndex(m => m.inst && m.inst[0] === sid);
+    const list = C.chapters.map(ch => ({ id: 'course-' + sid + '-' + ch.id, title: '기초 코스 ' + ch.n + '장 (' + C.ko + '): ' + ch.title, route: '/learn/' + ch.lessons[0], q: { s: sid }, goals: ch.goals || ['theory'], lv: ch.n <= 2 ? [0, 0] : [0, 1], inst: [sid], course: true, desc: ch.desc }));
+    MISSIONS.splice(at < 0 ? MISSIONS.length : at, 0, ...list);
+  });
   /* 페이지 가이드: 경로(앞부분 일치) → 무엇을, 어떻게 */
   const PAGES = [
     ['/guitar/voicings', '코드를 잡는 여러 방법을 찾는 곳입니다.', ['루트와 코드 퀄리티를 고르세요.', '다이어그램의 점을 누르면 그 줄 소리가 나고, ▶ 듣기로 전체를 들을 수 있습니다.', '처음이라면 기본 코드 폼의 오픈 코드부터 시작하세요.']],
@@ -130,30 +181,49 @@
   /* 미션 페이지의 따라 하기 단계 (coach.js) */
   function missionSteps(m) { const S = GH.coach && GH.coach.stepsFor({ path: m.route, query: m.q || {} }); return S ? S.map(x => x.say) : []; }
 
-  /* 맞춤 순서: 지금 수준과 한 단계 위, 목표가 겹치는 미션을 쉬운 것부터 */
+  /* 맞춤 순서: 고른 세션의 줄(그 세션 기초 코스 → 기본기 · 페이지)을 중심에 두고,
+     세션과 상관없는 화성학 · 음감 · 리듬 미션을 목표 순서대로 사이사이에 끼운다 */
   function plan(p) {
     p = p || data.profile; const li = Math.max(0, LEVELS.findIndex(l => l.id === p.level));
     const goals = p.goals && p.goals.length ? p.goals : GOALS.map(g => g.id);
     const n = goals.length;
-    const sess = p.sessions && p.sessions.length ? p.sessions : ['guitar'];
-    const pool = MISSIONS.filter(m => m.lv[0] <= li + 1 && m.lv[1] >= li && m.goals.some(g => goals.includes(g)) && (!m.inst || m.inst.some(i => sess.includes(i))));
-    const isCourse = m => /^course-/.test(m.id);
+    const sess = (p.sessions || []).filter(id => SESSIONS.some(s => s.id === id)); if (!sess.length) sess.push('guitar');
+    const fits = m => m.lv[0] <= li + 1 && m.lv[1] >= li;
+    const isCourse = m => !!m.course;
     const idx = m => MISSIONS.indexOf(m);
     const gap = m => m.lv[0] > li ? 1.5 * (m.lv[0] - li) : li - m.lv[0]; /* 내 수준에서 시작하는 것 → 복습 → 한 단계 위 */
     const hits = m => m.goals.filter(g => goals.includes(g));
     const weight = m => hits(m).reduce((a, g) => a + (n - goals.indexOf(g)), 0); /* 먼저 고른 목표일수록 무겁게 */
     const order = keyOf => (a, b) => { const x = keyOf(a), y = keyOf(b); for (let k = 0; k < x.length; k++) if (x[k] !== y[k]) return x[k] - y[k]; return 0; };
-    /* 1) 여러 목표를 골랐으면, 고른 목표를 두 개 이상 함께 채우는 미션부터 (많이 채울수록, 먼저 고른 목표일수록 앞) */
-    const combo = n > 1 ? pool.filter(m => hits(m).length >= 2 && (gap(m) <= 1 || (li === 0 && isCourse(m)))) : []; /* 한 단계 넘게 위인 것은 앞당기지 않는다 */
-    combo.sort(order(m => li === 0 && isCourse(m) ? [0, -hits(m).length, -weight(m), idx(m)] : [1, gap(m), -hits(m).length, -weight(m), m.lv[0], idx(m)]));
-    /* 2) 나머지는 목표마다 줄을 세우고, 첫 번째 목표부터 한 개씩 번갈아 꺼낸다
-       한 줄 안에서는: 처음이면 기초 코스 장 순서대로 → 수준에 가장 맞는 것 → 그 목표가 주된 목표인 것 → 쉬운 것 */
+    /* 1) 세션 줄: 기초 코스 장(순서대로)과 기본기 · 페이지 미션(수준에 맞는 것 → 목표가 겹치는 것)을 번갈아 */
+    const lane = sid => {
+      const mine = MISSIONS.filter(m => m.inst && m.inst.includes(sid) && fits(m));
+      const course = mine.filter(isCourse).sort((a, b) => idx(a) - idx(b));
+      const prac = mine.filter(m => !isCourse(m)).sort(order(m => [gap(m), -hits(m).length, -weight(m), m.lv[0], idx(m)]));
+      const out = []; for (let k = 0; out.length < course.length + prac.length; k++) { if (course[k]) out.push(course[k]); if (prac[k]) out.push(prac[k]); }
+      return out;
+    };
+    const lanes = sess.map(lane);
+    /* 2) 공통 줄: 목표가 겹치는 세션 공통 미션. 여러 목표를 함께 채우는 것부터, 나머지는 목표마다 번갈아 */
+    const pool = MISSIONS.filter(m => !m.inst && fits(m) && m.goals.some(g => goals.includes(g)));
+    const combo = n > 1 ? pool.filter(m => hits(m).length >= 2 && gap(m) <= 1) : []; /* 한 단계 넘게 위인 것은 앞당기지 않는다 */
+    combo.sort(order(m => [gap(m), -hits(m).length, -weight(m), m.lv[0], idx(m)]));
     const rest = pool.filter(m => !combo.includes(m));
     const groups = goals.map(() => []);
     rest.forEach(m => { const k = Math.min(...m.goals.map(g => { const i = goals.indexOf(g); return i < 0 ? 99 : i; })); groups[k].push(m); });
-    groups.forEach((list, i) => list.sort(order(m => li === 0 && isCourse(m) ? [0, 0, 0, 0, idx(m)] : [1, gap(m), m.goals[0] === goals[i] ? 0 : 1, m.lv[0], idx(m)])));
-    const out = combo.slice();
-    for (let round = 0; out.length < pool.length; round++) groups.forEach(list => { if (list[round]) out.push(list[round]); });
+    groups.forEach((list, i) => list.sort(order(m => [gap(m), m.goals[0] === goals[i] ? 0 : 1, m.lv[0], idx(m)])));
+    const general = combo.slice();
+    for (let round = 0; general.length < pool.length; round++) groups.forEach(list => { if (list[round]) general.push(list[round]); });
+    /* 3) 섞기: 첫 세션 두 개 → 공통 하나 → 다른 세션 하나씩 … */
+    const out = [], seen = new Set(), at = lanes.map(() => 0); let gi = 0;
+    const push = m => { if (m && !seen.has(m.id)) { seen.add(m.id); out.push(m); } };
+    while (out.length < 12) {
+      const left = lanes.some((l, j) => at[j] < l.length) || gi < general.length;
+      if (!left) break;
+      for (let t = 0; t < 2; t++) push(lanes[0][at[0]++]);
+      push(general[gi++]);
+      for (let j = 1; j < lanes.length; j++) push(lanes[j][at[j]++]);
+    }
     return out.slice(0, 12);
   }
 
@@ -180,9 +250,9 @@
       box.appendChild(h('div', { class: 'onboard-top' }, h('span', { class: 'eyebrow' }, 'STEP ' + step + ' / ' + TOTAL), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '닫기', onclick: skip }, GH.icon('close'))));
       if (step === 1) {
         box.appendChild(h('h2', { id: 'onboard-title' }, '어떤 세션에 관심 있으세요?'));
-        box.appendChild(h('p', { class: 'muted' }, '여러 개를 골라도 돼요. 고른 세션의 기본기 연습과 미션을 먼저 추천해 드려요.'));
+        box.appendChild(h('p', { class: 'muted' }, '여러 개를 골라도 돼요. 가장 먼저 고른 세션으로 기초 코스를 배우고, 고른 세션의 기본기 연습과 미션을 차례로 추천해 드려요.'));
         box.appendChild(h('div', { class: 'onboard-options goals sessions' }, SESSIONS.map(s => { const k = draft.sessions.indexOf(s.id); return h('button', { class: 'onboard-option' + (k >= 0 ? ' active' : ''), type: 'button', 'aria-pressed': k >= 0 ? 'true' : 'false', onclick: () => { if (k >= 0) draft.sessions.splice(k, 1); else draft.sessions.push(s.id); draw(); } }, h('span', { class: 'onboard-icon', 'aria-hidden': 'true' }, k >= 0 ? String(k + 1) : GH.icon(s.icon)), h('b', null, s.ko), h('small', null, s.desc)); })));
-        if (draft.sessions.some(id => id !== 'guitar')) box.appendChild(h('p', { class: 'onboard-note' }, '베이스 · 키보드 · 드럼 · 보컬은 지금 기본기 연습부터 준비돼 있어요. 화성학 · 리듬 · 음감 연습은 모든 세션에 함께 쓰여요.'));
+        if (draft.sessions.length) box.appendChild(h('p', { class: 'onboard-note' }, '처음 고른 ' + SESSIONS.find(x => x.id === draft.sessions[0]).ko + '에 맞춘 기초 코스와 연습 순서를 중심으로 추천해요. 화성학 · 리듬 · 음감 연습은 모든 세션에 함께 쓰여요.'));
         box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: skip }, '나중에 할게요'),
           only ? h('button', { class: 'btn primary', type: 'button', disabled: !draft.sessions.length, onclick: () => { setProfile({ sessions: draft.sessions }); closeModal(); if (opts.onDone) opts.onDone(); } }, '저장')
             : h('button', { class: 'btn primary', type: 'button', disabled: !draft.sessions.length, onclick: () => { step = 2; draw(); } }, '다음 →')));
