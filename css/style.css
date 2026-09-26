@@ -1292,6 +1292,7 @@ svg.tab .finger { fill:var(--brand); font-family:var(--sans, inherit); font-size
 svg.tab .pick { fill:none; stroke:var(--fg-soft); stroke-width:1.3; stroke-linecap:round; stroke-linejoin:round; }
 svg.tab .trip { fill:var(--fg-muted); font-size:9px; font-style:italic; }
 .tech-note { margin:8px 0 0; font-size:.8rem; }
+.tech-keycap { margin:0 0 6px; color:var(--fg-soft); font-size:.86rem; font-weight:700; }
 .tech-record { display:grid; gap:8px; }
 .tech-record-list p { margin:0 0 6px; }
 .tech-tips { margin:0; padding-left:1.2em; line-height:1.7; }

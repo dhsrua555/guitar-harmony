@@ -61,6 +61,7 @@
         const order = ks.map((k, i) => i).sort((a, b) => ks[a].step - ks[b].step);
         n = new VF.StaveNote({ keys: order.map(i => ks[i].key + (ev.x ? '/x2' : '')), duration: code.replace('d', ''), clef, auto_stem: true });
         if (!ev.x) order.forEach((i, idx) => { if (ks[i].acc) n.addModifier(new VF.Accidental(ks[i].acc), idx); });
+        if (ev.soft) order.forEach((i, idx) => { if (ev.soft.includes(ev.m[i])) try { n.setKeyStyle(idx, { fillStyle: '#948d80', strokeStyle: '#948d80' }); } catch (e) { /* ignore */ } });   /* 회색: 피아노가 치는 음 */
         n.__steps = ks.map(k => k.step);
         if (ev.stacc) try { n.addModifier(new VF.Articulation('a.').setPosition(VF.Modifier.Position.ABOVE), 0); } catch (e) { /* ignore */ }
         if (ev.acc) try { n.addModifier(new VF.Articulation('a>').setPosition(VF.Modifier.Position.ABOVE), 0); } catch (e) { /* ignore */ }
@@ -211,7 +212,7 @@
       const stDone = new Set();                        /* 손 · 발이 같은 칸이면 스티킹은 한 번만 */
       drawn.forEach(({ n, stave, k, line }) => {
         if (n.__rest && !n.__fg) return;
-        const L = lines[line][k]; const cx = n.getAbsoluteX() + 5;
+        const L = lines[line][k]; let cx = n.getAbsoluteX() + 5; try { const b = n.getNoteHeadBeginX(), e = n.getNoteHeadEndX(); if (isFinite(b) && isFinite(e) && e > b) cx = (b + e) / 2; } catch (err) { /* 음표 머리 가운데 (임시표가 있어도) */ }
         if (n.__fg != null && n.__fg !== '') texts.push(txt(svg, spec.chordAbove ? cx - 4 : cx, stave.getYForLine(0) - L.above - 14, n.__fg, spec.chordAbove ? 'sheet-ch' : 'sheet-fg'));
         if (n.__rest) return;
         let yb = stave.getYForLine(4) + L.below + 18;
@@ -235,6 +236,8 @@
       let cur = [];
       return {
         el: div,
+        /* 적힌 음 (점검용): 시각 · 보표 · VexFlow 키 */
+        notes: drawn.filter(x => !x.n.__rest).map(({ n, k }) => ({ at: n.__at, staff: k, keys: n.getKeys ? n.getKeys() : [] })),
         highlight(at) {
           cur.forEach(e => e.classList.remove('cur')); cur = [];
           if (at == null || at < 0) return;

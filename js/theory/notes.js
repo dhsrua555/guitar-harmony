@@ -142,6 +142,17 @@
   function niceName(pc, pref) { pc = mod(pc, 12); if ([1, 3, 8, 10].includes(pc)) return FLAT_NAMES[pc]; if (pc === 6) return pref === 'flat' ? 'Gb' : 'F#'; return SHARP_NAMES[pc]; }
   function koName(name) { const p = parseNote(name); if (!p) return name; return KO_NAMES[p.letter] + (p.acc > 0 ? '♯'.repeat(p.acc) : p.acc < 0 ? '♭'.repeat(-p.acc) : ''); }
 
-  GH.notes = { LETTERS, LETTER_SEMIS, SHARP_NAMES, FLAT_NAMES, INTERVALS, parseNote, pcOf, noteName, normalize, pretty, spell, transpose,
+  /* 가사 줄 계이름: 고정도(C = 도, 적힌 음이름 그대로) · 이동도(으뜸음 = 도). 보컬 화면이 함께 쓰는 설정 (이 브라우저에만) */
+  const SOLFA_KEY = 'gh.solfa';
+  const MOVABLE = ['도', '도♯', '레', '미♭', '미', '파', '파♯', '솔', '솔♯', '라', '시♭', '시'];
+  const solfa = {
+    get() { try { return localStorage.getItem(SOLFA_KEY) === 'movable' ? 'movable' : 'fixed'; } catch (e) { return 'fixed'; } },
+    set(v) { try { localStorage.setItem(SOLFA_KEY, v === 'movable' ? 'movable' : 'fixed'); } catch (e) { /* ignore */ } },
+    fixed: name => koName(name),
+    movable: semis => MOVABLE[mod(semis, 12)],
+    OPTIONS: [{ value: 'fixed', label: '고정도 (C = 도)' }, { value: 'movable', label: '이동도 (으뜸음 = 도)' }]
+  };
+
+  GH.notes = { solfa, LETTERS, LETTER_SEMIS, SHARP_NAMES, FLAT_NAMES, INTERVALS, parseNote, pcOf, noteName, normalize, pretty, spell, transpose,
     intervalKo, intervalEn, intervalBetween, alter, spellLetter, ivSemi, ivPc, ivClass, simpleIv, tensionIv, labelMap, intervalName, midiToFreq, midiName, midiFrom, rootList, rootFor, niceName, koName, mod };
 })();

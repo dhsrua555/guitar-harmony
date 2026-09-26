@@ -382,8 +382,14 @@
     ok(B_('d-six').seq.slice(0, 6).map(s => s.st).join('') === 'RLLRRL' && dChop.filter(e => e.handsOnly).length >= 5 && !byT('d-six-kit').handsOnly, 'drums chops: six stroke roll, hands-only flags');
     /* 보컬 */
     const v5 = B_('v-five', { voice: 'alto', steps: '5' });
-    ok(v5.seq[0].midi === 55 && v5.seq[0].syl === '도' && v5.seq[4].syl === '솔' && v5.trs.join(',') === '0,1,2,3,4,5,4,3,2,1', 'vocal 5-tone scale: root, solfège, key steps up & down');
-    ok(B_('v-five', { voice: 'bari' }).seq[0].midi === 43 && B_('v-five', { syl: 'vowel' }).seq[1].syl === '아', 'vocal voice range & vowel option');
+    ok(v5.seq[0].midi === 60 && v5.seq[0].syl === '도' && v5.seq[4].syl === '솔' && v5.trs.join(',') === '0,1,2,3,4,5,4,3,2,1', 'vocal 5-tone scale: starts on C, solfège, key steps up & down');
+    ok(B_('v-five', { voice: 'bari' }).seq[0].midi === 48 && B_('v-five', { syl: 'vowel' }).seq[1].syl === '아', 'vocal voice range & vowel option');
+    const oG = T.options(byT('v-five'), { voice: 'alto', start: 'G' }), vG = T.build(byT('v-five'), oG);
+    const oGm = T.options(byT('v-five'), { voice: 'alto', start: 'G', syl: 'solfa' });
+    ok(vG.seq[0].midi === 55 && vG.seq[0].name === 'G' && vG.seq[0].syl === '솔' && vG.seq[2].name === 'B' && vG.seq[2].syl === '시' && T.build(byT('v-five'), oGm).seq[0].syl === '도', 'vocal start key G: note names and fixed-do lyrics follow the notes, movable-do on request');
+    const o5 = T.options(byT('v-five'), {}), L2 = T.vocalLabels(T.build(byT('v-five'), o5), o5, 2);
+    ok(L2[0].name === 'D' && L2[0].syl === '레' && L2[2].name === 'F#' && L2[2].syl === '파♯', 'vocal key step +2: sheet names and lyrics move to D major');
+    const ohb = T.options(byT('v-harmony-below'), {}); ok(ohb.guide === 'line' && T.options(byT('v-harmony'), {}).guide === 'line' && T.options(byT('v-five'), {}).guide === 'mine', 'vocal harmony drills: piano plays the other line by default');
     const vh = B_('v-harmony').seq; ok(vh.slice(0, 8).every(s => s.gmidi != null && (s.midi - s.gmidi === 3 || s.midi - s.gmidi === 4)), 'vocal harmony: sung line a diatonic 3rd above the guide');
     ok(B_('v-chrom').seq.slice(8).some(s => /♭/.test(s.syl)), 'vocal chromatic: flats on the way down');
     /* 그림 · 악보 */

@@ -6,7 +6,10 @@
   const { h, section, select, chips } = GH.ui; const N = GH.notes; const mod = N.mod;
   const INSTS = [{ id: 'guitar', ko: '기타', icon: 'guitar' }, { id: 'bass', ko: '베이스', icon: 'bass' }, { id: 'keys', ko: '키보드', icon: 'piano' }, { id: 'vocal', ko: '보컬', icon: 'mic' }];
   const BASS = () => GH.data.techBassTuning;
-  const SOLFA = ['도', '도#', '레', '미♭', '미', '파', '파#', '솔', '솔#', '라', '시♭', '시'];
+  /* 보컬 가사 줄: 고정도(적힌 음 그대로) · 이동도(루트 = 도). 설정은 보컬 기본기와 같이 쓴다 */
+  const lyricOf = (name, semisFromRoot) => N.solfa.get() === 'movable' ? N.solfa.movable(semisFromRoot) : N.solfa.fixed(name);
+  const solfaNote = () => N.solfa.get() === 'movable' ? '가사 줄은 루트를 "도"로 둔 계이름(이동도)이에요.' : '가사 줄은 적힌 음 그대로 읽는 계이름(고정도, C = 도)이에요.';
+  const solfaSelect = () => h('label', null, '가사', select({ options: N.solfa.OPTIONS, value: N.solfa.get(), onChange: v => { N.solfa.set(v); GH.router.rerender(); } }));
   const PART_KO = ['베이스', '테너', '알토', '소프라노'];
   const instKo = id => (INSTS.find(i => i.id === id) || INSTS[0]).ko;
   /* 주제별 세션 페이지 주소 */
@@ -138,12 +141,13 @@
     let root = V.root + mod(chord.rootPc - mod(V.root, 12), 12); if (root > V.root + 5) root -= 12;
     const up = S.map(x => root + x).concat([root + 12]); const line = up.concat(up.slice(0, -1).reverse());
     const box = h('div');
-    box.appendChild(h('div', { class: 'toolbar' }, h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; try { localStorage.setItem('gh.tech.voice', v); } catch (e) { /* ignore */ } GH.router.rerender(); } }))));
-    const events = line.map((m, i) => ({ at: i, d: 1, m: [m], names: [N.noteName(mod(m, 12), pref)], lyric: SOLFA[mod(m - root, 12)] }));
+    box.appendChild(h('div', { class: 'toolbar' }, h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; try { localStorage.setItem('gh.tech.voice', v); } catch (e) { /* ignore */ } GH.router.rerender(); } })), solfaSelect()));
+    const nameOf = m => { const n = chord.notes.find(x => x.pc === mod(m, 12)); return n ? n.name : N.noteName(mod(m, 12), pref); };
+    const events = line.map((m, i) => ({ at: i, d: 1, m: [m], names: [nameOf(m)], lyric: lyricOf(nameOf(m), m - root) }));
     const sh = GH.render.sheet && GH.render.sheet({ kind: 'line', clef: V.clef, written: V.clef === 'treble8vb' ? 12 : 0, pref, events, width: 700 });
     box.appendChild(sh ? h('div', { class: 'tech-sheet' }, sh.el) : h('p', { class: 'muted' }, '악보를 불러오는 중이에요.'));
     box.appendChild(h('div', { class: 'row', style: 'gap:8px;margin-top:8px' }, GH.app.playBtn('▶ 코드 듣고 따라 부르기', () => { GH.player.playSeq(events, { tempo: 84, sound: (ev, t, dur) => { if (ev.at === 0) up.slice(0, -1).forEach(m => GH.audio.pluck(m - 12, t, events.length * dur, { preset: 'piano', gain: 0.35 })); GH.audio.pluck(ev.m[0], t, dur * 0.9, { preset: 'piano', gain: 0.6 }); }, onNote: (i, ev) => sh && sh.highlight(i < 0 || !ev ? null : ev.at) }); }, 'primary'), GH.app.stopBtn()));
-    box.appendChild(h('p', { class: 'muted' }, '가사 줄은 코드 루트를 "도"로 둔 계이름이에요. 피아노가 코드를 깔아 주면 한 음씩 따라 불러 보세요.'));
+    box.appendChild(h('p', { class: 'muted' }, solfaNote() + ' 피아노가 코드를 깔아 주면 한 음씩 따라 불러 보세요.'));
     /* 합창 파트: 베이스 = 루트, 나머지 음을 테너 · 알토 · 소프라노에 가까이 */
     const tones = S.slice(1); const parts = [];
     let b = 40 + mod(chord.rootPc - 4, 12); parts.push(b);
@@ -222,6 +226,7 @@
       h('label', null, '스케일', A.scaleSelect(scaleId, v => go({ scale: v }))),
       h('label', null, '패턴', select({ options: pats, value: vstate.pattern, onChange: v => { vstate.pattern = v; GH.router.rerender(); } })),
       inst === 'keys' ? h('label', null, '손', select({ options: [{ value: 'rh', label: '오른손' }, { value: 'lh', label: '왼손' }, { value: 'both', label: '양손' }], value: vstate.hands, onChange: v => { vstate.hands = v; GH.router.rerender(); } })) : null,
+      inst === 'vocal' ? solfaSelect() : null,
       inst === 'vocal' ? h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; try { localStorage.setItem('gh.tech.voice', v); } catch (e) { /* ignore */ } GH.router.rerender(); } })) : null,
       h('label', null, '템포', tempoIn));
     el.appendChild(tb);
@@ -232,6 +237,7 @@
     else { const V = GH.data.techVoices[voiceId()]; base = V.root + mod(rootPc - mod(V.root, 12), 12); if (base > V.root + 4) base -= 12; octaves = 1; }
     const upMidis = []; for (let o = 0; o < octaves; o++) semisOf.forEach(x => upMidis.push(base + 12 * o + x)); upMidis.push(base + 12 * octaves);
     const notes = upMidis.map(m => ({ midi: m, pc: mod(m, 12) }));
+    const spelled = GH.scales.notes(root, scaleId); const nameOf = m => { const n = spelled.find(x => x.pc === mod(m, 12)); return n ? n.name : N.noteName(mod(m, 12), pref); };   /* 스케일 철자 그대로 적는다 */
     const seq = GH.positions.pattern(notes, vstate.pattern).map(n => n.midi);
     const major = scaleId === 'ionian' && inst === 'keys';
     const rf = major ? scaleFingers(rootPc, 'rh', upMidis.length) : null, lf = major ? scaleFingers(rootPc, 'lh', upMidis.length) : null;
@@ -240,8 +246,8 @@
     let sheet = null, view = null;
     if (inst === 'keys') {
       const withF = ['asc', 'desc', 'ascdesc'].includes(vstate.pattern);
-      const rh = vstate.hands === 'lh' ? [] : seq.map((m, i) => ({ at: i * d, d, m: [m], fg: withF ? fgOf('rh', m) : '' }));
-      const lh = vstate.hands === 'rh' ? [] : seq.map((m, i) => ({ at: i * d, d, m: [m - 12], fg: withF ? fgOf('lh', m - 12) : '' }));
+      const rh = vstate.hands === 'lh' ? [] : seq.map((m, i) => ({ at: i * d, d, m: [m], names: [nameOf(m)], fg: withF ? fgOf('rh', m) : '' }));
+      const lh = vstate.hands === 'rh' ? [] : seq.map((m, i) => ({ at: i * d, d, m: [m - 12], names: [nameOf(m)], fg: withF ? fgOf('lh', m - 12) : '' }));
       sheet = GH.render.sheet && GH.render.sheet({ kind: 'grand', pref, width: Math.min(1100, el.clientWidth || 800), rh, lh });
       const shown = [].concat(vstate.hands !== 'lh' ? upMidis : [], vstate.hands !== 'rh' ? upMidis.map(m => m - 12) : []);
       const labels = {}; shown.forEach(m => { labels[m] = lm[mod(m, 12)] || ''; });
@@ -250,7 +256,7 @@
         h('p', { class: 'muted' }, major ? '음표 위 숫자가 손가락 번호(1 엄지 ~ 5 새끼)예요. 엄지를 넘기는 자리에서 소리가 끊기지 않게 해 보세요.' : '운지 표는 메이저 스케일(아이오니안)에만 붙여 두었어요. 다른 스케일은 가까운 메이저 스케일 운지를 바탕으로 쳐 보세요.')));
     } else {
       const V = GH.data.techVoices[voiceId()];
-      sheet = GH.render.sheet && GH.render.sheet({ kind: 'line', clef: V.clef, written: V.clef === 'treble8vb' ? 12 : 0, pref, width: Math.min(1100, el.clientWidth || 800), events: seq.map((m, i) => ({ at: i * d, d, m: [m], lyric: SOLFA[mod(m - base, 12)] })) });
+      sheet = GH.render.sheet && GH.render.sheet({ kind: 'line', clef: V.clef, written: V.clef === 'treble8vb' ? 12 : 0, pref, width: Math.min(1100, el.clientWidth || 800), events: seq.map((m, i) => ({ at: i * d, d, m: [m], names: [nameOf(m)], lyric: lyricOf(nameOf(m), m - base) })) });
     }
     const status = h('div', { class: 'tech-status', role: 'status', 'aria-live': 'polite' });
     el.appendChild(section(inst === 'keys' ? '악보 · 따라 치기' : '악보 · 따라 부르기',
@@ -261,7 +267,7 @@
           onNote: (i, ev) => { status.textContent = i >= 0 ? '' : status.textContent; if (sheet) sheet.highlight(i < 0 || !ev ? null : ev.i * d); if (view && view.highlightMany) view.highlightMany(i < 0 || !ev ? [] : [].concat(vstate.hands !== 'lh' ? [ev.m] : [], vstate.hands !== 'rh' ? [ev.m - 12] : [])); } });
       }, 'primary'), A.stopBtn(), status),
       sheet ? h('div', { class: 'tech-sheet' }, sheet.el) : h('p', { class: 'muted' }, '악보를 불러오는 중이에요.'),
-      inst === 'vocal' ? h('p', { class: 'muted' }, '가사 줄은 루트를 "도"로 둔 계이름이에요. 피아노를 따라 부른 뒤, 소리를 끄고 혼자 불러 보세요.') : null));
+      inst === 'vocal' ? h('p', { class: 'muted' }, solfaNote() + ' 피아노를 따라 부른 뒤, 소리를 끄고 혼자 불러 보세요.') : null));
     el.appendChild(h('div', { class: 'toc' }, h('a', { href: A.theoryScaleHref(scaleId, root) }, '스케일 이론 →'), h('a', { href: inst === 'keys' ? '#/technique/keys/k-scale' : '#/technique/vocal/v-five' }, inst === 'keys' ? '키보드 기본기: 스케일 2옥타브 →' : '보컬 기본기: 5음 스케일 →')));
   }
 
