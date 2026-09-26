@@ -1314,8 +1314,6 @@ svg.tab .trip { fill:var(--fg-muted); font-size:9px; font-style:italic; }
 .tech-inst-chips .chip .ic { width:15px; height:15px; }
 .tech-inst-chips .chip.active { border-color:var(--ink); background:var(--ink); color:var(--bg); }
 .tech-method { margin:6px 0 0; padding-left:1.3em; line-height:1.7; }
-.tech-sources { margin:0 0 8px; padding-left:1.2em; line-height:1.75; }
-.tech-src { margin:10px 0 0; color:var(--fg-soft); font-size:.86rem; }
 .tech-notation { display:grid; gap:12px; }
 .tech-sheet { min-width:0; }
 .staff-box.sheet { overflow-x:auto; padding:8px 6px; border:1.5px solid var(--ink-line); border-radius:var(--radius-sm); background:#FFFDF6; }

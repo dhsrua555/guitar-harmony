@@ -1,5 +1,5 @@
 /* 기본기 연습 데이터 (세션 공통 목록 + 기타). 베이스 · 키보드 · 드럼 · 보컬은 techBass · techKeys · techDrums · techVocal.js
-   기타: 크로매틱 · 손가락 신경분리 · 펜타토닉 · 피킹 · 레가토 (교재 · 입시 전통의 연습 방식을 참고해 새로 적은 연습)
+   기타: 크로매틱 · 손가락 신경분리 · 펜타토닉 · 피킹 · 레가토
    gen(o) → [{s 줄(1=높은 E), f 프렛, fg 손가락(0 개방 · 1 검지 · 2 중지 · 3 약지 · 4 새끼), t 'h' 해머온 | 'p' 풀오프, label 도수}]
    음 길이와 피킹 방향은 페이지에서 리듬 · 피킹 설정에 따라 붙인다. 운지는 스탠다드 튜닝 기준 */
 (function () {
@@ -199,92 +199,77 @@
       goal: '6번 줄부터 새끼손가락(4)으로 시작해 4-3-2-1 로 올라가고, 1-2-3-4 로 내려와요. 1-2-3-4 와 반대 방향이라 새끼손가락이 먼저 일해요.',
       how: ['새끼손가락을 시작 프렛 + 3 에 먼저 누르고 차례로 3 · 2 · 1.', '내려올 때는 1-2-3-4.'],
       tips: ['새끼손가락을 누를 때 손 전체가 따라 돌아가지 않게, 손목은 그대로.'],
-      src: 'Troy Stetina 《Speed Mechanics for Lead Guitar》 크로매틱 변형',
       gen: o => { const F = o.fret; const out = []; UP.forEach(s => out.push(...onString(s, F, [4, 3, 2, 1]))); UP.slice().reverse().forEach(s => out.push(...onString(s, F, [1, 2, 3, 4]))); return out; } },
     { id: 'perm-shift', cat: 'indep', level: 3, ko: '순열 계단 (줄마다 한 프렛씩 이동)', rh: '8', tempo: [60, 110], opts: { fret: 1, perm: '1324' },
       goal: '고른 손가락 순서를 치면서 줄을 옮길 때마다 한 프렛씩 위로 올라가요. 신경분리와 포지션 이동을 한꺼번에.',
       how: ['6번 줄은 시작 프렛, 5번 줄은 한 프렛 위 … 1번 줄은 다섯 프렛 위.', '내려올 때는 같은 계단을 거꾸로 내려와요.'],
       tips: ['손을 옮길 때 엄지도 같이 옮겨요. 손가락 간격은 늘 한 프렛씩.'],
-      src: 'John Petrucci 《Rock Discipline》 순열 연습의 포지션 이동 변형',
       gen: o => { const order = String(o.perm).split('').map(Number); const out = []; UP.forEach((s, i) => out.push(...onString(s, o.fret + i, order))); UP.slice().reverse().forEach((s, i) => out.push(...onString(s, o.fret + 5 - i, order))); return out; } },
     { id: 'pent-major', cat: 'pent', level: 2, ko: '메이저 펜타토닉 박스', rh: '8', tempo: [60, 140], opts: { key: 'C', box: 1 },
       goal: '1-2-3-5-6 다섯 음의 메이저 펜타토닉. 컨트리 · 팝 · 록 발라드의 밝은 솔로 재료예요. 모양은 마이너 펜타토닉과 같고 루트 자리만 달라요.',
       how: ['루트(빨강)가 6번 줄 · 4번 줄 · 1번 줄 어디에 있는지 먼저 확인해요.', '박스를 올라갔다 내려와요.'],
       tips: ['C 메이저 펜타토닉 = A 마이너 펜타토닉과 같은 음이에요. 어디를 루트로 느끼는지가 달라요.'],
-      src: 'William Leavitt 《A Modern Method for Guitar》 포지션 연습 · 메이저 펜타토닉',
       gen: o => { const b = boxOf(o, 'major_pent'); return b.concat(b.slice().reverse()); } },
     { id: 'blues-box', cat: 'pent', level: 2, ko: '블루스 스케일 박스 1 (b5 블루노트)', rh: '8', tempo: [60, 130], opts: { key: 'A' },
       goal: '마이너 펜타토닉 박스 1에 b5 블루노트를 더한 블루스 스케일. 블루스 · 록 솔로의 기본 모양이에요.',
       how: ['5번 줄과 3번 줄에 끼어드는 b5 가 새 음이에요.', '올라갔다 내려와요.'],
       tips: ['b5 는 오래 머무르지 말고 4 나 5 로 바로 지나가면 블루지하게 들려요.'],
-      src: '블루스 스케일 박스 (기타 교본 공통)',
       gen: o => { const rootPc = GH.notes.pcOf(o.key || 'A'); const box = GH.positions.npsPositions(rootPc, 'minor_pent', 2, STD())[0]; const lm = GH.scales.labelMap(rootPc, 'blues'); const b = windowNotes(GH.scales.pcs(rootPc, 'blues'), lm, box.lo, box.hi + 1); return b.concat(b.slice().reverse()); } },
     { id: 'pent-boxes', cat: 'pent', level: 4, ko: '펜타토닉 박스 1~5 이어 달리기', rh: '8', tempo: [70, 140], opts: { key: 'A' },
       goal: '박스 1을 올라가고, 박스 2를 내려오고, 박스 3을 올라가고 … 다섯 박스를 차례로 지나 지판 전체를 이어요.',
       how: ['박스가 바뀔 때 이전 박스의 마지막 음과 가까운 곳에서 새 박스를 시작해요.', '빨간 루트 음의 자리를 소리 내어 세면서 쳐요.'],
       tips: ['처음엔 박스 두 개(1 · 2)만 이어 보는 것도 좋아요.'],
-      src: 'Troy Stetina 《Speed Mechanics》 · 펜타토닉 포지션 연결',
       gen: o => { const out = []; for (let b = 1; b <= 5; b++) { const x = boxOf({ key: o.key, box: b }, 'minor_pent'); out.push(...(b % 2 ? x : x.slice().reverse())); } return out; } },
     { id: 'major-3nps', cat: 'scale', level: 3, ko: '메이저 스케일 3NPS', rh: '8', tempo: [60, 130], opts: { key: 'G', pos: 1 },
       goal: '한 줄에 세 음씩, 두 옥타브가 넘는 메이저 스케일. 실용음악과 기타 입시에서 가장 먼저 보는 스케일 과제예요.',
       how: ['줄마다 세 음. 온-온은 1-2-4, 온-반은 1-3-4 손가락.', '포지션을 바꿔 7개 모두 익혀요.'],
       tips: ['한 줄에 세 음이라 피킹이 규칙적이에요 (다운-업-다운 / 업-다운-업).'],
-      src: '실용음악과 기타 입시 스케일 과제 · 3NPS 포지션',
       gen: o => { const b = nps3Of(o, 'ionian'); return b.concat(b.slice().reverse()); } },
     { id: 'major-caged', cat: 'scale', level: 3, ko: '메이저 스케일 CAGED 포지션', rh: '8', tempo: [60, 130], opts: { key: 'G', pos: 1 },
       goal: 'C · A · G · E · D 코드 폼을 감싸는 다섯 포지션의 메이저 스케일. 코드와 스케일을 같은 자리에서 연결해요.',
       how: ['포지션마다 그 자리의 코드 폼을 먼저 잡아 보고 스케일을 쳐요.', '포지션을 1 → 5로 옮겨요.'],
       tips: ['한 포지션 안에서 손을 옮기지 않는 게 원칙이에요. 스트레치가 필요한 음은 검지나 새끼를 뻗어요.'],
-      src: 'CAGED 시스템 (기타 교본 공통) · 입시 스케일 과제',
       gen: o => { const rootPc = GH.notes.pcOf(o.key || 'G'); const w = GH.positions.caged(rootPc, 'ionian', STD())[clamp((Number(o.pos) || 1) - 1, 0, 4)]; const lm = GH.scales.labelMap(rootPc, 'ionian'); const b = windowNotes(GH.scales.pcs(rootPc, 'ionian'), lm, w.lo, w.hi); return b.concat(b.slice().reverse()); } },
     { id: 'scale-3rds', cat: 'scale', level: 4, ko: '스케일 3도 시퀀스 (3NPS)', rh: '8', tempo: [60, 120], opts: { key: 'G', pos: 1 },
       goal: '스케일을 한 음씩 건너 짝지어 쳐요 (도-미, 레-파, 미-솔 …). 멜로디가 넓게 뛰는 소리를 손에 익혀요.',
       how: ['올라갈 때는 첫째-셋째, 둘째-넷째 … 짝으로.', '맨 위에서 거꾸로 짝을 지어 내려와요.'],
       tips: ['줄을 건너는 곳이 많아 피킹 정확도가 중요해요. 천천히.'],
-      src: '인터벌 시퀀스 (Troy Stetina 《Speed Mechanics》 · 입시 스케일 과제)',
       gen: o => { const b = nps3Of(o, 'ionian'); const out = []; for (let i = 0; i + 2 < b.length; i++) out.push(b[i], b[i + 2]); const d = b.slice().reverse(); for (let i = 0; i + 2 < d.length; i++) out.push(d[i], d[i + 2]); return out; } },
     { id: 'arp-triad', cat: 'arp', level: 3, ko: '트라이어드 아르페지오 (E 폼)', rh: '8t', tempo: [60, 120], opts: { key: 'A', q: 'maj' },
       goal: '6번 줄 루트의 E 폼 자리에서 코드 음(1-3-5)만 골라 두 옥타브를 오르내려요. 코드와 솔로를 잇는 아르페지오의 기본이에요.',
       how: ['코드 폼을 잡은 자리에서 1 · 3 · 5 만 차례로.', '셋잇단 한 박에 세 음씩.'],
       tips: ['같은 프렛의 이웃 줄 두 음은 손가락을 굴려(롤링) 치면 소리가 겹치지 않아요.'],
-      src: '아르페지오 포지션 (William Leavitt · Berklee)',
       gen: o => { const b = chordWindow(o); return b.concat(b.slice(0, -1).reverse()); } },
     { id: 'arp-7th', cat: 'arp', level: 4, ko: '세븐 코드 아르페지오 (E 폼)', rh: '8', tempo: [60, 120], opts: { key: 'A', q: 'm7' },
       goal: 'maj7 · m7 · 7 · m7b5 의 코드 음(1-3-5-7)을 한 자리에서 두 옥타브. 재즈 솔로의 뼈대예요.',
       how: ['코드를 바꾸며 3음과 7음이 어디로 움직이는지 봐요.', '올라갔다 내려와요.'],
       tips: ['ii–V–I (m7 → 7 → maj7) 순서로 바꿔 가며 쳐 보면 코드 진행이 들려요.'],
-      src: '재즈 기타 아르페지오 (실용음악과 기타 입시 · 재즈 전공 과제)',
       gen: o => { const b = chordWindow(o); return b.concat(b.slice(0, -1).reverse()); } },
     { id: 'sweep', cat: 'arp', level: 5, ko: '스윕 피킹 (3줄 마이너 트라이어드)', rh: '8t', tempo: [50, 110], opts: { key: 'A' },
       goal: '3 · 2 · 1번 줄의 마이너 트라이어드를 피크를 한 방향으로 쓸어내리듯(스윕) 쳐요. 올라갈 때는 다운만, 내려올 때는 업만.',
       how: ['다운 ⊓ ⊓ ⊓ 로 3 → 2 → 1번 줄, 맨 위 옥타브는 해머온.', '내려올 때 풀오프 뒤 업 V V V.', '음이 겹쳐 울리지 않게, 친 줄은 손가락을 들어 바로 끊어요.'],
       tips: ['“한 번에 긁기”가 아니라 음마다 따로 들려야 해요. 아주 느리게부터.'],
-      src: '스윕 피킹 (Frank Gambale · Yngwie Malmsteen 식 3줄 트라이어드)',
       gen: o => { let r = GH.notes.mod(GH.notes.pcOf(o.key || 'A') - 7, 12); if (r < 3) r += 12; const n3 = { s: 3, f: r, fg: 3, label: '1' }, n2 = { s: 2, f: r - 1, fg: 2, label: 'b3' }, n1 = { s: 1, f: r - 2, fg: 1, label: '5' }, top = { s: 1, f: r + 3, fg: 4, label: '1', t: 'h' };
         return [Object.assign({}, n3, { pk: 'd' }), Object.assign({}, n2, { pk: 'd' }), Object.assign({}, n1, { pk: 'd' }), top, Object.assign({}, n1, { t: 'p' }), Object.assign({}, n2, { pk: 'u' })]; } },
     { id: 'pick-3nps', cat: 'pick', level: 4, ko: '3NPS 얼터네이트 피킹', rh: '16', tempo: [60, 120], opts: { key: 'G', pos: 1 },
       goal: '한 줄에 세 음인 스케일을 다운-업을 끝까지 번갈아 쳐요. 줄을 옮길 때마다 피크 방향이 바뀌어 바깥쪽 · 안쪽 피킹이 번갈아 나와요.',
       how: ['모든 음을 피킹, 다운 · 업 순서는 절대 바꾸지 않아요.', '16분음표 네 개를 한 박으로 세요 (세 음 묶음과 박이 엇갈려요).'],
       tips: ['엇갈리는 박이 헷갈리면 메트로놈을 켜고 박마다 오는 음에 살짝 힘을 줘요.'],
-      src: 'Troy Stetina 《Speed Mechanics》 · Paul Gilbert 3NPS 얼터네이트',
       gen: o => { const b = nps3Of(o, 'ionian'); return b.concat(b.slice().reverse()); } },
     { id: 'pick-econ', cat: 'pick', level: 5, ko: '이코노미 피킹 (3NPS)', rh: '8t', tempo: [60, 130], opts: { key: 'G', pos: 1 },
       goal: '줄을 옮길 때 같은 방향으로 쓸고 넘어가는 이코노미 피킹. 올라갈 때 줄마다 ⊓ V ⊓, 다음 줄 첫 음도 ⊓.',
       how: ['올라갈 때: 줄마다 다운-업-다운, 다음 줄로 넘어가며 다운이 두 번 이어져요.', '내려올 때: 줄마다 업-다운-업.'],
       tips: ['넘어가는 다운 두 번은 한 번의 긴 움직임처럼. 피크가 다음 줄에 기대며 멈춰요.'],
-      src: '이코노미 피킹 (Frank Gambale · Troy Grady 피킹 분석)',
       gen: o => { const b = nps3Of(o, 'ionian'); const asc = b.map((n, i) => Object.assign({}, n, { pk: ['d', 'u', 'd'][i % 3] })); const desc = b.slice().reverse().map((n, i) => Object.assign({}, n, { pk: ['u', 'd', 'u'][i % 3] })); return asc.concat(desc); } },
     { id: 'pick-gallop', cat: 'pick', level: 3, ko: '갤럽 피킹 (8분 + 16분 두 개)', fixed: true, rh: '8', tempo: [70, 140], opts: {},
       goal: '따-다다 따-다다. 말발굽 소리 같은 갤럽 리듬을 6번 줄 개방현과 파워 코드 루트로. 메탈 · 록 리듬 기타의 기본이에요.',
       how: ['8분음표 다운, 16분음표 두 개는 다운 · 업.', '오른손 손날을 줄 끝(브리지)에 살짝 얹어 소리를 눌러요 (팜 뮤트).'],
       tips: ['16분 두 개가 뭉치지 않게 박자를 정확히. 메트로놈이 꼭 필요해요.'],
-      src: '메탈 리듬 기타 갤럽 패턴 (록 · 메탈 기타 교본 공통)',
       gen: () => { const out = []; [0, 0, 0, 0, 3, 3, 5, 5].forEach(f => { out.push({ s: 6, f, fg: f ? 1 : 0, d: 0.5, pk: 'd' }, { s: 6, f, fg: f ? 1 : 0, d: 0.25, pk: 'd' }, { s: 6, f, fg: f ? 1 : 0, d: 0.25, pk: 'u' }); }); return out; } },
     { id: 'legato-chroma', cat: 'legato', level: 2, ko: '크로매틱 레가토 (피킹 한 번에 네 음)', rh: '8', tempo: [60, 120], opts: { fret: 5 },
       goal: '줄마다 첫 음만 피킹하고 2 · 3 · 4 는 해머온, 내려올 때는 4 만 피킹하고 3 · 2 · 1 은 풀오프.',
       how: ['해머온은 손가락 끝으로 프렛 바로 뒤를 “딱” 내리쳐요.', '풀오프는 줄을 바닥 쪽으로 살짝 튕기며 떼요.'],
       tips: ['네 음의 크기가 같아질 때까지 천천히. 새끼손가락 해머온이 가장 약해요.'],
-      src: '레가토 기초 (Joe Satriani 레가토 연습)',
       gen: o => { const F = o.fret; const out = []; UP.forEach(s => [1, 2, 3, 4].forEach((k, i) => out.push(nt(s, F + k - 1, k, i ? 'h' : null)))); UP.slice().reverse().forEach(s => [4, 3, 2, 1].forEach((k, i) => out.push(nt(s, F + k - 1, k, i ? 'p' : null)))); return out; } }
   );
   CATS.push(
@@ -298,30 +283,15 @@
     { id: 'g-hard', inst: 'guitar', ko: '고급 루틴', min: 20, desc: '포지션 이동, 약한 손가락, 건너뛰기, 3NPS 레가토로 속도와 정확도를 함께.', steps: [['chroma-shift', 3], ['perm', 3], ['weak34', 3], ['pent-skip', 4], ['pick-skip', 3], ['legato-3nps', 4]] }
   ];
 
-  /* 연습마다 참고한 교재 · 전통 */
-  const SRC = {
-    'chroma-1234': 'Troy Stetina 《Speed Mechanics for Lead Guitar》의 크로매틱 워밍업', 'chroma-shift': 'Troy Stetina 《Speed Mechanics for Lead Guitar》 · 포지션 이동', stretch: 'John Petrucci 《Rock Discipline》의 스트레칭 워밍업',
-    perm: 'John Petrucci 《Rock Discipline》의 손가락 순열 (신경분리)', trill: 'John Petrucci 《Rock Discipline》의 트릴 연습', spider: 'John Petrucci 《Rock Discipline》의 스파이더 연습', weak34: '약지 · 새끼 독립 연습 (기타 교본 공통)', diag: '대각선 크로매틱 (기타 교본 공통)',
-    'pent-box': 'William Leavitt 《A Modern Method for Guitar》(Berklee) 포지션 연습', 'pent-3s': '펜타토닉 시퀀스 (Troy Stetina 《Speed Mechanics》)', 'pent-4s': '펜타토닉 시퀀스 (Troy Stetina 《Speed Mechanics》)', 'pent-skip': '인터벌 시퀀스 (실용음악 기타 입시 스케일 과제)',
-    'pick-open': 'William Leavitt 《A Modern Method for Guitar》 얼터네이트 피킹', 'pick-tremolo': 'Troy Stetina 《Speed Mechanics》 피킹 동기화', 'pick-cross': '인사이드 · 아웃사이드 피킹 (Troy Grady의 피킹 분석)', 'pick-skip': '스트링 스키핑 (Paul Gilbert 연습 방식)',
-    'pent-legato': '해머온 · 풀오프 기초 (기타 교본 공통)', 'legato-3nps': '3NPS 레가토 (Joe Satriani · John Petrucci 레가토 연습)'
-  };
-  EX.forEach(e => { e.inst = 'guitar'; e.src = e.src || SRC[e.id] || ''; });
+  EX.forEach(e => { e.inst = 'guitar'; });
   CATS.forEach(c => { c.inst = 'guitar'; });
 
   GH.data.techInst = [
     { id: 'guitar', ko: '기타', en: 'GUITAR', icon: 'guitar', desc: '크로매틱 · 신경분리 · 펜타토닉 · 피킹 · 레가토', view: '지판 · TAB · 오선' },
     { id: 'bass', ko: '베이스', en: 'BASS', icon: 'bass', desc: '투핑거 · 운지 · 코드톤 · 워킹 · 그루브', view: '지판 · TAB · 낮은음자리표' },
     { id: 'keys', ko: '키보드', en: 'KEYS', icon: 'piano', desc: '하논 · 스케일 · 아르페지오 · 케이던스 · 양손 독립', view: '건반 · 큰보표' },
-    { id: 'drums', ko: '드럼', en: 'DRUMS', icon: 'drum', desc: '루디먼트 · 액센트 · 그루브 · 필인 · 손발 독립', view: '드럼 킷 · 드럼 악보' },
+    { id: 'drums', ko: '드럼', en: 'DRUMS', icon: 'drum', desc: '루디먼트 · 찹 · 그루브 · 필인 · 컴비네이션', view: '드럼 킷 · 드럼 악보' },
     { id: 'vocal', ko: '보컬', en: 'VOCAL', icon: 'mic', desc: '호흡 · 발성 · 음정 · 시창 · 애드리브', view: '악보 · 피아노 가이드' }
-  ];
-  GH.data.techSources = GH.data.techSources || {};
-  GH.data.techSources.guitar = [
-    ['Troy Stetina', '《Speed Mechanics for Lead Guitar》 (Hal Leonard)', '크로매틱 · 얼터네이트 피킹 · 템포를 조금씩 올리는 스피드 훈련'],
-    ['John Petrucci', '《Rock Discipline》', '손가락 순열(신경분리) · 스파이더 · 트릴 · 레가토 워밍업'],
-    ['William Leavitt', '《A Modern Method for Guitar》 (Berklee Press)', '포지션 · 스케일 · 피킹 기본기'],
-    ['실용음악과 기타 입시', '공통 과제', '메이저 · 펜타토닉 포지션, 메트로놈 템포 올리기, 인터벌 시퀀스']
   ];
   GH.data.techCats = CATS;
   GH.data.technique = EX;

@@ -230,7 +230,7 @@
     render(el) {
       const sel = GH.guide && GH.guide.sessions ? GH.guide.sessions() : [];
       el.appendChild(h('h1', null, '세션별 기본기 연습'));
-      el.appendChild(h('p', { class: 'muted' }, '가장 기초부터 응용까지, 악보와 악기 그림을 보며 메트로놈에 맞춰 따라 해요. 스피드 트레이너로 템포를 조금씩 올리고, 깨끗하게 친 템포를 기록해요.'));
+      el.appendChild(h('p', { class: 'muted' }, '가장 기초부터 응용까지, 악보와 악기 그림을 보며 메트로놈에 맞춰 따라 해요. 스피드 트레이너로 템포를 조금씩 올려요. 마지막으로 쓴 템포는 기억해 두었다가 다음에 이어서 시작해요.'));
       el.appendChild(h('div', { class: 'grid cols-3 tech-insts' }, sessionsOrder().map(s => {
         const n = GH.data.technique.filter(e => e.inst === s.id).length;
         return h('a', { class: 'card link tech-inst', href: '#/technique/' + s.id },
@@ -239,7 +239,7 @@
             h('div', { class: 'desc' }, s.desc), h('div', { class: 'tech-inst-meta' }, n + '가지 연습 · ' + s.view)));
       })));
       el.appendChild(h('div', { class: 'callout' }, h('b', null, '어떻게 연습하나요?'),
-        h('ol', { class: 'tech-method' }, h('li', null, '루틴을 고르면 연습을 순서대로, 정해진 시간만큼 안내해요.'), h('li', null, '▶ 시작을 누르면 4박을 센 뒤 메트로놈과 함께 소리가 나고, 악보와 악기 그림에 지금 칠 음이 표시돼요.'), h('li', null, '스피드 트레이너를 켜면 몇 번 반복할 때마다 템포가 자동으로 올라가요.'), h('li', null, '틀리지 않고 쳤다면 그 템포를 기록해 두고, 다음 날 이어서 올려요.'))));
+        h('ol', { class: 'tech-method' }, h('li', null, '루틴을 고르면 연습을 순서대로, 정해진 시간만큼 안내해요.'), h('li', null, '▶ 시작을 누르면 4박을 센 뒤 메트로놈과 함께 소리가 나고, 악보와 악기 그림에 지금 칠 음이 표시돼요.'), h('li', null, '스피드 트레이너를 켜면 몇 번 반복할 때마다 템포가 자동으로 올라가요.'), h('li', null, '틀리지 않고 칠 수 있는 템포에서 멈추고, 다음 날 그 템포부터 이어서 올려요.'))));
     }
   };
 
@@ -284,16 +284,14 @@
         d.addEventListener('toggle', remember);
         el.appendChild(d);
       });
-      /* 참고 교재 */
-      el.appendChild(section('참고한 교재 · 입시 전통',
-        h('ul', { class: 'tech-sources' }, (GH.data.techSources[I.id] || []).map(([who, what, why]) => h('li', null, h('b', null, who), ' ', h('span', null, what), h('span', { class: 'muted' }, ' — ' + why)))),
-        h('p', { class: 'muted', style: 'font-size:.82rem' }, '위 교재와 음대 · 실용음악과 입시에서 흔히 쓰는 연습 방식을 참고해 이 사이트에서 새로 적은 연습이에요. 교재의 악보를 그대로 옮기지는 않았어요 (저작권이 끝난 하논 1번 음형만 원래 모양 그대로).')));
     }
   };
 
   /* 드럼 › 루디먼트 · 그루브 (분류만 모은 페이지) */
   GH.pages['/drums/rudiments'] = { title: '루디먼트 · 스틱 컨트롤', render(el, p) { GH.pages['/technique/:inst'].render(el, { inst: 'drums', query: p.query || {}, only: ['d-rud', 'd-ctrl'], title: '루디먼트 · 스틱 컨트롤', desc: '스네어(또는 연습 패드) 하나로 하는 손 연습. 국제 표준 루디먼트와 액센트 · 탭 컨트롤, 셈여림.' }); } };
   GH.pages['/drums/grooves'] = { title: '그루브 · 필인', render(el, p) { GH.pages['/technique/:inst'].render(el, { inst: 'drums', query: p.query || {}, only: ['d-groove', 'd-fill'], title: '그루브 · 필인', desc: '8비트 · 16비트 · 셔플 · 스윙 · 보사노바 같은 장르 그루브와 필인 · 손발 독립 연습. 드럼 보표와 킷 그림으로 따라 쳐요.' }); } };
+
+  GH.pages['/drums/chops'] = { title: '찹 · 컴비네이션', render(el, p) { GH.pages['/technique/:inst'].render(el, { inst: 'drums', query: p.query || {}, only: ['d-chop', 'd-combo'], title: '찹 · 컴비네이션', desc: '빠른 손 패턴(찹)과 손 · 킥을 한 줄로 잇는 조합(컴비네이션). 짧은 버스트와 3 · 4 · 6음 조합에서 시작해 탐을 도는 필까지.' }); } };
 
   /* ============ 연습 화면 ============ */
   const play = { metronome: true, loop: true, countIn: true, trainer: false, every: 2, step: 4, view: 'both' };
@@ -415,7 +413,7 @@
         h('p', { class: 'muted tech-note' }, B.kind === 'fretted' ? '오선의 음은 실제 소리보다 한 옥타브 높게 적는 ' + (ex.inst === 'bass' ? '베이스' : '기타') + ' 표기 관례를 따라요. TAB 숫자는 누를 프렛, 위의 작은 글자는 손가락 · 피킹.' + (ex.inst === 'bass' ? ' x 는 데드 노트.' : '') : B.kind === 'drums' ? (ex.handsOnly ? '스네어 한 가지 소리만 적었어요. 음표 아래 글자가 스티킹(R 오른손 · L 왼손), > 는 액센트예요.' : '드럼 보표: 맨 위 x 크래시 · 그 아래 x 하이햇 · 라이드, 가운데 칸 스네어, 아래 킥, 맨 아래 x 는 하이햇 페달.') : B.kind === 'keys' ? '위는 오른손(높은음자리표), 아래는 왼손(낮은음자리표). 음표 위 숫자는 손가락 번호.' : '악보는 처음 키로 적었어요. 반복할 때마다 피아노 화음이 새 키를 알려 줘요.')));
       if (view) el.appendChild(section(B.kind === 'keys' ? '건반' : B.kind === 'drums' ? (ex.handsOnly ? '스네어' : '드럼 킷') : '지판', view.el, h('p', { class: 'muted' }, view.note)));
 
-      el.appendChild(section('도움말', h('ul', { class: 'tech-tips' }, ex.tips.map(x => h('li', null, x))), ex.src ? h('p', { class: 'tech-src' }, h('b', null, '참고: '), ex.src) : null));
+      el.appendChild(section('도움말', h('ul', { class: 'tech-tips' }, ex.tips.map(x => h('li', null, x)))));
       const same = GH.data.technique.filter(e => e.cat === ex.cat && e.id !== ex.id);
       const extra = ex.inst === 'guitar' && (ex.cat === 'pent' || ex.id === 'pent-legato') ? [h('a', { href: A.scaleHref('minor_pent', o.key || 'A') }, '스케일 포지션에서 박스 보기')] : [];
       el.appendChild(section('다음에 해 볼 것', h('div', { class: 'toc' }, same.map(e => h('a', { href: exHref(e) }, e.ko)).concat(extra, [h('a', { href: '#/technique/' + I.id }, I.ko + ' 기본기 목록'), h('a', { href: '#/rhythm' }, '메트로놈 · 리듬 연습')]))));

@@ -115,9 +115,9 @@
     const n = new VF.StaveNote({ keys: hs.map(x => POS[x.k]), duration: code.replace('d', ''), clef: 'percussion', stem_direction: up ? 1 : -1 });
     if (code.endsWith('d')) try { VF.Dot.buildAndAttach([n], { all: true }); } catch (e) { /* ignore */ }
     if (hs.some(x => x.acc)) try { n.addModifier(new VF.Articulation('a>').setPosition(up ? VF.Modifier.Position.ABOVE : VF.Modifier.Position.BELOW), 0); } catch (e) { /* ignore */ }
-    hs.forEach((x, i) => { if (x.ghost) { try { if (VF.Parenthesis) VF.Parenthesis.buildAndAttach([n]); else n.setKeyStyle(i, { fillStyle: '#9a948a', strokeStyle: '#9a948a' }); } catch (e) { /* ignore */ } } });
+    hs.forEach((x, i) => { if (x.ghost) { try { if (VF.Parenthesis) { n.addModifier(new VF.Parenthesis(VF.Modifier.Position.LEFT), i); n.addModifier(new VF.Parenthesis(VF.Modifier.Position.RIGHT), i); } else n.setKeyStyle(i, { fillStyle: '#9a948a', strokeStyle: '#9a948a' }); } catch (e) { /* ignore */ } } });   /* 고스트 노트인 음에만 괄호 */
     if (hs.some(x => x.k === 'hatopen')) try { n.addModifier(new VF.Annotation('o').setFont('Arial', 9).setVerticalJustification(VF.Annotation.VerticalJustify.TOP), 0); } catch (e) { /* ignore */ }
-    n.__at = at; n.__d = d; n.__st = o.s.st; n.__steps = hs.map(x => STEP[x.k]); return n;
+    n.__at = at; n.__d = d; n.__st = o.s.st; n.__ghost = hs.some(x => x.ghost); n.__steps = hs.map(x => STEP[x.k]); return n;
   }
 
   function sheet(spec) {
@@ -137,7 +137,7 @@
       const nMeasures = Math.max(...staffs.map(s => Math.max(...s.voices.map(v => v.length))));
       /* 마디 너비: 한 마디 안에서 음표가 놓이는 서로 다른 시각의 수로 */
       let dense = 1;
-      for (let mi = 0; mi < 64; mi++) { const ats = new Set(); staffs.forEach(s => s.voices.forEach(v => (v[mi] || []).forEach(n => ats.add(Math.round(n.__at * 1000))))); dense = Math.max(dense, ats.size); }
+      for (let mi = 0; mi < 64; mi++) { const ats = new Set(), ghosts = new Set(); staffs.forEach(s => s.voices.forEach(v => (v[mi] || []).forEach(n => { ats.add(Math.round(n.__at * 1000)); if (n.__ghost) ghosts.add(Math.round(n.__at * 1000)); }))); dense = Math.max(dense, ats.size + ghosts.size * 0.4); }   /* 고스트 노트 괄호는 자리를 더 차지한다 */
       const MW = Math.max(200, Math.min(620, 90 + dense * (spec.kind === 'drum' ? 27 : 24))), CLEF = 46;
       const W = Math.max(spec.width || 700, 480);
       const perLine = Math.max(1, Math.min(4, Math.floor((W - CLEF - 20) / MW)));
@@ -152,7 +152,8 @@
           s.voices.forEach(v => v.slice(li * perLine, (li + 1) * perLine).forEach(m => m.forEach(n => { (n.__steps || []).forEach(st => { hi = Math.max(hi, st); lo = Math.min(lo, st); }); if (n.__fg != null && n.__fg !== '') hasFg = true; if (n.__lyric) hasLy = true; if (n.__st) hasSt = true; })));
           const above = (hi - topL) * 5, below = (botL - lo) * 5;
           const drum = s.clef === 'percussion';                  /* 드럼은 위 기둥 · 아래 기둥이 보표 밖으로 나간다 */
-          return { padTop: Math.max(24, above + 14) + (drum ? 44 : 12) + (hasFg ? 16 : 0), padBottom: Math.max(22, below + 20) + (drum ? 34 : 6) + (hasLy ? 18 : 0) + (hasSt ? 20 : 0), above: above + (drum ? 40 : 8), below: below + (drum ? 32 : 4), hasFg, hasLy, hasSt };
+          const tupDown = drum && s.voices.length > 1 && s.voices[1].slice(li * perLine, (li + 1) * perLine).some(m => m.__tuplets && m.__tuplets.length) ? 24 : 0;   /* 발(아래 기둥)의 셋잇단 괄호 · 3 자리 */
+          return { padTop: Math.max(24, above + 14) + (drum ? 44 : 12) + (hasFg ? 16 : 0), padBottom: Math.max(22, below + 20) + (drum ? 34 : 6) + tupDown + (hasLy ? 18 : 0) + (hasSt ? 20 : 0), above: above + (drum ? 40 : 8), below: below + (drum ? 32 : 4) + tupDown, hasFg, hasLy, hasSt };
         });
         lines.push(ss);
       }
@@ -186,15 +187,14 @@
         staffs.forEach((s, k) => s.voices.forEach(v => {
           const notes = v[mi] || [];
           if (!notes.length) return;
+          /* 셋잇단 묶음: 음표 길이가 바뀌므로 목소리에 넣기 전에 만든다 (뒤에 만들면 두 목소리의 박 위치가 어긋난다) */
+          const tuplets = (v[mi] && v[mi].__tuplets) || [];
+          const trips = tuplets.length ? tuplets : groupTriplets(notes);
+          const tupletObjs = trips.map(g => { try { const down = g[0].getStemDirection && g[0].getStemDirection() < 0; return new VF.Tuplet(g, { num_notes: 3, notes_occupied: 2, bracketed: g.some(n => n.__rest) || g.length < 3, ratioed: false, location: down ? -1 : 1 }); } catch (e) { return null; } }).filter(Boolean);
           const voice = new VF.Voice({ num_beats: 4, beat_value: 4 }).setStrict(false);
           voice.addTickables(notes);
-          allVoices.push({ voice, notes, stave: staves[k], k, tuplets: (v[mi] && v[mi].__tuplets) || [] });
+          allVoices.push({ voice, notes, stave: staves[k], k, tupletObjs });
         }));
-        /* 셋잇단 묶음 */
-        allVoices.forEach(av => {
-          const trips = av.tuplets.length ? av.tuplets : groupTriplets(av.notes);
-          av.tupletObjs = trips.map(g => { try { const down = g[0].getStemDirection && g[0].getStemDirection() < 0; return new VF.Tuplet(g, { num_notes: 3, notes_occupied: 2, bracketed: g.some(n => n.__rest) || g.length < 3, ratioed: false, location: down ? -1 : 1 }); } catch (e) { return null; } }).filter(Boolean);
-        });
         const fmt = new VF.Formatter();
         staffs.forEach((s, k) => { const vs = allVoices.filter(a => a.k === k).map(a => a.voice); if (vs.length) fmt.joinVoices(vs); });
         const width = staves[0].getNoteEndX() - staves[0].getNoteStartX() - 14;
@@ -208,6 +208,7 @@
         });
       }
       /* 운지 (위) · 가사 (아래) · 스티킹 (아래) */
+      const stDone = new Set();                        /* 손 · 발이 같은 칸이면 스티킹은 한 번만 */
       drawn.forEach(({ n, stave, k, line }) => {
         if (n.__rest && !n.__fg) return;
         const L = lines[line][k]; const cx = n.getAbsoluteX() + 5;
@@ -215,7 +216,7 @@
         if (n.__rest) return;
         let yb = stave.getYForLine(4) + L.below + 18;
         if (n.__lyric) { texts.push(txt(svg, cx, yb, n.__lyric, 'sheet-ly')); yb += 18; }
-        if (n.__st) texts.push(txt(svg, cx, yb, n.__st, 'sheet-st'));
+        if (n.__st && !stDone.has(k + ':' + Math.round(n.__at * 1000))) { stDone.add(k + ':' + Math.round(n.__at * 1000)); texts.push(txt(svg, cx, yb, n.__st, 'sheet-st')); }
       });
       if (spec.chordAbove) texts.forEach(t => { if (t && t.getAttribute('class') === 'sheet-ch') t.setAttribute('text-anchor', 'start'); });
       if (svg) {
@@ -262,7 +263,7 @@
   function beamsFor(VF, notes) {
     const groups = new Map();
     notes.forEach(n => {
-      if (n.__rest || n.__d >= 1 - EPS) return;
+      if (n.__rest || n.__d >= 1 - EPS || /^(q|4|h|2|w|1)$/.test(n.getDuration ? n.getDuration() : '')) return;   /* 4분음표(셋잇단 4분 포함)는 빔을 걸지 않는다 */
       const b = Math.floor(n.__at + EPS);
       if (!groups.has(b)) groups.set(b, []);
       groups.get(b).push(n);

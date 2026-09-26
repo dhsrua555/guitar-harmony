@@ -317,9 +317,9 @@
     const T = GH.technique, TD = GH.data.technique;
     const byT = id => TD.find(e => e.id === id);
     const B_ = (id, q) => { const ex = byT(id); return T.build(ex, T.options(ex, q || {})); };
-    ok(GH.data.techInst.length === 5 && GH.data.techInst.every(I => TD.filter(e => e.inst === I.id).length >= 9 && GH.data.techCats.some(c => c.inst === I.id) && GH.data.techRoutines.filter(r => r.inst === I.id).length === 3 && (GH.data.techSources[I.id] || []).length >= 3),
-      'technique: 5 sessions × (exercises, categories, 3 routines, sources) ' + GH.data.techInst.map(I => I.id + ' ' + TD.filter(e => e.inst === I.id).length).join(' · '));
-    ok(new Set(TD.map(e => e.id)).size === TD.length && TD.every(e => GH.data.techCats.some(c => c.id === e.cat && c.inst === e.inst) && e.src && e.how.length && e.tips.length && e.tempo.length === 2 && e.level >= 1 && e.level <= 5), 'technique metadata (unique ids, category, source, how, tips, tempo)');
+    ok(GH.data.techInst.length === 5 && GH.data.techInst.every(I => TD.filter(e => e.inst === I.id).length >= 9 && GH.data.techCats.some(c => c.inst === I.id) && GH.data.techRoutines.filter(r => r.inst === I.id).length === 3) && !GH.data.techSources,
+      'technique: 5 sessions × (exercises, categories, 3 routines), no source lists ' + GH.data.techInst.map(I => I.id + ' ' + TD.filter(e => e.inst === I.id).length).join(' · '));
+    ok(new Set(TD.map(e => e.id)).size === TD.length && TD.every(e => GH.data.techCats.some(c => c.id === e.cat && c.inst === e.inst) && !('src' in e) && e.how.length && e.tips.length && e.tempo.length === 2 && e.level >= 1 && e.level <= 5), 'technique metadata (unique ids, category, how, tips, tempo; no per-exercise source)');
     ok([1, 2, 3, 4, 5].every(lv => TD.some(e => e.level === lv)), 'technique levels 1-5 all used');
     ok(GH.data.techRoutines.every(r => r.steps.every(([id]) => { const e = byT(id); return e && e.inst === r.inst; })), 'technique routines reference own-session exercises');
     const techBad = [];
@@ -374,6 +374,12 @@
     const b8 = B_('d-8beat').seq; ok(b8.length === 16 && b8[2].hits.some(x => x.k === 'snare') && b8[0].hits.some(x => x.k === 'kick') && b8.every(s => s.hits.some(x => x.k === 'hat')), 'drums 8-beat groove lanes');
     const sw = B_('d-swing').seq; ok(Math.abs(sw[0].d - 1 / 3) < 1e-9 && sw[3].hits.some(x => x.k === 'pedal') && sw[5].hits.some(x => x.k === 'ride'), 'drums swing ride triplets + hi-hat 2 · 4');
     const lin = B_('d-linear').seq; ok(lin.every(s => s.hits.length === 1), 'drums linear: one limb per slot');
+    const dCombo = TD.filter(e => e.cat === 'd-combo'), dChop = TD.filter(e => e.cat === 'd-chop');
+    ok(dCombo.length >= 6 && dChop.length >= 6 && dCombo.every(e => { const q = B_(e.id).seq; return !e.handsOnly && q.some(s => s.st === 'K' && s.hits.some(x => x.k === 'kick')) && q.some(s => /[RL]/.test(s.st || '')); }), 'drums combinations: hands + kick in one line (' + dCombo.length + ' combos · ' + dChop.length + ' chops)');
+    const rlk = B_('d-rlk').seq; ok(Math.abs(rlk[0].d - 1 / 3) < 1e-9 && rlk.slice(0, 6).map(s => s.st).join('') === 'RLKRLK' && rlk[2].hits[0].k === 'kick' && rlk[0].hits[0].acc, 'drums R L K triplet combo');
+    const toms = B_('d-rlk-toms').seq; ok(['snare', 'tom1', 'tom2', 'tom3'].every((k, b) => toms[b * 3].hits[0].k === k) && toms[2].hits[0].k === 'kick', 'drums R L K around the toms');
+    const t34 = B_('d-3over4').seq; ok(t34.length === 48 && t34.every((s, i) => !!s.hits[0].acc === (i % 3 === 0)), 'drums 3 over 4 accents every three 16ths');
+    ok(B_('d-six').seq.slice(0, 6).map(s => s.st).join('') === 'RLLRRL' && dChop.filter(e => e.handsOnly).length >= 5 && !byT('d-six-kit').handsOnly, 'drums chops: six stroke roll, hands-only flags');
     /* 보컬 */
     const v5 = B_('v-five', { voice: 'alto', steps: '5' });
     ok(v5.seq[0].midi === 55 && v5.seq[0].syl === '도' && v5.seq[4].syl === '솔' && v5.trs.join(',') === '0,1,2,3,4,5,4,3,2,1', 'vocal 5-tone scale: root, solfège, key steps up & down');
@@ -393,7 +399,7 @@
       const shK = GH.render.sheet({ kind: 'grand', rh: ks.rh.map(n => ({ at: n.at, d: n.d, m: n.m, fg: n.fg.join('') })), lh: ks.lh.map(n => ({ at: n.at, d: n.d, m: n.m })) }); ok(!!shK, 'grand staff renders');
     }
     ok(GH.search.query('신경분리').some(x => x.route === '#/technique/guitar/perm' || x.route === '#/technique/guitar'), 'search 신경분리');
-    ok(GH.search.query('하논').some(x => x.route === '#/technique/keys/k-hanon') && GH.search.query('패러디들').some(x => /technique\/drums/.test(x.route)), 'search 하논 · 패러디들');
+    ok(GH.search.query('하논').some(x => x.route === '#/technique/keys/k-hanon') && GH.search.query('패러디들').some(x => /technique\/drums/.test(x.route)) && GH.search.query('찹').some(x => x.route === '#/drums/chops'), 'search 하논 · 패러디들 · 찹');
     /* 세션 설문 */
     const GG = GH.guide;
     ok(GG.SESSIONS.length === 5 && GG.plan({ level: 'new', goals: ['guitar', 'rhythm'], sessions: ['drums'] }).every(m => !m.inst || m.inst.includes('drums')) && GG.plan({ level: 'new', goals: ['guitar', 'rhythm'], sessions: ['drums'] }).some(m => m.inst && m.inst.includes('drums')), 'guide: drum session → drum missions, no guitar-only missions');

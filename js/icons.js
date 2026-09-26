@@ -48,6 +48,7 @@
     bass: ['M12.3 11.7 20.6 3.4', 'M19.4 2.2l2.4 2.4', 'M18.6 3.2l.9-.9', 'M20.8 5.4l.9-.9', 'M13.2 10.4c-1.7-1.2-3.6-1-4.5.6-.4.8-.3 1.6-1.1 2-1.3.6-3.1.3-4.2 1.6-1.8 2-1 5.1 1 6.5 2 1.5 4.9 1.3 6.1-.5.8-1.3.3-2.9 1-4 .5-.8 1.4-.8 2-1.3 1.1-.9 1-3.1-.3-4.9z', 'M7.6 14.6l2.6 2.6', 'M9.2 13.4l1 1'],
     mic: ['M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z', 'M9 7.5h6', 'M9 10h6', 'M6 11a6 6 0 0 0 12 0', 'M12 17v4', 'M8.5 21h7'],
     bug: ['M12 8.6c2.9 0 4.9 2.5 4.9 5.9s-2 6-4.9 6-4.9-2.6-4.9-6 2-5.9 4.9-5.9z', 'M9.6 8.9a2.4 2.4 0 0 1 4.8 0', 'M12 11.2v9.2', 'M7.3 12.4 4.2 11', 'M7.1 15.3H3.8', 'M7.7 18.2l-3 1.8', 'M16.7 12.4l3.1-1.4', 'M16.9 15.3h3.3', 'M16.3 18.2l3 1.8', 'M10.7 7 9.3 4.2', 'M13.3 7l1.4-2.8'],
+    bolt: ['M13.5 3 5.5 13.5h6L10.5 21l8-10.5h-6z'],
     spark: ['M12 3v5', 'M12 16v5', 'M3 12h5', 'M16 12h5', 'M5.6 5.6l3.2 3.2', 'M15.2 15.2l3.2 3.2', 'M18.4 5.6l-3.2 3.2', 'M8.8 15.2l-3.2 3.2']
   };
   function icon(name, opts) {
@@ -67,7 +68,7 @@
     '/learn': 'learn', '/guitar': 'guitar', '/theory': 'piano', '/practice': 'metronome', '/bass': 'bass', '/keys': 'piano', '/drums': 'drum', '/vocal': 'mic',
     '/technique': 'metronome', '/technique/guitar': 'pick', '/technique/bass': 'bass', '/technique/keys': 'piano', '/technique/drums': 'drum', '/technique/vocal': 'mic',
     '/bass/chords': 'chord', '/bass/scales': 'fretboard', '/bass/arpeggios': 'triad', '/bass/finder': 'finder', '/keys/voicings': 'chord', '/keys/voicings/advanced': 'stack', '/keys/scales': 'scale', '/keys/arpeggios': 'triad', '/keys/finder': 'finder',
-    '/drums/rudiments': 'drum', '/drums/grooves': 'backing', '/vocal/scales': 'scale', '/vocal/arpeggios': 'triad', '/vocal/chords': 'harmony',
+    '/drums/rudiments': 'drum', '/drums/grooves': 'backing', '/drums/chops': 'bolt', '/vocal/scales': 'scale', '/vocal/arpeggios': 'triad', '/vocal/chords': 'harmony',
     '/guitar/voicings': 'chord', '/guitar/scales': 'fretboard', '/guitar/triads': 'triad', '/guitar/doublestops': 'doublestop', '/guitar/phrasing': 'melody', '/guitar/licks': 'pick',
     '/theory/intervals': 'interval', '/theory/chords': 'stack', '/theory/scales': 'scale', '/theory/progressions': 'progression', '/theory/modes': 'modes', '/theory/reharm': 'reharm',
     '/ear': 'headphones', '/backing': 'drum', '/rhythm': 'metronome', '/tools/finder': 'finder', '/tools/melody': 'notes', '/tools/harmony': 'harmony', '/songs': 'songs', '/glossary': 'book', '/chord': 'stack'
