@@ -25,10 +25,11 @@
     const list = dir === 'up' ? midis.slice().reverse() : midis;
     const gap = STRUM * (dir === 'up' ? .72 : 1) * (list.length > 5 ? .88 : 1);
     const base = gain == null ? .8 : gain;
+    const eff = preset || (A.current ? A.current() : 'steel');   /* 피아노 · 베이스 소리면 긁지 않고 거의 동시에 */
     list.forEach((m, i) => {
       /* 다운 스트로크는 저음, 업 스트로크는 고음에 자연스러운 악센트를 둔다. */
       const contour = dir === 'up' ? .8 + i * .035 : 1 - i * .025;
-      A.pluck(m, when + i * (preset === 'piano' ? 0.006 : gap) + human(.0025), dur, { gain: base * contour * (1 + human(.035)), preset });
+      A.pluck(m, when + i * (eff === 'piano' || eff === 'bass' ? 0.006 : gap) + human(.0025), dur, { gain: base * contour * (1 + human(.035)), preset });
     });
   }
   function playChord(midis, opts) {

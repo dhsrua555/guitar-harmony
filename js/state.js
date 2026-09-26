@@ -23,7 +23,9 @@
     symbolStyle: 'standard', // standard | jazz
     theme: 'auto',       // auto | light | dark
     volume: 0.8,
-    instrument: 'steel', // steel | nylon | electric | piano
+    instrument: 'auto',  // auto (고른 세션에 맞춤: 기타 · 베이스는 그 악기, 나머지는 피아노) | guitar | piano | bass
+    guitarTone: 'steel', // 기타 소리를 낼 때의 음색: steel | nylon | electric
+    compTone: 'auto',    // 백킹 트랙 컴핑 음색: auto | steel | nylon | electric | piano
     sound: 'sample',     // sample (실제 악기 녹음) | synth (합성음)
     reverb: 0.3,
     level: 'basic'       // basic | all : 메뉴에 심화 항목 표시 여부
@@ -31,7 +33,12 @@
   let settings = Object.assign({}, defaults);
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) settings = Object.assign({}, defaults, JSON.parse(raw));
+    if (raw) {
+      const d = JSON.parse(raw);
+      /* 예전 설정: instrument 가 기타 음색이었다 → 음색은 guitarTone 으로, 악기는 세션에 맞춤으로 */
+      if (['steel', 'nylon', 'electric'].includes(d.instrument)) { d.guitarTone = d.instrument; d.instrument = 'auto'; }
+      settings = Object.assign({}, defaults, d);
+    }
   } catch (e) { /* 저장소를 못 쓰는 환경 */ }
 
   const FLAT_KEYS = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'D', 'G', 'Dm', 'Gm', 'Cm', 'Fm']);
@@ -59,6 +66,18 @@
       if (/#/.test(k)) return 'sharp';
       return k === 'F' ? 'flat' : 'sharp';
     },
+    /* 지금 낼 소리: 설정이 '세션에 맞춤'이면 이 페이지의 세션(없으면 설문에서 처음 고른 세션)을 따른다 */
+    soundId(sess) {
+      const tone = ['steel', 'nylon', 'electric'].includes(settings.guitarTone) ? settings.guitarTone : 'steel';
+      const i = settings.instrument;
+      if (i === 'guitar') return tone;
+      if (i === 'piano' || i === 'bass') return i;
+      if (['steel', 'nylon', 'electric'].includes(i)) return i;
+      const s = sess || (GH.soundSession ? GH.soundSession() : 'guitar');
+      return s === 'bass' ? 'bass' : s === 'guitar' || !s ? tone : 'piano';
+    },
+    /* 백킹 트랙 컴핑: 고른 음색, 아니면 지금 소리 (베이스 세션이면 기타 음색) */
+    compId() { const c = settings.compTone; if (['steel', 'nylon', 'electric', 'piano'].includes(c)) return c; const id = state.soundId(); return id === 'bass' ? (['steel', 'nylon', 'electric'].includes(settings.guitarTone) ? settings.guitarTone : 'steel') : id; },
     tuningMidi() { return (TUNINGS[settings.tuning] || TUNINGS.standard).midi; },
     isStandardTuning() { return settings.tuning === 'standard'; }
   };

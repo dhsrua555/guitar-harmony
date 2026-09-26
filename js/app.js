@@ -68,6 +68,17 @@
     if (/^\/(songs|tools|ear|glossary|backing|practice|rhythm)/.test(path)) return 'practice';
     return null;
   }
+  /* 소리를 정하는 세션: 세션 페이지(/bass/… · /technique/keys/…)는 그 세션, 레슨은 배우는 악기,
+     지판 코드 파인더는 기타, 나머지(화성학 · 연습 · 홈)는 설문에서 처음 고른 세션 */
+  const SOUND_SESS = ['guitar', 'bass', 'keys', 'drums', 'vocal'];
+  GH.soundSession = function () {
+    const r = GH.router && GH.router.current(); const path = r ? r.path : '/';
+    if (/^\/learn\/./.test(path) && GH.course && GH.course.currentSess) return GH.course.currentSess(r.query);
+    const sec = sectionOf(path); if (SOUND_SESS.includes(sec)) return sec;
+    if (path === '/tools/finder') return 'guitar';
+    const first = GH.guide && GH.guide.sessions ? GH.guide.sessions()[0] : null;
+    return SOUND_SESS.includes(first) ? first : 'guitar';
+  };
   function parentOf(path) {
     const parents = [
       '/theory/progressions', '/theory/reharm', '/theory/intervals', '/theory/modes', '/theory/scales',
@@ -299,10 +310,16 @@
       panel.appendChild(h('div', { class: 'field' }, h('label', { style: 'display:flex;gap:8px;align-items:center;color:var(--fg)' }, h('input', { type: 'checkbox', checked: gp.showGuides !== false, onchange: e => { G.setProfile({ showGuides: e.target.checked }); GH.router.rerender(); } }), '페이지마다 사용법 가이드 보이기')));
     }
     panel.appendChild(h('h3', { class: 'settings-group' }, '소리'));
-    panel.appendChild(field('재생 음색', select({ options: GH.audio.PRESET_ORDER.map(id => ({ value: id, label: GH.audio.PRESETS[id].ko })), value: s.instrument, onChange: v => GH.state.set({ instrument: v }) })));
+    const nowSnd = h('small', { class: 'muted' });
+    const paintNow = () => { const id = GH.state.soundId(); nowSnd.textContent = '지금 이 페이지: ' + (GH.audio.PRESETS[id] ? GH.audio.PRESETS[id].ko : id) + (GH.state.get().instrument === 'auto' ? ' (세션: ' + ({ guitar: '기타', bass: '베이스', keys: '키보드', drums: '드럼', vocal: '보컬' }[GH.soundSession()] || '기타') + ')' : ''); };
+    paintNow();
+    panel.appendChild(field('재생 악기', h('div', { style: 'display:grid;gap:6px' },
+      select({ options: [{ value: 'auto', label: '세션에 맞춤 (기타 · 베이스는 그 악기, 나머지는 피아노)' }, { value: 'guitar', label: '늘 기타' }, { value: 'piano', label: '늘 피아노' }, { value: 'bass', label: '늘 베이스' }], value: ['auto', 'guitar', 'piano', 'bass'].includes(s.instrument) ? s.instrument : 'auto', onChange: v => { GH.state.set({ instrument: v }); paintNow(); } }),
+      nowSnd)));
+    panel.appendChild(field('기타 음색', select({ options: ['steel', 'nylon', 'electric'].map(id => ({ value: id, label: GH.audio.PRESETS[id].ko })), value: s.guitarTone || 'steel', onChange: v => { GH.state.set({ guitarTone: v }); paintNow(); } })));
     if (GH.samples) {
       const stTxt = h('small', { class: 'muted sample-status' });
-      const upd = () => { const a = GH.samples.status(GH.state.get().instrument); stTxt.textContent = GH.state.get().sound === 'synth' ? '합성음으로 재생합니다.' : a === 'ready' ? '실제 악기 녹음으로 재생합니다.' : a === 'error' ? '녹음을 받지 못해 합성음으로 재생합니다.' : '녹음을 받는 중이에요. 그동안은 합성음으로 재생합니다.'; };
+      const upd = () => { const a = GH.samples.status(GH.state.soundId()); stTxt.textContent = GH.state.get().sound === 'synth' ? '합성음으로 재생합니다.' : a === 'ready' ? '실제 악기 녹음으로 재생합니다.' : a === 'error' ? '녹음을 받지 못해 합성음으로 재생합니다.' : '녹음을 받는 중이에요. 그동안은 합성음으로 재생합니다.'; };
       upd(); GH.samples.onChange(upd);
       const soundSel = select({ options: [{ value: 'sample', label: '실제 악기 녹음 (기본)' }, { value: 'synth', label: '합성음 (데이터 절약)' }], value: s.sound || 'sample', onChange: v => { GH.state.set({ sound: v }); upd(); } });
       const credit = h('small', { class: 'muted', style: 'font-size:.72rem;line-height:1.5' }, '녹음 출처: 어쿠스틱 University of Iowa MIS · 일렉 기타 · 일렉 베이스 Karoryfer Samples · 클래식 Freesound quartertone · 피아노 Salamander Grand Piano (Alexander Holm), tonejs-instruments 모음 (CC BY 3.0) · 드럼 Virtuosity Drums (Versilian Studios · Karoryfer Samples) · 콘트라베이스 D. Smolken (CC0)');

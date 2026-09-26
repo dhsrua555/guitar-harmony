@@ -71,7 +71,7 @@
   }
 
   /* ---- 악기별: 연습 → 재생 순서(seq) · 악보 · 악기 그림 · 소리 ---- */
-  function guitarPreset() { const p = GH.state.get().instrument; return ['steel', 'nylon', 'electric'].includes(p) ? p : 'steel'; }
+  function guitarPreset() { const p = GH.state.get().guitarTone; return ['steel', 'nylon', 'electric'].includes(p) ? p : 'steel'; }
   function buildFretted(ex, o) {
     const tun = ex.inst === 'bass' ? BASS() : STD(); const NS = tun.length;
     const d = RH[o.rh].d; let alt = 0;

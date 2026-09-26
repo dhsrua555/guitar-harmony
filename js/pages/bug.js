@@ -62,9 +62,9 @@
   function envLines() {
     const s = GH.state.get(), d = device();
     const w = window.innerWidth, ht = window.innerHeight, dpr = Math.round((window.devicePixelRatio || 1) * 100) / 100;
-    const inst = GH.audio && GH.audio.PRESETS && GH.audio.PRESETS[s.instrument];
+    const sid = GH.state.soundId ? GH.state.soundId() : s.instrument; const inst = GH.audio && GH.audio.PRESETS && GH.audio.PRESETS[sid];
     let sound = s.sound === 'synth' ? '합성음' : '실제 악기 녹음';
-    if (s.sound !== 'synth' && GH.samples) { const st = GH.samples.status(s.instrument); sound += ' (' + ({ ready: '받음', loading: '받는 중', error: '받기 실패', fetched: '받는 중' }[st] || '아직 안 받음') + ')'; }
+    if (s.sound !== 'synth' && GH.samples) { const st = GH.samples.status(sid); sound += ' (' + ({ ready: '받음', loading: '받는 중', error: '받기 실패', fetched: '받는 중' }[st] || '아직 안 받음') + ')'; }
     const set = ['키 ' + GH.notes.pretty(s.key)];
     if (s.tuning !== 'standard') set.push((GH.state.TUNINGS[s.tuning] || {}).label || s.tuning);
     if (Number(s.capo)) set.push('카포 ' + s.capo + '프렛');

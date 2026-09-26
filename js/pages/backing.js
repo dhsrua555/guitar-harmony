@@ -120,7 +120,7 @@
         const vol = h('input', { type: 'range', min: 0, max: 1.2, step: 0.05, value: state.mix[k], style: 'width:90px', oninput: e => { state.mix[k] = Number(e.target.value); GH.audio.setBusGain(k, state.mix[k]); } });
         mixRow.appendChild(h('label', null, on, label, vol));
       });
-      mixRow.appendChild(h('label', null, '컴핑 음색', select({ options: GH.audio.PRESET_ORDER.map(id => ({ value: id, label: GH.audio.PRESETS[id].ko })), value: GH.state.get().instrument, onChange: v => GH.state.set({ instrument: v }) })));
+      mixRow.appendChild(h('label', null, '컴핑 음색', select({ options: [{ value: 'auto', label: '세션에 맞춤' }].concat(GH.audio.PRESET_ORDER.map(id => ({ value: id, label: GH.audio.PRESETS[id].ko }))), value: GH.state.get().compTone || 'auto', onChange: v => GH.state.set({ compTone: v }) })));
       mixRow.appendChild(h('span', { class: 'muted', style: 'font-size:.8rem' }, chords.reduce((a, c) => a + c.beats, 0) / 4 + '마디 · 4/4'));
       el.appendChild(mixRow);
       el.appendChild(h('div', { class: 'row', style: 'gap:14px' }, dots, strip));

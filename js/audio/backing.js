@@ -107,7 +107,7 @@
     }
     /* 컴핑 */
     if (o.comp !== false && item.midi && item.midi.length) {
-      const pos = mod(globalBeat, 4);
+      const pos = mod(globalBeat, 4); const compPre = GH.state.compId ? GH.state.compId() : undefined;   /* 컴핑은 베이스 소리로 치지 않는다 */
       for (let m = 0; m < B + pos; m += 4) {
         const bar = Math.floor((globalBeat + m) / 4);
         const pat = S.compAlt && bar % 2 === 1 ? S.compAlt : S.comp;
@@ -115,11 +115,11 @@
           const t = e.t + m - pos; if (t < 0 || t >= B) return;
           const d = Math.min(e.d, B - t) * beat + 0.04;
           const list = e.dir === 'up' ? item.midi.slice().reverse() : item.midi;
-          const gap = (st.style === 'funk' || d < beat * .55 ? .012 : st.style === 'ballad' ? .027 : .021) * (e.dir === 'up' ? .72 : 1);
+          const gap = compPre === 'piano' ? .006 : (st.style === 'funk' || d < beat * .55 ? .012 : st.style === 'ballad' ? .027 : .021) * (e.dir === 'up' ? .72 : 1);
           const eventGain = (e.g == null ? .8 : e.g) * .78 * (1 + human(.035));
           list.forEach((mm, i) => {
             const contour = e.dir === 'up' ? .8 + i * .035 : 1 - i * .024;
-            A.pluck(mm, at + swingT(t, sw) * beat + i * gap + human(.0025), d, { gain: eventGain * contour * (1 + human(.025)), bus: 'chords' });
+            A.pluck(mm, at + swingT(t, sw) * beat + i * gap + human(.0025), d, { gain: eventGain * contour * (1 + human(.025)), bus: 'chords', preset: compPre });
           });
         });
       }
@@ -157,7 +157,7 @@
     /* 녹음을 아직 못 풀었으면 잠깐(최대 2.5초) 기다렸다가 시작해서, 첫 마디만 합성음으로 나오는 일이 없게 */
     const Smp = GH.samples;
     if (Smp && Smp.enabled()) {
-      const need = [opts.drums !== false && 'drums', opts.bass !== false && (STYLES[st.style].bassInst || 'bass'), opts.comp !== false && GH.state.get().instrument].filter(Boolean);
+      const need = [opts.drums !== false && 'drums', opts.bass !== false && (STYLES[st.style].bassInst || 'bass'), opts.comp !== false && (GH.state.compId ? GH.state.compId() : 'steel')].filter(Boolean);
       if (need.some(id => Smp.status(id) !== 'ready')) {
         st.playing = 'loading';
         Smp.whenReady(need, 2500).then(() => { if (st.playing === 'loading' && st.opts === opts) begin(A, opts); });

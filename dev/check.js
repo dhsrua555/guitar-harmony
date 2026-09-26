@@ -414,6 +414,16 @@
     const ohb = T.options(byT('v-harmony-below'), {}); ok(ohb.guide === 'line' && T.options(byT('v-harmony'), {}).guide === 'line' && T.options(byT('v-five'), {}).guide === 'mine', 'vocal harmony drills: piano plays the other line by default');
     const vh = B_('v-harmony').seq; ok(vh.slice(0, 8).every(s => s.gmidi != null && (s.midi - s.gmidi === 3 || s.midi - s.gmidi === 4)), 'vocal harmony: sung line a diatonic 3rd above the guide');
     ok(B_('v-chrom').seq.slice(8).some(s => /♭/.test(s.syl)), 'vocal chromatic: flats on the way down');
+    /* 소리: '세션에 맞춤'이면 기타 · 베이스는 그 악기, 나머지는 피아노. 컴핑은 베이스 소리로 치지 않는다 */
+    (function () {
+      const S0 = Object.assign({}, GH.state.get()); const ss0 = GH.soundSession;
+      GH.state.set({ instrument: 'auto', guitarTone: 'nylon', compTone: 'auto' });
+      ok(GH.state.soundId('guitar') === 'nylon' && GH.state.soundId('bass') === 'bass' && ['keys', 'drums', 'vocal'].every(x => GH.state.soundId(x) === 'piano'), 'sound follows session: guitar tone · bass · piano for keys, drums, vocal');
+      GH.soundSession = () => 'bass'; ok(GH.state.soundId() === 'bass' && GH.state.compId() === 'nylon' && GH.audio.PRESETS.bass, 'sound: bass session plays bass, backing comp stays a guitar tone');
+      GH.soundSession = () => 'vocal'; ok(GH.state.compId() === 'piano', 'sound: vocal session comps on piano');
+      GH.state.set({ instrument: 'guitar' }); ok(GH.state.soundId('keys') === 'nylon', 'sound: fixed instrument overrides the session');
+      GH.soundSession = ss0; GH.state.set({ instrument: S0.instrument, guitarTone: S0.guitarTone, compTone: S0.compTone });
+    })();
     /* 그림 · 악보 */
     const kit = GH.render.drumkit(); kit.highlight([{ k: 'snare', st: 'L' }]);
     ok(kit.el.querySelectorAll('.kit-pad').length === 9 && kit.el.querySelector('.kit-snare.cur .kit-hand').textContent === 'L', 'drum kit view: 9 pads, highlight with sticking');

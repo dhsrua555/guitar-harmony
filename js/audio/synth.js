@@ -16,12 +16,13 @@
     steel: { ko: '어쿠스틱 기타 (스틸)', damp: 0.3, t60: 5.4, pickPos: 0.14, exc: 0.36, body: [[105, 3.8, 3.2], [205, 2.6, 2.8], [410, 1.4, 2.1], [2450, 1.2, 1.2]], tone: 7600, shelf: -1.5, pick: 3300 },
     nylon: { ko: '클래식 기타 (나일론)', damp: 0.5, t60: 3.8, pickPos: 0.21, exc: 0.62, body: [[94, 4.2, 3], [188, 3, 2.8], [370, 1.7, 2.1]], tone: 4400, shelf: -4.5, pick: 1850 },
     electric: { ko: '일렉 기타 (클린)', damp: 0.22, t60: 6.2, pickPos: 0.1, exc: 0.28, body: [[240, 1.6, 1.2], [1650, 1.8, 1]], tone: 6100, shelf: -0.5, pick: 2800, chorus: true },
-    piano: { ko: '피아노', synth: 'piano' }
+    piano: { ko: '피아노', synth: 'piano' },
+    bass: { ko: '베이스', synth: 'bass' }
   };
   const PRESET_ORDER = ['steel', 'nylon', 'electric', 'piano'];
 
   function preset() {
-    const id = GH.state ? GH.state.get().instrument : 'steel';
+    const id = GH.state && GH.state.soundId ? GH.state.soundId() : 'steel';
     return PRESETS[id] ? id : 'steel';
   }
   function softCurve() {
@@ -258,6 +259,7 @@
     const c = context(); if (!c) return null;
     opts = opts || {};
     const id = opts.preset || preset();
+    if (id === 'bass') return bass(midi, when, dur, { gain: opts.gain });   /* 베이스 세션: 한 음 · 코드 모두 베이스 소리 */
     if (useSamples()) { const v = GH.samples.voice(id, midi); if (v) return playSample(v, id, midi, when, dur, opts); }
     if (PRESETS[id].synth === 'piano') return pianoNote(midi, when, dur, opts);
     const P = PRESETS[id];
@@ -567,8 +569,10 @@
   /* 소리를 켜기 전에도 파일만 먼저 받아 둔다 (풀기는 오디오가 켜진 뒤) */
   setTimeout(() => { if (useSamples()) { const pf = GH.samples.prefetch(preset()); if (pf) pf.then(() => GH.samples.prefetch('bass')).catch(() => {}); } }, 1500);
   if (GH.events) GH.events.on('settings', () => { if (!useSamples()) return; if (ctx) warmSamples(); else GH.samples.prefetch(preset()); });
+  /* 페이지마다 세션이 바뀌면 (기타 → 키보드 페이지) 그 소리를 미리 */
+  if (GH.events) GH.events.on('route', () => { if (!useSamples()) return; if (ctx) GH.samples.ensure(preset()); else GH.samples.prefetch(preset()); });
   /* 전화 · 잠금 · 앱 전환 뒤에 돌아오면 다시 깨운다 */
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running' && ctx.state !== 'closed') { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } });
 
-  GH.audio = { context, unlock, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, KIT_TRIM, available: () => !!(window.AudioContext || window.webkitAudioContext) };
+  GH.audio = { context, unlock, pluck, bass, drum, click, stopAll, now, setBusGain, PRESETS, PRESET_ORDER, KIT_TRIM, current: preset, available: () => !!(window.AudioContext || window.webkitAudioContext) };
 })();
