@@ -26,11 +26,17 @@
   ];
   /* 세션(악기): 모두 기본기 연습이 있고, 코드 폼 · 스케일 포지션 같은 나머지 도구는 아직 기타 중심 */
   const SESSIONS = [
-    { id: 'guitar', ko: '기타', icon: 'guitar', desc: '코드 폼 · 스케일 · 릭 · 기본기' },
-    { id: 'bass', ko: '베이스', icon: 'bass', desc: '투핑거 · 코드톤 · 워킹 · 그루브' },
-    { id: 'keys', ko: '키보드', icon: 'piano', desc: '하논 · 스케일 · 케이던스 · 보이싱' },
-    { id: 'drums', ko: '드럼', icon: 'drum', desc: '루디먼트 · 그루브 · 필인' },
-    { id: 'vocal', ko: '보컬', icon: 'mic', desc: '호흡 · 음정 · 시창 · 애드리브' }
+    /* changes: 이 악기를 고르면 바뀌는 것 (설문 · 홈 · 악기 버튼에서 그대로 보여 준다), starter: 홈의 "바로 따라 하기" 연습 */
+    { id: 'guitar', ko: '기타', icon: 'guitar', desc: '코드 폼 · 스케일 · 릭 · 기본기', starter: { id: 'pent-box', tempo: 72 },
+      changes: [['기초 코스', '지판 · 오픈 코드 · 스트로크 · 펜타토닉 박스'], ['소리', '기타'], ['백킹 트랙', '기타 지판에 지금 코드의 음'], ['추천', '기타 코드 폼 · 기본기 연습부터']] },
+    { id: 'bass', ko: '베이스', icon: 'bass', desc: '투핑거 · 코드톤 · 워킹 · 그루브', starter: { id: 'b-root58', tempo: 80 },
+      changes: [['기초 코스', '개방현 · 루트 치기 · 투핑거 · 베이스 펜타 박스'], ['소리', '베이스'], ['백킹 트랙', '베이스를 끄고, 베이스 지판에 지금 코드의 음'], ['추천', '베이스 기본기 · 코드톤 · 그루브부터']] },
+    { id: 'keys', ko: '키보드', icon: 'piano', desc: '하논 · 스케일 · 케이던스 · 보이싱', starter: { id: 'k-pop-comp', tempo: 80 },
+      changes: [['기초 코스', '건반 지도 · 손가락 번호 · 코드 8개 · 첫 반주'], ['소리', '피아노'], ['백킹 트랙', '컴핑을 끄고, 건반에 지금 코드의 음'], ['추천', '코드 보이싱 · 반주 · 스케일 운지부터']] },
+    { id: 'drums', ko: '드럼', icon: 'drum', desc: '루디먼트 · 그루브 · 필인', starter: { id: 'd-8beat', tempo: 80 },
+      changes: [['기초 코스', '킷 · 스틱 · 8비트 · 필인 · 코드표 따라가기'], ['소리', '피아노 (화성학 예제)'], ['백킹 트랙', '드럼을 끄고, 마디 흐름을 보여 줘요'], ['추천', '루디먼트 · 그루브 · 필인부터']] },
+    { id: 'vocal', ko: '보컬', icon: 'mic', desc: '호흡 · 음정 · 시창 · 애드리브', starter: { id: 'v-five', q: { steps: '2' }, tempo: 90 },
+      changes: [['기초 코스', '음역 찾기 · 롱톤 · 코드 음 부르기'], ['소리', '피아노'], ['백킹 트랙', '건반에 지금 코드의 음 (따라 부를 음)'], ['추천', '발성 · 음정 · 시창 연습부터']] }
   ];
   /* lv: [가장 쉬운 수준, 가장 어려운 수준] (LEVELS 인덱스), inst: 이 세션을 고른 사람에게만 (없으면 모두) */
   const MISSIONS = [
@@ -175,6 +181,8 @@
   function setProfile(patch) { Object.assign(data.profile, patch); save(); GH.events.emit('guide', data); }
   const levelIdx = () => Math.max(0, LEVELS.findIndex(l => l.id === data.profile.level));
   const sessions = () => (data.profile.sessions || []).filter(id => SESSIONS.some(s => s.id === id));
+  /* 받침에 따라 조사 (드럼을 · 기타를) */
+  const josa = (w, a, b) => { const c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return w + (c >= 0 && c < 11172 && c % 28 ? a : b); };
   /* 수준 이름 · 설명은 첫 번째로 고른 세션에 맞춰 */
   const levelText = (l, sess) => { const b = l.by && sess && l.by[sess]; return b ? { ko: b[0], desc: b[1] } : { ko: l.ko, desc: l.desc }; };
   const missionHref = (m, extra) => GH.router.href(m.route, Object.assign({}, m.q || {}, extra || {}));
@@ -239,28 +247,34 @@
     opts = opts || {};
     if (modal) return;
     const draft = { level: data.profile.level || 'new', goals: (data.profile.goals || []).slice(), sessions: sessions().slice() };
-    const only = opts.only === 'sessions'; const TOTAL = only ? 1 : 3;
-    let step = opts.step || 1;
+    const only = opts.only === 'sessions'; const skipSess = !only && !opts.step && sessions().length > 0;   /* 홈 · 머리에서 악기를 이미 골랐으면 */
+    const TOTAL = only ? 1 : skipSess ? 2 : 3;
+    let step = opts.step || (skipSess ? 2 : 1);
+    const stepNo = n => skipSess ? n - 1 : n;
     const box = h('div', { class: 'onboard', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'onboard-title', tabindex: '-1' });
     const wrap = h('div', { class: 'onboard-backdrop' }, box);
     wrap.addEventListener('click', e => { if (e.target === wrap) skip(); });
     const skip = () => { if (!data.profile.onboarded) setProfile({ skipped: true }); closeModal(); };
     const draw = () => {
       GH.ui.clear(box);
-      box.appendChild(h('div', { class: 'onboard-top' }, h('span', { class: 'eyebrow' }, 'STEP ' + step + ' / ' + TOTAL), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '닫기', onclick: skip }, GH.icon('close'))));
+      box.appendChild(h('div', { class: 'onboard-top' }, h('span', { class: 'eyebrow' }, 'STEP ' + stepNo(step) + ' / ' + TOTAL), h('button', { class: 'iconbtn', type: 'button', 'aria-label': '닫기', onclick: skip }, GH.icon('close'))));
       if (step === 1) {
-        box.appendChild(h('h2', { id: 'onboard-title' }, '어떤 세션에 관심 있으세요?'));
-        box.appendChild(h('p', { class: 'muted' }, '여러 개를 골라도 돼요. 가장 먼저 고른 세션으로 기초 코스를 배우고, 고른 세션의 기본기 연습과 미션을 차례로 추천해 드려요.'));
-        box.appendChild(h('div', { class: 'onboard-options goals sessions' }, SESSIONS.map(s => { const k = draft.sessions.indexOf(s.id); return h('button', { class: 'onboard-option' + (k >= 0 ? ' active' : ''), type: 'button', 'aria-pressed': k >= 0 ? 'true' : 'false', onclick: () => { if (k >= 0) draft.sessions.splice(k, 1); else draft.sessions.push(s.id); draw(); } }, h('span', { class: 'onboard-icon', 'aria-hidden': 'true' }, k >= 0 ? String(k + 1) : GH.icon(s.icon)), h('b', null, s.ko), h('small', null, s.desc)); })));
-        if (draft.sessions.length) box.appendChild(h('p', { class: 'onboard-note' }, '처음 고른 ' + SESSIONS.find(x => x.id === draft.sessions[0]).ko + '에 맞춘 기초 코스와 연습 순서를 중심으로 추천해요. 화성학 · 리듬 · 음감 연습은 모든 세션에 함께 쓰여요.'));
+        /* 주로 연주할 악기 하나. 고르면 무엇이 바뀌는지 바로 보여 준다 */
+        const main = draft.sessions[0];
+        box.appendChild(h('h2', { id: 'onboard-title' }, '주로 연주하는 악기는 무엇인가요?'));
+        box.appendChild(h('p', { class: 'muted' }, '고른 악기가 "내 악기"가 돼요. 소리, 기초 코스, 추천 순서, 백킹 트랙이 그 악기에 맞춰 바뀌고, 맨 위 악기 버튼으로 언제든 바꿀 수 있어요.'));
+        box.appendChild(h('div', { class: 'onboard-options goals sessions', role: 'radiogroup' }, SESSIONS.map(s => h('button', { class: 'onboard-option' + (main === s.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': main === s.id ? 'true' : 'false', onclick: () => { draft.sessions = [s.id].concat(draft.sessions.filter(x => x !== s.id)); draw(); } }, h('span', { class: 'onboard-icon', 'aria-hidden': 'true' }, GH.icon(s.icon)), h('b', null, s.ko), h('small', null, s.desc)))));
+        const S0 = SESSIONS.find(x => x.id === main);
+        box.appendChild(S0 ? h('div', { class: 'onboard-changes' }, h('b', null, josa(S0.ko, '을', '를') + ' 고르면'), h('ul', null, S0.changes.map(([k, v]) => h('li', null, h('span', null, k), v))))
+          : h('div', { class: 'onboard-changes empty' }, '악기를 누르면 무엇이 바뀌는지 여기에 보여 드려요.'));
         box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: skip }, '나중에 할게요'),
-          only ? h('button', { class: 'btn primary', type: 'button', disabled: !draft.sessions.length, onclick: () => { setProfile({ sessions: draft.sessions }); closeModal(); if (opts.onDone) opts.onDone(); } }, '저장')
-            : h('button', { class: 'btn primary', type: 'button', disabled: !draft.sessions.length, onclick: () => { step = 2; draw(); } }, '다음 →')));
+          only ? h('button', { class: 'btn primary', type: 'button', disabled: !main, onclick: () => { setProfile({ sessions: draft.sessions }); closeModal(); if (opts.onDone) opts.onDone(); } }, '저장')
+            : h('button', { class: 'btn primary', type: 'button', disabled: !main, onclick: () => { step = 2; draw(); } }, '다음 →')));
       } else if (step === 2) {
         box.appendChild(h('h2', { id: 'onboard-title' }, '음악을 얼마나 알고 계세요?'));
         box.appendChild(h('p', { class: 'muted' }, '수준에 맞춰 쉬운 것부터 순서대로 추천해 드립니다. 나중에 설정에서 언제든 바꿀 수 있어요.'));
         box.appendChild(h('div', { class: 'onboard-options', role: 'radiogroup' }, LEVELS.map(l => h('button', { class: 'onboard-option' + (draft.level === l.id ? ' active' : ''), type: 'button', role: 'radio', 'aria-checked': draft.level === l.id ? 'true' : 'false', onclick: () => { draft.level = l.id; draw(); } }, h('i', { class: 'dyn-tag lv' + l.lv, 'aria-hidden': 'true', title: l.dyn + ' ' + l.tag }, l.dyn), h('b', null, levelText(l, draft.sessions[0]).ko), h('small', null, levelText(l, draft.sessions[0]).desc)))));
-        box.appendChild(h('div', { class: 'onboard-actions' }, h('button', { class: 'btn', type: 'button', onclick: () => { step = 1; draw(); } }, '← 이전'), h('button', { class: 'btn primary', type: 'button', onclick: () => { step = 3; draw(); } }, '다음 →')));
+        box.appendChild(h('div', { class: 'onboard-actions' }, skipSess ? h('button', { class: 'btn', type: 'button', onclick: skip }, '나중에 할게요') : h('button', { class: 'btn', type: 'button', onclick: () => { step = 1; draw(); } }, '← 이전'), h('button', { class: 'btn primary', type: 'button', onclick: () => { step = 3; draw(); } }, '다음 →')));
       } else {
         box.appendChild(h('h2', { id: 'onboard-title' }, '이 사이트에서 무엇을 얻고 싶으세요?'));
         box.appendChild(h('p', { class: 'muted' }, '여러 개를 골라도 됩니다. 고른 순서대로 우선해서 추천합니다.'));
@@ -355,5 +369,5 @@
   }
   function resetProgress() { data.done = {}; data.visits = {}; save(); GH.events.emit('guide', data); }
 
-  GH.guide = { LEVELS, GOALS, SESSIONS, sessions, levelText, sessionChips, MISSIONS, PAGES, missionHref, profile, setProfile, plan, next, isDone, toggleDone, missionFor, openOnboarding, shouldOnboard, homeCard, planSection, decorate, resetProgress, levelKo };
+  GH.guide = { LEVELS, GOALS, SESSIONS, sessions, josa, levelText, sessionChips, MISSIONS, PAGES, missionHref, profile, setProfile, plan, next, isDone, toggleDone, missionFor, openOnboarding, shouldOnboard, homeCard, planSection, decorate, resetProgress, levelKo };
 })();

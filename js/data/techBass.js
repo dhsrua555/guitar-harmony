@@ -42,7 +42,13 @@
     return best;
   }
   const PROG = { pop: [[0, 'maj'], [9, 'min'], [5, 'maj'], [7, 'maj']] };
-  const chordsOf = (key, list) => { const kr = keyRoot(key); return list.map(([deg, q]) => ({ root: rootNear(N().mod(N().pcOf(key) + deg, 12), kr.f), q })); };
+  /* 코드 이름: 키 안의 도수(반음)와 코드 종류로 철자 그대로 (C 키 9 → Am) */
+  const DEG_IV = { 0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7' };
+  const Q_ID = { maj: 'maj', min: 'min', m7: 'm7', dom7: '7', maj7: 'maj7' };
+  const symOf = (key, deg, q) => GH.chords.symbol(N().spell(key, DEG_IV[N().mod(deg, 12)]), Q_ID[q] || q);
+  const chordsOf = (key, list) => { const kr = keyRoot(key); return list.map(([deg, q]) => ({ root: rootNear(N().mod(N().pcOf(key) + deg, 12), kr.f), q, sym: symOf(key, deg, q) })); };
+  /* 코드가 바뀌는 첫 음에 코드 이름 (ch) — 악보 위에 적고, 연습 중 "지금 코드"로 보여 준다 */
+  const tag = (out, i, sym) => { if (out[i]) out[i] = Object.assign({}, out[i], { ch: sym }); };
 
   const CATS = [
     { id: 'b-hand', inst: 'bass', ko: '오른손 · 운지', en: 'TECHNIQUE', icon: 'bass', desc: '검지 · 중지를 번갈아 치는 투핑거와, 한 손가락 한 프렛 · 시만들 1-2-4 운지를 익혀요.' },
@@ -75,17 +81,17 @@
       goal: '팝 · 록에서 가장 많이 쓰는 베이스 모양. 1-6-4-5 진행 위에서 루트, 5도, 옥타브를 8분음표로 쳐요.',
       how: ['검지로 루트, 약지로 5도(한 줄 위 두 프렛 위), 약지를 굴려 옥타브(두 줄 위 두 프렛 위).', '코드가 바뀌면 같은 모양을 새 루트로 옮겨요.'],
       tips: ['드럼 킥과 루트가 같이 떨어진다고 생각하면 그루브가 단단해져요.', '옥타브를 칠 때는 가운데 줄을 검지 옆면으로 살짝 막아 소리가 섞이지 않게.'],
-      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => { const sh = shapeAt(c.root, 'r58'); for (let k = 0; k < 2; k++) out.push(sh[0], sh[1], sh[2], sh[1]); }); return out.map(n => Object.assign({}, n)); } },
+      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => { const at = out.length; const sh = shapeAt(c.root, 'r58'); for (let k = 0; k < 2; k++) out.push(sh[0], sh[1], sh[2], sh[1]); tag(out, at, c.sym); }); return out.map(n => Object.assign({}, n)); } },
     { id: 'b-arp', cat: 'b-tone', level: 3, ko: '코드톤 아르페지오 (1-3-5-8)', rh: '4', tempo: [70, 140], opts: { key: 'C', pluck: 'i' },
       goal: '1-6-4-5 진행의 코드마다 1-3-5-8을 쳐요. 메이저는 루트를 중지, 마이너는 검지로 잡는 두 모양을 익혀요.',
       how: ['메이저: 루트(2) → 한 줄 위 한 프렛 아래(1) → 같은 줄 두 프렛 위(4) → 옥타브.', '마이너: 루트(1) → 같은 줄 세 프렛 위(4) → 한 줄 위(3) → 옥타브.'],
       tips: ['코드 이름을 보고 3음이 메이저인지 마이너인지 먼저 떠올린 뒤 모양을 고르세요.'],
-      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => out.push(...shapeAt(c.root, c.q === 'min' ? 'min' : 'maj'))); return out; } },
+      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => { const at = out.length; out.push(...shapeAt(c.root, c.q === 'min' ? 'min' : 'maj')); tag(out, at, c.sym); }); return out; } },
     { id: 'b-arp7', cat: 'b-tone', level: 3, ko: '세븐 코드 톤 (ii–V–I, 1-3-5-7)', rh: '4', tempo: [70, 140], opts: { key: 'C', pluck: 'i' },
       goal: '재즈의 기본 진행 ii–V–I 에서 m7 · 7 · maj7 코드톤을 4분음표로. 7음의 자리가 모양마다 달라요.',
       how: ['m7: 1(1) b3(4) 5(3) b7(1)', '7: 1(2) 3(1) 5(4) b7(2)', 'maj7: 1(2) 3(1) 5(4) 7(3), 마지막 마디는 거꾸로 내려와요.'],
       tips: ['b7 과 7 의 한 프렛 차이가 코드의 색을 바꿔요. 소리로 차이를 느껴 보세요.'],
-      gen: o => { const cs = chordsOf(o.key, [[2, 'm7'], [7, 'dom7'], [0, 'maj7'], [0, 'maj7']]); const out = []; cs.forEach((c, i) => { const sh = shapeAt(c.root, c.q); out.push(...(i === 3 ? sh.slice().reverse() : sh)); }); return out; } },
+      gen: o => { const cs = chordsOf(o.key, [[2, 'm7'], [7, 'dom7'], [0, 'maj7'], [0, 'maj7']]); const out = []; cs.forEach((c, i) => { const at = out.length; const sh = shapeAt(c.root, c.q); out.push(...(i === 3 ? sh.slice().reverse() : sh)); tag(out, at, c.sym); }); return out; } },
     { id: 'b-walk', cat: 'b-walk', level: 4, ko: '워킹 베이스 (코드톤 + 반음 어프로치)', rh: '4', tempo: [80, 160], opts: { key: 'C', pluck: 'i' },
       goal: 'ii–V–I–VI 네 마디를 4분음표로 걸어가요. 1 · 2 · 3박은 코드톤, 4박은 다음 코드 루트로 가는 반음 어프로치.',
       how: ['1박은 꼭 루트, 2 · 3박은 3음 · 5음.', '4박은 다음 루트의 반음 아래(또는 위) 음으로, 다음 마디 첫 박에 루트로 착지해요.'],
@@ -97,7 +103,7 @@
           const sh = shapeAt(c.root, c.q); const next = cs[(i + 1) % cs.length].root;
           const P = c.root.f - (SHAPE[c.q][0][2] - 1);
           const app = place(next.midi + (i % 2 ? 1 : -1), P);
-          out.push(sh[0], sh[1], sh[2], Object.assign(app, { label: i % 2 ? '↓' : '↑' }));
+          const at = out.length; out.push(sh[0], sh[1], sh[2], Object.assign(app, { label: i % 2 ? '↓' : '↑' })); tag(out, at, c.sym);
         });
         return out;
       } },
@@ -152,22 +158,22 @@
       goal: '루트와 한 옥타브 위를 8분음표로 번갈아. 디스코 · 펑크 · 댄스 음악의 대표 베이스 패턴이에요.',
       how: ['검지로 루트, 약지(또는 새끼)로 두 줄 위 두 프렛 위 옥타브.', '1-6-4-5 진행을 따라 모양을 옮겨요.'],
       tips: ['옥타브를 칠 때 가운데 줄이 울리지 않게 검지 옆면으로 막아요.'],
-      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => { const sh = shapeAt(c.root, 'r58'); for (let k = 0; k < 4; k++) out.push(sh[0], sh[2]); }); return out.map(n => Object.assign({}, n)); } },
+      gen: o => { const out = []; chordsOf(o.key, PROG.pop).forEach(c => { const at = out.length; const sh = shapeAt(c.root, 'r58'); for (let k = 0; k < 4; k++) out.push(sh[0], sh[2]); tag(out, at, c.sym); }); return out.map(n => Object.assign({}, n)); } },
     { id: 'b-boogie', cat: 'b-groove', level: 3, ko: '12마디 블루스 부기 (1-3-5-6-b7-6-5-3)', rh: '8', tempo: [80, 140], opts: { key: 'A', pluck: 'i' },
       goal: '코드마다 1-3-5-6-b7-6-5-3 을 8분음표로 오르내리는 부기 베이스. 12마디 블루스 폼을 몸에 익혀요.',
       how: ['I 네 마디 → IV 두 마디 → I 두 마디 → V · IV · I · V.', '셔플(스윙)로 치면 더 블루스다워요.'],
       tips: ['마디 수를 세면서 코드가 바뀌는 곳을 미리 봐 두세요.'],
-      gen: o => { const form = [0, 0, 0, 0, 5, 5, 0, 0, 7, 5, 0, 7]; const kr = keyRoot(o.key); const out = []; form.forEach(dg => { const root = rootNear(N().mod(N().pcOf(o.key) + dg, 12), kr.f); const P = root.f - 1; [0, 4, 7, 9, 10, 9, 7, 4].forEach((x, i) => { const p = place(root.midi + x, P); out.push(Object.assign(p, { label: ['1', '3', '5', '6', 'b7', '6', '5', '3'][i] })); }); }); return out; } },
+      gen: o => { const form = [0, 0, 0, 0, 5, 5, 0, 0, 7, 5, 0, 7]; const kr = keyRoot(o.key); const out = []; form.forEach(dg => { const at = out.length; const root = rootNear(N().mod(N().pcOf(o.key) + dg, 12), kr.f); const P = root.f - 1; [0, 4, 7, 9, 10, 9, 7, 4].forEach((x, i) => { const p = place(root.midi + x, P); out.push(Object.assign(p, { label: ['1', '3', '5', '6', 'b7', '6', '5', '3'][i] })); }); tag(out, at, symOf(o.key, dg, 'dom7')); }); return out; } },
     { id: 'b-motown', cat: 'b-walk', level: 4, ko: '모타운 스타일 (코드톤 + 반음 어프로치 8분)', rh: '8', tempo: [80, 130], opts: { key: 'C', pluck: 'i' },
       goal: '8분음표로 코드톤을 돌다가 마디 끝에서 다음 루트로 반음 어프로치. 제임스 제머슨 식 모타운 베이스의 뼈대예요.',
       how: ['1-5-8-5-3-5-6 다음 마지막 음은 다음 루트의 반음 아래.', 'I–vi–ii–V 진행을 반복해요.'],
       tips: ['어프로치 음은 짧게, 다음 루트는 또렷하게.'],
-      gen: o => { const cs = chordsOf(o.key, [[0, 'maj'], [9, 'min'], [2, 'min'], [7, 'maj']]); const out = []; cs.forEach((c, i) => { const next = cs[(i + 1) % cs.length].root; const P = c.root.f - 1; const third = c.q === 'min' ? 3 : 4; [0, 7, 12, 7, third, 7, 9].forEach((x, k) => out.push(Object.assign(place(c.root.midi + x, P), { label: ['1', '5', '1', '5', c.q === 'min' ? 'b3' : '3', '5', '6'][k] }))); out.push(Object.assign(place(next.midi - 1, P), { label: '↑' })); }); return out; } },
+      gen: o => { const cs = chordsOf(o.key, [[0, 'maj'], [9, 'min'], [2, 'min'], [7, 'maj']]); const out = []; cs.forEach((c, i) => { const at = out.length; const next = cs[(i + 1) % cs.length].root; const P = c.root.f - 1; const third = c.q === 'min' ? 3 : 4; [0, 7, 12, 7, third, 7, 9].forEach((x, k) => out.push(Object.assign(place(c.root.midi + x, P), { label: ['1', '5', '1', '5', c.q === 'min' ? 'b3' : '3', '5', '6'][k] }))); out.push(Object.assign(place(next.midi - 1, P), { label: '↑' })); tag(out, at, c.sym); }); return out; } },
     { id: 'b-bossa', cat: 'b-groove', level: 3, ko: '보사노바 베이스 (1 · 5, 점4분 리듬)', fixed: true, rh: '4', tempo: [70, 130], opts: { key: 'C', pluck: 'i' },
       goal: '루트(점4분) – 5도(8분) – 5도(2분). 보사노바 · 라틴 재즈의 기본 베이스 리듬으로 ii–V–I–I 을 쳐요.',
       how: ['1박 루트를 길게, 2박 반에 5도를 짧게, 3박에 5도를 길게.', '손가락 끝의 살로 부드럽게.'],
       tips: ['드럼 없이도 보사 느낌이 나게, 점4분 뒤의 8분을 살짝 앞당기는 느낌으로.'],
-      gen: o => { const cs = chordsOf(o.key, [[2, 'min'], [7, 'maj'], [0, 'maj'], [0, 'maj']]); const out = []; cs.forEach(c => { const P = c.root.f - 1; const r = Object.assign(place(c.root.midi, P), { label: '1' }); const f5 = c.root.s === 3 ? place(c.root.midi - 5, P) : place(c.root.midi + 7, P);   /* A 줄 루트면 아래 5도(E 줄 같은 프렛) */ const five = Object.assign(f5, { label: '5' }); out.push(Object.assign({}, r, { d: 1.5 }), Object.assign({}, five, { d: 0.5 }), Object.assign({}, five, { d: 2 })); }); return out; } },
+      gen: o => { const cs = chordsOf(o.key, [[2, 'min'], [7, 'maj'], [0, 'maj'], [0, 'maj']]); const out = []; cs.forEach(c => { const at = out.length; const P = c.root.f - 1; const r = Object.assign(place(c.root.midi, P), { label: '1' }); const f5 = c.root.s === 3 ? place(c.root.midi - 5, P) : place(c.root.midi + 7, P);   /* A 줄 루트면 아래 5도(E 줄 같은 프렛) */ const five = Object.assign(f5, { label: '5' }); out.push(Object.assign({}, r, { d: 1.5 }), Object.assign({}, five, { d: 0.5 }), Object.assign({}, five, { d: 2 })); tag(out, at, c.sym); }); return out; } },
     { id: 'b-funkoct', cat: 'b-groove', level: 4, ko: '16비트 옥타브 펑크 (고스트 노트)', rh: '16', tempo: [70, 110], opts: { key: 'E', pluck: 'i' },
       goal: '루트 · 옥타브 사이에 데드 노트(x)를 섞은 16분음표 펑크 옥타브. 래리 그레이엄 · 부시 콜린스 스타일 그루브의 기초예요.',
       how: ['R x O x | R R x O | x R O x | R x O O 를 두 마디.', 'x 는 왼손을 얹기만 하고 쳐요.'],

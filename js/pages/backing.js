@@ -33,10 +33,22 @@
     return groups;
   }
 
+  /* 내 악기(세션)마다: 끄는 파트, 코드 위 연습 그림, 연습 아이디어 */
+  const SESS = {
+    guitar: { ko: '기타', off: null, idea: '처음에는 코드톤만으로 한 마디에 두세 음씩 연주해 보세요. 다음에는 코드가 바뀌기 직전에 다음 코드의 코드톤으로 반음·온음 어프로치를 연결합니다. 익숙해지면 템포를 10 BPM씩 올리고, 그루브를 바꿔 같은 진행을 다른 리듬으로 연습해 보세요.' },
+    bass: { ko: '베이스', off: 'bass', idea: '먼저 코드마다 루트를 8분음표로, 킥 드럼과 같이 떨어지게 치세요. 익숙해지면 루트 · 5도 · 옥타브(1-5-8-5)로 마디를 채우고, 코드가 바뀌기 직전 박에 다음 루트로 반음 어프로치를 넣어 보세요.' },
+    keys: { ko: '키보드', off: 'comp', idea: '왼손은 루트, 오른손은 코드를 8분음표로 채워 보세요. 코드가 바뀔 때 오른손은 가장 가까운 전위로 옮기고, 익숙해지면 오른손으로 코드톤 멜로디를 얹어 보세요.' },
+    drums: { ko: '드럼', off: 'drums', idea: '8비트로 박을 지키며 마디를 세고, 4마디마다 마지막 박에 짧은 필 → 다음 첫 박에 크래시. 그루브를 바꿔 같은 진행을 셔플 · 펑크 · 보사노바로도 쳐 보세요.' },
+    vocal: { ko: '보컬', off: null, idea: '코드마다 루트나 3도를 길게 불러 보세요 (색 있는 음이 코드 음이에요). 익숙해지면 펜타토닉으로 두 마디 흥얼거리고 두 마디 쉬기를 반복하며 애드리브해 보세요.' }
+  };
+  let offFor = null;   /* 이 세션으로 이미 기본 파트를 껐는지 */
   GH.pages['/backing'] = {
     title: '백킹 트랙',
     render(el, params) {
       const A = GH.app; const qy = params.query || {}; const S = GH.backing.STYLES;
+      const sess = GH.soundSession ? GH.soundSession() : 'guitar'; const SS = SESS[sess] || SESS.guitar;
+      /* 처음 열 때: 내 세션 파트를 꺼 두고 (마이너스 원), 세션을 바꾸면 다시 맞춘다 */
+      if (!qy.off && offFor !== sess) { offFor = sess; ['drums', 'bass', 'comp'].forEach(k => { state[k] = k !== SS.off; }); }
       if (qy.id && GH.data.progressions.find(p => p.id === qy.id)) { if (qy.id !== state.id || state.source !== 'prog') { state.tempo = null; state.style = null; } state.source = 'prog'; state.id = qy.id; }
       if (qy.chords) { state.source = 'text'; state.text = qy.chords; }
       if (qy.key && N.pcOf(qy.key) != null) state.key = N.normalize(qy.key);
@@ -55,7 +67,9 @@
       const go = patch => GH.router.go('/backing', Object.assign({ id: state.source === 'prog' ? state.id : null, chords: state.source === 'text' ? state.text : null, key: state.key, style: state.style, tempo: state.tempo, noscroll: 1 }, patch));
 
       el.appendChild(h('h1', null, '백킹 트랙'));
-      el.appendChild(h('p', { class: 'muted' }, '드럼, 베이스, 컴핑과 함께 솔로와 리듬을 연습합니다. 진행을 고르거나 코드를 직접 입력하고, 그루브와 템포를 바꿔 반복 재생하세요. 재생 중에는 현재 코드와 코드 스케일 후보가 지판에 표시됩니다.'));
+      const where = sess === 'bass' ? '베이스 지판' : sess === 'keys' || sess === 'vocal' ? '건반' : sess === 'drums' ? '마디 흐름' : '지판';
+      el.appendChild(h('p', { class: 'muted' }, '드럼, 베이스, 컴핑과 함께 솔로와 리듬을 연습합니다. 진행을 고르거나 코드를 직접 입력하고, 그루브와 템포를 바꿔 반복 재생하세요. 재생 중에는 현재 코드와 스케일 후보가 ' + where + '에 표시됩니다.'));
+      if (SS.off && state[SS.off] === false) el.appendChild(h('p', { class: 'backing-sessnote' }, GH.icon(({ bass: 'bass', keys: 'piano', drums: 'drum' })[sess], { cls: 'badge-ic' }), SS.ko + ' 세션이라 ' + ({ bass: '베이스', comp: '컴핑(코드 반주)', drums: '드럼' })[SS.off] + ' 파트를 꺼 두었어요. 그 자리를 직접 연주해 보세요. 아래 믹스에서 다시 켤 수 있어요.'));
 
       /* ---- 소스 ---- */
       const src = h('div', { class: 'toolbar' });
@@ -136,12 +150,21 @@
         nowBox.appendChild(h('div', { class: 'row', style: 'justify-content:space-between' },
           h('div', { class: 'row' }, h('span', { class: 'eyebrow' }, i >= 0 ? '재생 중' : '첫 코드'), h('span', { class: 'symbol-big' }, c.symbol), c.roman ? h('span', { class: 'muted' }, c.roman) : null, h('span', { class: A.fnClass(c.fn) }, GH.chords.FN_KO[c.fn] || '비다이어토닉')),
           h('div', { class: 'row' }, h('a', { class: 'btn small', href: A.chordHref(c.root, c.qId) }, '코드 상세 →'), h('a', { class: 'btn small', href: A.scaleHref(sc.id, c.root) }, '스케일 포지션 →'))));
+        if (sess === 'drums') {
+          /* 드럼: 음 대신 마디 흐름 */
+          const beatsBefore = chords.slice(0, idx).reduce((a, x) => a + x.beats, 0), totalBars = chords.reduce((a, x) => a + x.beats, 0) / 4;
+          const bar = Math.floor(beatsBefore / 4) + 1;
+          nowBox.appendChild(h('p', { class: 'muted', style: 'margin:6px 0' }, h('b', null, bar + ' / ' + totalBars + '마디'), ' · 코드가 바뀌는 곳이 마디의 첫 박이에요. ' + (totalBars % 4 === 0 ? '4마디마다 마지막 박에 필을 넣고, 다음 첫 박에 크래시.' : '진행이 한 바퀴 돌기 직전 마디에 필을 넣어 보세요.')));
+          return;
+        }
         nowBox.appendChild(h('p', { class: 'muted', style: 'margin:6px 0' }, '스케일 후보: ', h('b', null, N.pretty(c.root) + ' ' + sc.ko), fits.length > 1 ? ' · 다른 후보: ' + fits.slice(1, 3).map(f => f.scale.ko).join(', ') : '', ' — 실제 선택은 키와 앞뒤 진행을 함께 고려하세요. 색 있는 음은 코드톤, 회색은 나머지 스케일 음입니다.'));
-        nowBox.appendChild(GH.render.fretboard({ pcMap, pref, to: 15 }).el);
+        if (sess === 'keys' || sess === 'vocal') nowBox.appendChild(h('div', { class: 'backing-piano' }, GH.render.piano({ from: 48, to: 83, on: pcMap })));
+        else if (sess === 'bass') nowBox.appendChild(GH.render.fretboard({ pcMap, pref, to: 12, tuning: GH.data.techBassTuning, capo: 0, sound: m => GH.audio.bass(m, GH.audio.now() + 0.02, 1.2, {}) }).el);
+        else nowBox.appendChild(GH.render.fretboard({ pcMap, pref, to: 15 }).el);
       }
       renderNow(-1);
-      el.appendChild(section('현재 코드 위에서 연습하기', nowBox, h('div', { style: 'margin-top:6px' }, A.ivLegend())));
-      el.appendChild(callout(h('b', null, '연습 아이디어. '), '처음에는 코드톤만으로 한 마디에 두세 음씩 연주해 보세요. 다음에는 코드가 바뀌기 직전에 다음 코드의 코드톤으로 반음·온음 어프로치를 연결합니다. 익숙해지면 템포를 10 BPM씩 올리고, 그루브를 바꿔 같은 진행을 다른 리듬으로 연습해 보세요.'));
+      el.appendChild(section('현재 코드 위에서 연습하기' + (sess !== 'guitar' ? ' · ' + SS.ko : ''), nowBox, sess === 'drums' ? null : h('div', { style: 'margin-top:6px' }, A.ivLegend())));
+      el.appendChild(callout(h('b', null, '연습 아이디어' + (sess !== 'guitar' ? ' (' + SS.ko + ')' : '') + '. '), SS.idea));
       if (state.source === 'prog') el.appendChild(h('div', { class: 'toc' }, h('a', { href: A.progHref(P.id, key) }, '진행 분석 · 보이싱 →'), h('a', { href: '#/ear?tab=root' }, '진행 듣고 루트 맞히기 퀴즈 →')));
     }
   };

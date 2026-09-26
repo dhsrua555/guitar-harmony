@@ -424,6 +424,26 @@
       GH.state.set({ instrument: 'guitar' }); ok(GH.state.soundId('keys') === 'nylon', 'sound: fixed instrument overrides the session');
       GH.soundSession = ss0; GH.state.set({ instrument: S0.instrument, guitarTone: S0.guitarTone, compTone: S0.compTone });
     })();
+    /* 내 악기(모드): 설문 · 홈 · 머리 버튼 · 허브가 같은 값 (설문에서 처음 고른 세션) */
+    (function () {
+      if (!GH.mode) { ok(false, 'GH.mode exists'); return; }
+      const G = GH.guide, P0 = JSON.parse(JSON.stringify(G.profile())), rr = GH.router.rerender; let cs0 = null;
+      try { cs0 = localStorage.getItem('gh.course.sess'); } catch (e) { /* ignore */ }
+      GH.router.rerender = () => {};
+      try {
+        G.setProfile({ sessions: ['guitar', 'vocal'] }); GH.mode.set('bass', { toast: false });
+        ok(GH.mode.get() === 'bass' && G.sessions().join(',') === 'bass,guitar,vocal' && GH.course.currentSess({}) === 'bass', 'mode: picking bass puts it first and switches the course');
+        ok(G.SESSIONS.every(s => s.starter && (GH.data.technique || []).some(e => e.id === s.starter.id) && s.changes.length === 4), 'mode: every instrument has a starter drill and a what-changes list');
+        const home = document.createElement('div'); GH.pages['/'].render(home, { query: {} });
+        ok(home.querySelectorAll('.home-mode-pick').length === 5 && home.querySelector('.home-mode-pick.mine b').textContent === '베이스' && /베이스 첫 연습/.test(home.querySelector('.hm-try-head h3').textContent) && home.querySelector('.home-mode .lesson-practice'), 'home: pick-your-instrument hook with the bass starter drill');
+        const hubB = document.createElement('div'), hubK = document.createElement('div');
+        GH.pages['/bass'].render(hubB, { query: {} }); GH.pages['/keys'].render(hubK, { query: {} });
+        ok(hubB.querySelector('.hub-mode.mine') && hubK.querySelector('.hub-mode:not(.mine) button'), 'session hubs: tell whether it is my instrument, offer a switch');
+      } finally {
+        GH.router.rerender = rr; G.setProfile(P0);
+        try { if (cs0 == null) localStorage.removeItem('gh.course.sess'); else localStorage.setItem('gh.course.sess', cs0); } catch (e) { /* ignore */ }
+      }
+    })();
     /* 그림 · 악보 */
     const kit = GH.render.drumkit(); kit.highlight([{ k: 'snare', st: 'L' }]);
     ok(kit.el.querySelectorAll('.kit-pad').length === 9 && kit.el.querySelector('.kit-snare.cur .kit-hand').textContent === 'L', 'drum kit view: 9 pads, highlight with sticking');

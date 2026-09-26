@@ -150,8 +150,39 @@
   }
   const displayHead = (ko, en, sub, cls) => h('div', { class: 'display-head' + (cls ? ' ' + cls : '') }, h('span', { class: 'en' }, en), h('h2', null, ko), sub ? h('p', null, sub) : null);
 
+  /* 내 악기로 바로 시작: 악기 다섯 개 중 하나를 누르면 그 자리에서 첫 연습이 바뀌고, 사이트 전체(소리 · 코스 · 추천 · 백킹)가 그 악기로 */
+  function modeHook() {
+    const G = GH.guide; if (!G || !G.SESSIONS || !GH.mode || !GH.course) return null;
+    const mode = GH.mode.get(), shown = mode || 'guitar';
+    const M = G.SESSIONS.find(s => s.id === shown);
+    const chs = GH.course.chapters(shown), first = chs[0] && chs[0].lessons[0];
+    const nLessons = chs.reduce((a, c) => a + c.lessons.length, 0);
+    const ex = (GH.data.technique || []).find(e => e.id === M.starter.id);
+    const widget = ex && GH.course.WIDGETS.practice ? GH.course.WIDGETS.practice(M.starter, { sess: shown }) : null;
+    return h('section', { class: 'wrap home-mode reveal', 'aria-labelledby': 'home-mode-title' },
+      h('div', { class: 'display-head' }, h('span', { class: 'en' }, 'PICK YOUR INSTRUMENT'), h('h2', { id: 'home-mode-title' }, '내 악기로 바로 시작'),
+        h('p', null, '악기 하나만 누르세요. 소리 · 기초 코스 · 추천 · 백킹 트랙이 그 악기에 맞춰지고, 아래에서 바로 첫 연습을 따라 할 수 있어요.')),
+      h('div', { class: 'home-mode-picks', role: 'group', 'aria-label': '내 악기 고르기' }, G.SESSIONS.map(s => h('button', {
+        class: 'home-mode-pick' + (s.id === shown ? ' active' : '') + (s.id === mode ? ' mine' : ''), type: 'button', 'aria-pressed': s.id === mode ? 'true' : 'false',
+        onclick: () => { if (s.id !== mode) GH.mode.set(s.id); }
+      }, h('span', { class: 'hmp-ic', 'aria-hidden': 'true' }, I(s.icon)), h('b', null, s.ko), h('small', null, s.desc), s.id === mode ? h('span', { class: 'hmp-mine' }, '내 악기') : null))),
+      h('div', { class: 'home-mode-body' },
+        h('div', { class: 'home-mode-try' },
+          h('div', { class: 'hm-try-head' }, h('span', { class: 'en' }, 'TRY IT NOW'), h('h3', null, M.ko + ' 첫 연습' + (ex ? ': ' + ex.ko : ''))),
+          widget || h('p', { class: 'muted' }, '연습을 불러오지 못했어요.')),
+        h('aside', { class: 'home-mode-side' },
+          h('h3', null, mode ? '내 악기: ' + M.ko : G.josa(M.ko, '을', '를') + ' 고르면'),
+          h('ul', { class: 'mode-changes' }, M.changes.map(([k, v]) => h('li', null, h('span', null, k), v))),
+          !mode ? h('p', { class: 'muted small' }, '아직 악기를 고르지 않아 기타로 보여 드려요. 위에서 하나를 누르면 바로 바뀝니다.') : null,
+          h('div', { class: 'home-mode-links' },
+            first ? h('a', { class: 'btn primary', href: GH.course.href(first.id, shown) }, I('learn'), M.ko + ' 기초 코스 시작', h('small', { class: 'hm-count' }, chs.length + '장 · ' + nLessons + '레슨')) : null,
+            h('a', { class: 'btn', href: '#/' + shown }, I(M.icon), M.ko + ' 메뉴 전체'),
+            h('a', { class: 'btn', href: '#/backing' }, I('backing'), '백킹 트랙에서 합주')))));
+  }
+
   GH.pages['/'] = {
     title: '홈',
+    staff: true,
     render(el) {
       const A = GH.app; const key = A.key();
 
@@ -168,6 +199,7 @@
             h('div', { class: 'home-search', role: 'search' }, h('span', { class: 'search-icon', 'aria-hidden': 'true' }, I('search')), input, results)),
           heroArt())));
       el.appendChild(marquee(['GUITAR', 'BASS', 'KEYS', 'DRUMS', 'VOCAL', 'CHORDS', 'SCALES', 'PROGRESSIONS', 'EAR TRAINING', 'RHYTHM', 'VOICINGS', 'MODES']));
+      const hook = modeHook(); if (hook) el.appendChild(hook);
 
       /* 맞춤 가이드 (처음 방문이면 설문 창) */
       if (GH.guide) {
@@ -188,7 +220,7 @@
         h('div', { class: 'path-grid' },
           h('a', { href: '#/learn', class: 'path-card c-pink' },
             h('span', { class: 'path-num' }, '01'), h('span', { class: 'path-ic', 'aria-hidden': 'true' }, I('learn')),
-            h('div', { class: 'title' }, '처음이라면, 기초 코스'), h('p', null, '음 이름부터 코드, 리듬, 스케일, 코드 진행까지 23개의 짧은 레슨. 한 장에 개념 하나씩, 듣고 쳐 보고 문제로 확인합니다.'),
+            h('div', { class: 'title' }, '처음이라면, 기초 코스'), h('p', null, '악기마다 따로 짠 여섯 장의 짧은 레슨. 한 장에 개념 하나씩, 듣고 쳐 보고 문제로 확인합니다. 내 악기의 코스가 먼저 열려요.'),
             h('span', { class: 'sticker path-sticker', 'aria-hidden': 'true' }, 'START', h('br'), 'HERE'), go()),
           h('div', { class: 'path-card c-sun' },
             h('span', { class: 'path-num' }, '02'), h('span', { class: 'path-ic', 'aria-hidden': 'true' }, I('chord')),

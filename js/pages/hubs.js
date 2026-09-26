@@ -61,6 +61,15 @@
       render(el) {
         const A = GH.app; const sec = A.SECTIONS.find(x => x.id === id);
         el.appendChild(hubHead(sec, sec.label, sec.desc));
+        /* 세션 허브: 내 악기와 같은지 알려 주고, 다르면 한 번에 바꾸기 */
+        const MS = GH.mode && GH.guide && GH.guide.SESSIONS.find(s => s.id === id);
+        if (MS) {
+          const cur = GH.mode.get(), CS = GH.guide.SESSIONS.find(s => s.id === cur), J = GH.guide.josa;
+          el.appendChild(h('div', { class: 'hub-mode' + (cur === id ? ' mine' : '') }, I(MS.icon, { cls: 'hub-mode-ic' }),
+            cur === id ? h('span', null, h('b', null, J(MS.ko, '이', '가') + ' 내 악기예요.'), ' 소리 · 기초 코스 · 추천 · 백킹 트랙이 ' + MS.ko + '에 맞춰져 있어요.')
+              : h('span', null, (CS ? '지금 내 악기는 ' + J(CS.ko, '이에요', '예요') + '. ' : '') + '여기서는 ' + MS.ko + ' 연습을 그대로 둘러볼 수 있어요. 내 악기로 바꾸면 기초 코스 · 추천 · 백킹 트랙까지 ' + MS.ko + '에 맞춰져요.'),
+            cur === id ? null : h('button', { class: 'btn small primary', type: 'button', onclick: () => GH.mode.set(id) }, J(MS.ko, '을', '를') + ' 내 악기로')));
+        }
         const basic = sec.items.filter(it => it[2] <= 2), more = sec.items.filter(it => it[2] > 2);
         let n = 0;
         const card = ([p, label, level, desc]) => { n++; return h('a', { href: '#' + p, class: 'card link hub-card' },

@@ -294,6 +294,11 @@
     { id: 'vocal', ko: '보컬', en: 'VOCAL', icon: 'mic', desc: '호흡 · 발성 · 음정 · 시창 · 애드리브', view: '악보 · 피아노 가이드' }
   ];
   GH.data.techCats = CATS;
+  /* 코드 하나로 하는 연습: 악보 위와 "지금 코드"에 코드 이름 */
+  const setChord = (id, fn) => { const e = EX.find(x => x.id === id); if (e) e.chordName = fn; };
+  setChord('arp-triad', o => GH.chords.symbol(o.key || 'A', Q_INT[o.q] ? o.q : 'maj'));
+  setChord('arp-7th', o => GH.chords.symbol(o.key || 'A', Q_INT[o.q] ? o.q : 'm7'));
+  setChord('sweep', o => GH.chords.symbol(o.key || 'A', 'min'));
   GH.data.technique = EX;
   GH.data.techRoutines = ROUTINES;
   GH.data.techPerms = PERM_EASY;

@@ -79,10 +79,11 @@
     const marks = ex.inst === 'bass' ? ['i', 'm'] : ['d', 'u'];
     let at = 0;
     const notes = ex.gen(o).map(n => {
-      const e = { at, d: ex.fixed && n.d ? n.d : d, s: n.s, f: n.f, fg: n.fg, t: n.t || null, x: !!n.x, label: n.label || null, midi: tun[NS - n.s] + n.f };
+      const e = { at, d: ex.fixed && n.d ? n.d : d, s: n.s, f: n.f, fg: n.fg, t: n.t || null, x: !!n.x, label: n.label || null, midi: tun[NS - n.s] + n.f, ch: n.ch || null };
       if (n.pk) e.pk = n.pk; else if (!e.t) { e.pk = marks[(first + alt) % 2]; alt++; }
       at += e.d; return e;
     });
+    if (ex.chordName && notes.length && !notes.some(n => n.ch)) notes[0].ch = ex.chordName(o);   /* 코드 하나로 하는 연습 (아르페지오) */
     return { kind: 'fretted', tun, NS, seq: notes, notes };
   }
   function buildKeys(ex, o) {
@@ -92,6 +93,8 @@
     const map = new Map();
     rh.concat(lh).forEach(n => { const k = Math.round(n.at * 1000); if (!map.has(k)) map.set(k, { at: n.at, notes: [] }); map.get(k).notes.push(Object.assign({ hand: rh.includes(n) ? 'r' : 'l' }, n)); });
     const seq = Array.from(map.values()).sort((a, b) => a.at - b.at);
+    seq.forEach(s => { const c = s.notes.find(n => n.ch); if (c) s.ch = c.ch; });   /* 코드가 바뀌는 곳 */
+    if (ex.chordName && seq.length && !seq.some(s => s.ch)) seq[0].ch = ex.chordName(o);
     const end = Math.max(0, ...rh.concat(lh).map(n => n.at + n.d));
     seq.forEach((s, i) => { s.d = (i + 1 < seq.length ? seq[i + 1].at : end) - s.at; });
     return { kind: 'keys', seq, rh, lh };
@@ -120,7 +123,8 @@
     return B.seq.map(n => {
       if (n.rest) return {};
       const name = spellDeg(key, n.deg, movableOf(n));
-      return { name, gname: n.gdeg != null ? spellDeg(key, n.gdeg, null) : null,
+      const chd = n.chd || (n.i === 0 && ex0(B).chordDeg) || null;   /* 코드 이름도 지금 키로 */
+      return { name, gname: n.gdeg != null ? spellDeg(key, n.gdeg, null) : null, chord: chd ? GH.chords.symbol(spellDeg(key, chd[0], null), chd[1]) : null,
         syl: n.own || (o.syl === 'vowel' ? '아' : o.syl === 'solfa' ? movableOf(n) : N.solfa.fixed(name)) };
     });
   }
@@ -134,7 +138,7 @@
     const steps = o.steps || 0; const trs = [];
     for (let k = 0; k <= steps; k++) trs.push(k);
     for (let k = steps - 1; k >= 1; k--) trs.push(k);
-    const B = { kind: 'vocal', seq, V, T, trs };
+    const B = { kind: 'vocal', seq, V, T, trs, ex };
     vocalLabels(B, o, 0).forEach((L, i) => Object.assign(seq[i], L));
     B.keyOf = tr => vocalKey(o.start, tr);
     return B;
@@ -161,12 +165,35 @@
     };
   }
 
+  const ex0 = B => B.ex || {};
+  /* 코드 이름 줄: [{at, sym}] (같은 코드가 이어지면 한 번만). 보컬은 반복마다 바뀌는 키로 */
+  function chordTrack(ex, B, o, tr) {
+    let list = [];
+    if (B.kind === 'fretted') list = B.notes.filter(n => n.ch).map(n => ({ at: n.at, sym: n.ch }));
+    else if (B.kind === 'keys') list = B.seq.filter(s => s.ch).map(s => ({ at: s.at, sym: s.ch }));
+    else if (B.kind === 'vocal') { const L = vocalLabels(B, o, tr || 0); list = B.seq.map((n, i) => ({ at: n.at, sym: L[i] && L[i].chord })).filter(x => x.sym); }
+    return list.filter((x, i) => i === 0 || x.sym !== list[i - 1].sym).map(x => ({ at: x.at, sym: N.pretty(x.sym) }));
+  }
+  /* "지금 코드 → 다음" 표시 (연습 중 onNote 시각으로 옮겨 간다) */
+  function chordNow(track) {
+    const cur = h('b', { class: 'tech-chord-cur' }), nxt = h('span', { class: 'tech-chord-next' });
+    const el = h('div', { class: 'tech-chordnow', hidden: !track.length, 'aria-live': 'polite' }, h('span', { class: 'tech-chord-lab' }, '지금 코드'), cur, nxt);
+    let T = track, shown = -1;
+    const paint = i => { shown = i; const c = T[i] || T[0]; cur.textContent = c ? c.sym : ''; const n = T.length > 1 ? T[(i + 1) % T.length] : null; nxt.textContent = n ? '다음 ' + n.sym : ''; };
+    paint(0);
+    return { el, set(t) { T = t || []; el.hidden = !T.length; paint(0); }, at(t) { if (!T.length || t == null) return; let i = 0; T.forEach((c, k) => { if (c.at <= t + 1e-6) i = k; }); if (i !== shown) paint(i); }, reset() { paint(0); } };
+  }
   /* ---- 악보 ---- */
   function sheetFor(ex, B, width, o, tr) {
     if (!GH.render.sheet) return null;
     const pref = o.key ? GH.state.pref(o.key.replace(/m$/, '')) : 'sharp';
-    if (B.kind === 'fretted') return GH.render.sheet({ kind: 'line', clef: ex.inst === 'bass' ? 'bass' : 'treble', written: 12, width, pref, events: B.notes.map(n => ({ at: n.at, d: n.d, m: [n.midi], x: n.x, fg: n.fg > 0 || typeof n.fg === 'string' ? String(n.fg) : '' })) });
-    if (B.kind === 'keys') { const ev = n => ({ at: n.at, d: n.d, m: n.m, fg: (n.fg || []).join('') }); return GH.render.sheet({ kind: 'grand', width, pref, rh: B.rh.map(ev), lh: B.lh.map(ev) }); }
+    const chords = chordTrack(ex, B, o, tr);
+    if (B.kind === 'fretted') return GH.render.sheet({ kind: 'line', clef: ex.inst === 'bass' ? 'bass' : 'treble', written: 12, width, pref, events: B.notes.map(n => ({ at: n.at, d: n.d, m: [n.midi], x: n.x, fg: n.fg > 0 || typeof n.fg === 'string' ? String(n.fg) : '' })), chords });
+    if (B.kind === 'keys') {
+      /* 운지 숫자는 바뀔 때만 (한 마디 안에서 같은 코드를 같은 손가락으로 되풀이하면 첫 번째에만) */
+      const evs = list => { let prev = null; return list.map(n => { const fg = (n.fg || []).join(''), k = Math.floor(n.at / 4 + 1e-6) + '|' + (n.m || []).join(',') + '|' + fg; const e = { at: n.at, d: n.d, m: n.m, fg: k === prev ? '' : fg }; if ((n.m || []).length) prev = k; return e; }); };
+      return GH.render.sheet({ kind: 'grand', width, pref, rh: evs(B.rh), lh: evs(B.lh), chords });
+    }
     if (B.kind === 'drums') return GH.render.sheet({ kind: 'drum', width, slots: B.seq, handsOnly: !!ex.handsOnly });
     /* 보컬: 지금 키(반음 tr)로 적는다. 피아노가 다른 선율을 치면 그 음은 회색으로 함께 */
     tr = tr || 0; const L = vocalLabels(B, o, tr); const line = o.guide === 'line';
@@ -174,7 +201,7 @@
       if (n.rest) return { at: n.at, d: n.d, m: null };
       const g = line && n.gmidi != null;
       return { at: n.at, d: n.d, m: g ? [n.midi + tr, n.gmidi + tr] : [n.midi + tr], names: g ? [L[i].name, L[i].gname] : [L[i].name], soft: g ? [n.gmidi + tr] : null, lyric: L[i].syl, stacc: n.stacc };
-    }) });
+    }), chords });
   }
   /* 기타 · 베이스 TAB: 화면 너비에 맞춰 1~4마디씩 끊는다 */
   function tabRows(notes, rh, width, NS) {
@@ -404,10 +431,11 @@
       /* 따라 치기 */
       const width = Math.min(1100, el.clientWidth || 700);
       let sheet = sheetFor(ex, B, width, o), shownTr = 0;
+      const cNow = chordNow(chordTrack(ex, B, o, 0));   /* 지금 코드 → 다음 */
       /* 보컬: 반복마다 키가 바뀌면 악보도 그 키로 다시 적는다 */
       const keyCap = B.kind === 'vocal' ? h('p', { class: 'tech-keycap' }) : null;
       const paintKey = tr => { if (!keyCap) return; keyCap.textContent = '악보 · 가사: ' + N.pretty(B.keyOf(tr)) + ' 메이저' + (tr ? ' (처음 키에서 반음 +' + tr + ')' : ' (처음 키)'); };
-      const showKey = tr => { if (B.kind !== 'vocal' || tr === shownTr) return; shownTr = tr; sheet = sheetFor(ex, B, width, o, tr); paintNotation(); };
+      const showKey = tr => { if (B.kind !== 'vocal' || tr === shownTr) return; shownTr = tr; sheet = sheetFor(ex, B, width, o, tr); cNow.set(chordTrack(ex, B, o, tr)); paintNotation(); };
       const tabR = B.kind === 'fretted' ? tabRows(B.notes, o.rh, width, B.NS) : null;
       const view = viewFor(ex, B);
       const status = h('div', { class: 'tech-status', role: 'status', 'aria-live': 'polite' }, '▶ 시작을 누르면 “하나 둘 셋 넷” 뒤에 시작해요.');
@@ -424,10 +452,11 @@
           nextTempo: n => { if (play.trainer && n % play.every === 0) t.bpm = Math.min(t.max, t.bpm + play.step); return t.bpm; },
           onNote: (i, ev) => {
             if (sheet) sheet.highlight(i < 0 || !ev ? null : ev.at);
+            cNow.at(i < 0 || !ev ? null : ev.at);
             if (tabR) tabR.highlight(i);
             if (view) view.highlight(i < 0 ? null : ev);
           },
-          onStop: () => { showKey(0); status.classList.remove('count'); status.textContent = '멈췄어요. 편하게 됐다면 템포를 조금 올려 보세요.'; keepTempo(); }
+          onStop: () => { showKey(0); cNow.reset(); status.classList.remove('count'); status.textContent = '멈췄어요. 편하게 됐다면 템포를 조금 올려 보세요.'; keepTempo(); }
         });
       };
       const chk = (label, key, extra) => h('label', { class: 'tech-chk' }, h('input', { type: 'checkbox', checked: play[key], onchange: e => { play[key] = e.target.checked; if (extra) extra(); } }), label);
@@ -448,7 +477,7 @@
         h('div', { class: 'toolbar tech-play' }, A.playBtn('▶ 시작', start, 'primary'), A.stopBtn(), h('label', { class: 'tech-tempo' }, '템포', tempoIn)),
         h('div', { class: 'toolbar tech-play-opts' }, chk('메트로놈', 'metronome'), chk('반복', 'loop'), chk('시작 전 4박 세기', 'countIn'), chk('스피드 트레이너', 'trainer', () => { trainerBox.hidden = !play.trainer; }),
           tabR ? h('label', null, '보기', select({ options: [{ value: 'both', label: '오선 + TAB' }, { value: 'staff', label: '오선만' }, { value: 'tab', label: 'TAB만' }], value: play.view, onChange: v => { play.view = v; paintNotation(); } })) : null),
-        trainerBox, status, noteBox,
+        trainerBox, status, cNow.el, noteBox,
         h('p', { class: 'muted tech-note' }, B.kind === 'fretted' ? '오선의 음은 실제 소리보다 한 옥타브 높게 적는 ' + (ex.inst === 'bass' ? '베이스' : '기타') + ' 표기 관례를 따라요. TAB 숫자는 누를 프렛, 위의 작은 글자는 손가락 · 피킹.' + (ex.inst === 'bass' ? ' x 는 데드 노트.' : '') : B.kind === 'drums' ? (ex.handsOnly ? '스네어 한 가지 소리만 적었어요. 음표 아래 글자가 스티킹(R 오른손 · L 왼손), > 는 액센트예요.' : '드럼 보표: 맨 위 x 크래시 · 그 아래 x 하이햇 · 라이드, 가운데 칸 스네어, 아래 킥, 맨 아래 x 는 하이햇 페달.') : B.kind === 'keys' ? '위는 오른손(높은음자리표), 아래는 왼손(낮은음자리표). 음표 위 숫자는 손가락 번호.' : '반복할 때마다 피아노 화음이 새 키를 먼저 알려 주고, 악보와 가사도 그 키로 바뀌어요.' + (o.guide === 'line' ? ' 회색 음표는 피아노가 치는 선율, 검은 음표가 내가 부를 음이에요.' : ''))));
       if (view) el.appendChild(section(B.kind === 'keys' ? '건반' : B.kind === 'drums' ? (ex.handsOnly ? '스네어' : '드럼 킷') : '지판', view.el, h('p', { class: 'muted' }, view.note)));
 
@@ -458,5 +487,5 @@
       el.appendChild(section('다음에 해 볼 것', h('div', { class: 'toc' }, same.map(e => h('a', { href: exHref(e) }, e.ko)).concat(extra, [h('a', { href: '#/technique/' + I.id }, I.ko + ' 기본기 목록'), h('a', { href: '#/rhythm' }, '메트로놈 · 리듬 연습')]))));
     }
   };
-  GH.technique = { build, options, rhOptions, RH, soundFor, sheetFor, viewFor, vocalLabels };
+  GH.technique = { build, options, rhOptions, RH, soundFor, sheetFor, viewFor, vocalLabels, chordTrack, chordNow };
 })();

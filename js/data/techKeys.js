@@ -14,6 +14,11 @@
   const chord = (ms, fs, d) => ({ m: ms, fg: fs, d });
   /* 손 고르기: 한 손만이면 다른 손은 비운다 */
   const hands = (o, rh, lh) => ({ rh: o.hands === 'lh' ? [] : rh, lh: o.hands === 'rh' ? [] : lh });
+  /* 코드 이름: 키 안의 도수(반음) + 코드 종류, 슬래시(/베이스 도수)는 전위 · 베이스 음 */
+  const DEG_IV = { 0: '1', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7' };
+  const sym = (key, deg, q, bassDeg) => { const k = String(key || 'C').replace(/m$/, ''); const s = GH.chords.symbol(N().spell(k, DEG_IV[N().mod(deg, 12)]), q); return bassDeg == null ? s : s + '/' + N().pretty(N().spell(k, DEG_IV[N().mod(bassDeg, 12)])); };
+  /* 코드가 바뀌는 음에 코드 이름 (ch): 왼손 · 오른손 목록의 i 번째에 */
+  const tagAt = (list, i, s) => { if (list[i]) list[i] = Object.assign({}, list[i], { ch: s }); return list; };
 
   /* 2옥타브 메이저 스케일 표준 운지 */
   const SCALE_FG = {
@@ -60,8 +65,8 @@
       tips: ['세 음이 한꺼번에 같은 크기로 울리게. 손가락을 미리 모양대로 벌려 두고 손 전체로 눌러요.'],
       gen: o => {
         const r = rhRoot(o.key), l = r - 12; const shapes = [[0, 4, 7], [4, 7, 12], [7, 12, 16], [12, 16, 19]]; const rf = [[1, 3, 5], [1, 2, 5], [1, 3, 5], [1, 3, 5]], lf = [[5, 3, 1], [5, 3, 1], [5, 2, 1], [5, 3, 1]];
-        const idx = [0, 1, 2, 3, 2, 1, 0];
-        return hands(o, idx.map(i => chord(shapes[i].map(x => x + r), rf[i])), idx.map(i => chord(shapes[i].map(x => x + l), lf[i])));
+        const idx = [0, 1, 2, 3, 2, 1, 0]; const names = [sym(o.key, 0, 'maj'), sym(o.key, 0, 'maj', 4), sym(o.key, 0, 'maj', 7), sym(o.key, 0, 'maj')];
+        return hands(o, idx.map(i => Object.assign(chord(shapes[i].map(x => x + r), rf[i]), { ch: names[i] })), idx.map(i => Object.assign(chord(shapes[i].map(x => x + l), lf[i]), { ch: names[i] })));
       } },
     { id: 'k-cadence', cat: 'k-chord', level: 3, ko: '케이던스 I–IV–V–I (가까운 자리)', rh: '2', tempo: [60, 110], opts: { key: 'C', hands: 'both', mode: 'major' },
       goal: '오른손은 가까운 전위로 I – IV – V – I, 왼손은 베이스 음. 입시 · 반주에서 가장 먼저 익히는 케이던스(마침꼴)예요.',
@@ -71,6 +76,8 @@
         const r = rhRoot(o.key); const minor = o.mode === 'minor'; const t = minor ? 3 : 4, s6 = minor ? 8 : 9;
         const R = [chord([r, r + t, r + 7], [1, 3, 5]), chord([r, r + 5, r + s6], [1, 2, 5]), chord([r - 1, r + 2, r + 7], [1, 2, 5]), chord([r, r + t, r + 7], [1, 3, 5])];
         const b = r - 12; const L = [one(b, 5), one(b - 7, 5), one(b - 5, 5), one(b, 5)];
+        const q = minor ? 'min' : 'maj'; const names = [sym(o.key, 0, q), sym(o.key, 5, q), sym(o.key, 7, 'maj'), sym(o.key, 0, q)];
+        names.forEach((s, i) => { tagAt(R, i, s); tagAt(L, i, s); });
         return hands(o, R, L);
       } },
     { id: 'k-arp', cat: 'k-scale', level: 3, ko: '트라이어드 아르페지오 2옥타브', rh: '16', tempo: [60, 110], opts: { key: 'C', hands: 'rh', keys: ['C', 'F', 'G', 'Am', 'Dm', 'Em'] },
@@ -102,6 +109,7 @@
         const sh = N().mod(pcOf(o.key), 12); const t = sh > 6 ? sh - 12 : sh;
         const R = [chord([65, 72, 76].map(x => x + t), [1, 4, 5], 2), chord([65, 71, 76].map(x => x + t), [1, 3, 5], 2), chord([64, 71, 74].map(x => x + t), [1, 4, 5], 4)];
         const L = [one(50 + t, 5, 2), one(43 + t, 5, 2), one(48 + t, 5, 4)];
+        [sym(o.key, 2, 'm7'), sym(o.key, 7, '7'), sym(o.key, 0, 'maj7')].forEach((s, i) => { tagAt(R, i, s); tagAt(L, i, s); });
         return hands(o, R, L);
       }, fixed: true },
     { id: 'k-alberti', cat: 'k-indep', level: 5, ko: '알베르티 베이스 + 오른손 선율', rh: '8', tempo: [60, 120], opts: { key: 'C', hands: 'both' },
@@ -112,6 +120,7 @@
         const sh = N().mod(pcOf(o.key), 12); const t = sh > 6 ? sh - 12 : sh;
         const alb = (a, b, c) => [one(a + t, 5, .5), one(c + t, 1, .5), one(b + t, 3, .5), one(c + t, 1, .5), one(a + t, 5, .5), one(c + t, 1, .5), one(b + t, 3, .5), one(c + t, 1, .5)];
         const L = [].concat(alb(48, 52, 55), alb(48, 53, 57), alb(47, 50, 55), alb(48, 52, 55));
+        [sym(o.key, 0, 'maj'), sym(o.key, 5, 'maj', 0), sym(o.key, 7, 'maj', 11), sym(o.key, 0, 'maj')].forEach((s, i) => tagAt(L, i * 8, s));
         const mel = [[64, 1], [67, 2], [72, 5], [67, 2], [65, 1], [69, 3], [72, 5], [69, 3], [62, 1], [67, 3], [71, 5], [67, 3]];
         const R = mel.map(([m, f]) => one(m + t, f, 1)).concat([one(64 + t, 1, 1), one(67 + t, 3, 1), one(72 + t, 5, 2)]);
         return hands(o, R, L);
@@ -120,7 +129,7 @@
   /* ---- 더 많은 키보드 연습 ---- */
   const nameOf = (k, deg) => N().noteName(N().mod(pcOf(k) + deg, 12), GH.state.pref(k));
   const chordOf = (k, deg, q) => GH.chords.buildChord(nameOf(k, deg), q);
-  const pickV = (c, level, re) => { const L = GH.instView.keysVoicings(c, level).list; return L.find(v => re.test(v.name)) || L[0]; };
+  const pickV = (c, level, re) => { const L = GH.instView.keysVoicings(c, level).list; return Object.assign({}, L.find(v => re.test(v.name)) || L[0], { sym: c.symbol }); };
   /* 가장 가까운 전위 고르기 (보이스 리딩) */
   function nearest(c, prev) {
     const L = GH.instView.keysVoicings(c, 'basic').list.filter(v => /기본형|전위/.test(v.name));
@@ -130,9 +139,9 @@
   }
   const fingersFor = ms => ms.length === 3 ? [1, 3, 5] : ms.length === 4 ? [1, 2, 3, 5] : ms.length === 2 ? [1, 4] : ms.map((_, i) => Math.min(5, i + 1));
   const lhFingers = ms => ms.length === 1 ? [5] : ms.length === 2 ? [5, 1] : ms.length === 3 ? [5, 3, 1] : [5, 4, 2, 1].slice(0, ms.length);
-  const progVoicings = (o, degs, pick) => { let prev = null; return degs.map(([d, q]) => { const c = chordOf(o.key, d, q); const v = pick(c, prev); prev = v; return v; }); };
+  const progVoicings = (o, degs, pick) => { let prev = null; return degs.map(([d, q]) => { const c = chordOf(o.key, d, q); const v = Object.assign({}, pick(c, prev), { sym: c.symbol }); prev = v; return v; }); };
   /* 오른손이 없는 보이싱(셸 · 루트리스)은 그 박을 쉼표로 */
-  const toHands = (o, vs) => hands(o, vs.some(v => v.rh.length) ? vs.map(v => v.rh.length ? chord(v.rh, fingersFor(v.rh)) : { m: [], fg: [], rest: true }) : [], vs.map(v => chord(v.lh, lhFingers(v.lh))));
+  const toHands = (o, vs) => hands(o, vs.some(v => v.rh.length) ? vs.map(v => Object.assign(v.rh.length ? chord(v.rh, fingersFor(v.rh)) : { m: [], fg: [], rest: true }, { ch: v.sym })) : [], vs.map(v => Object.assign(chord(v.lh, lhFingers(v.lh)), { ch: v.sym })));
   CATS.push({ id: 'k-voice', inst: 'keys', ko: '코드 보이싱', en: 'VOICINGS', icon: 'stack', desc: '진행 위에서 보이싱을 가깝게 잇는 연습. 팝 반주형부터 셸 · 루트리스 · 드롭 2 · 쿼탈 · 어퍼 스트럭처까지.' });
   EX.push(
     /* 코드 보이싱 */
@@ -187,7 +196,8 @@
       how: ['오른손 운지: 기본형 1-3-5-3, 2전위 1-2-5-2, 1전위 1-2-5-2.', '왼손은 코드가 바뀔 때만 움직여요.'],
       tips: ['오른손 첫 음(박 첫머리)을 조금 또렷하게.'],
       gen: o => { const r = rhRoot(o.key); const sets = [[[r, r + 4, r + 7], [1, 3, 5]], [[r, r + 5, r + 9], [1, 2, 5]], [[r - 1, r + 2, r + 7], [1, 2, 5]], [[r, r + 4, r + 7], [1, 3, 5]]]; const R = [], L = []; const b = r - 12, bass = [b, b - 7, b - 5, b];
-        sets.forEach(([ms, fs], i) => { for (let k = 0; k < 2; k++) [0, 1, 2, 1].forEach(j => R.push(one(ms[j], fs[j], 0.5))); L.push(one(bass[i], 5, 2), one(bass[i], 5, 2)); }); return hands(o, R, L); } },
+        const names = [sym(o.key, 0, 'maj'), sym(o.key, 5, 'maj'), sym(o.key, 7, 'maj'), sym(o.key, 0, 'maj')];
+        sets.forEach(([ms, fs], i) => { tagAt(R, R.push(one(ms[0], fs[0], 0.5)) - 1, names[i]); [1, 2, 1].forEach(j => R.push(one(ms[j], fs[j], 0.5))); [0, 1, 2, 1].forEach(j => R.push(one(ms[j], fs[j], 0.5))); L.push(Object.assign(one(bass[i], 5, 2), { ch: names[i] }), one(bass[i], 5, 2)); }); return hands(o, R, L); } },
     { id: 'k-contrary', cat: 'k-scale', level: 3, ko: '반진행 스케일 (양손 반대 방향)', rh: '8', tempo: [60, 110], opts: { key: 'C', hands: 'both', keys: ['C', 'G', 'D', 'A', 'E'] },
       goal: '같은 음에서 출발해 오른손은 올라가고 왼손은 내려가요. 양손 엄지가 같은 순간에 넘어가서 손가락 번호가 거울처럼 맞아요. 입시 스케일 과제에 자주 나와요.',
       how: ['오른손 1-2-3-1-2-3-4-5, 왼손 1-2-3-1-2-3-4-5 (반대 방향).', '한 옥타브 벌어졌다가 다시 가운데로 모여요.'],
@@ -210,13 +220,14 @@
       how: ['오른손은 가까운 전위(C · G/B · Am · F/C)로 손목을 가볍게.', '박 첫머리(1 · 3박)에 살짝 힘을 줘요.'],
       tips: ['오른손 코드를 너무 길게 누르지 말고 짧게 끊으면 리듬이 살아요.'],
       gen: o => { const r = rhRoot(o.key); const vs = [[r, r + 4, r + 7], [r - 1, r + 2, r + 7], [r, r + 4, r + 9], [r, r + 5, r + 9]]; const roots = [0, 7, 9, 5].map(d => r - 12 + d - (d > 6 ? 12 : 0)); const R = [], L = [];
-        vs.forEach((v, i) => { for (let k = 0; k < 8; k++) R.push(chord(v, [1, 3, 5], 0.5)); L.push(one(roots[i], 5, 2), one(roots[i], 5, 2)); }); return hands(o, R, L); } },
+        const names = [sym(o.key, 0, 'maj'), sym(o.key, 7, 'maj'), sym(o.key, 9, 'min'), sym(o.key, 5, 'maj')];
+        vs.forEach((v, i) => { for (let k = 0; k < 8; k++) R.push(Object.assign(chord(v, [1, 3, 5], 0.5), k ? {} : { ch: names[i] })); L.push(Object.assign(one(roots[i], 5, 2), { ch: names[i] }), one(roots[i], 5, 2)); }); return hands(o, R, L); } },
     { id: 'k-ballad', cat: 'k-indep', level: 3, ko: '발라드 분산 반주 (왼손 1-5-8-10)', rh: '8', tempo: [60, 100], opts: { key: 'C', hands: 'both' }, fixed: true,
       goal: '왼손이 루트-5도-옥타브-10도(3음)를 8분음표로 펼치고, 오른손은 코드를 길게. 발라드 · CCM 반주에서 가장 많이 쓰는 모양이에요.',
       how: ['왼손: 1 → 5 → 8 → 10 → 8 → 5 … 손을 넓게 벌려요.', '오른손은 코드를 온음표로 누르고 페달을 쓴다고 생각해요.'],
       tips: ['왼손 10도가 멀면 3음을 한 옥타브 아래(1-5-8-3)로 바꿔도 좋아요.'],
       gen: o => { const r = rhRoot(o.key); const prog = [[0, 4], [7, 4], [9, 3], [5, 4]]; const R = [], L = [];
-        prog.forEach(([d, t]) => { const b = r - 24 + d; const pat = [0, 7, 12, 12 + t, 12, 7, 0, 7]; pat.forEach((x, i) => L.push(one(b + x, [5, 2, 1, 1, 1, 2, 5, 2][i], 0.5))); const top = r + d - (d > 6 ? 12 : 0); R.push(chord([top, top + t, top + 7].map(x => x < 57 ? x + 12 : x).sort((a, c) => a - c), [1, 3, 5], 4)); }); return hands(o, R, L); } },
+        prog.forEach(([d, t]) => { const b = r - 24 + d; const pat = [0, 7, 12, 12 + t, 12, 7, 0, 7]; const s = sym(o.key, d, t === 3 ? 'min' : 'maj'); pat.forEach((x, i) => L.push(Object.assign(one(b + x, [5, 2, 1, 1, 1, 2, 5, 2][i], 0.5), i ? {} : { ch: s }))); const top = r + d - (d > 6 ? 12 : 0); R.push(chord([top, top + t, top + 7].map(x => x < 57 ? x + 12 : x).sort((a, c) => a - c), [1, 3, 5], 4)); }); return hands(o, R, L); } },
     { id: 'k-circle', cat: 'k-chord', level: 4, ko: '5도권 케이던스 (C → G → D → A)', rh: '2', tempo: [60, 110], opts: { hands: 'both' },
       goal: 'I–IV–V–I 케이던스를 C → G → D → A 키로 옮겨 가며 쳐요. 조가 바뀌어도 같은 손 모양이 나오는 게 목표예요.',
       how: ['키마다 오른손 I 기본형 → IV 2전위 → V 1전위 → I 기본형.', '다음 키의 I 은 앞 키의 V 와 같은 코드예요.'],
@@ -226,9 +237,10 @@
       goal: '왼손이 1 · 3박에 낮은 베이스, 2 · 4박에 가운데 코드를 번갈아 치는 스트라이드(붐칙). 래그타임 · 스윙 피아노의 왼손이에요.',
       how: ['1박 루트(낮게) → 2박 코드 → 3박 5음(낮게) → 4박 코드.', '왼손이 크게 뛰어요. 코드 자리를 눈으로 먼저 보고 손을 보내요.'],
       tips: ['처음엔 베이스와 코드 사이를 한 옥타브만 뛰게 가까이 해도 돼요.'],
-      gen: o => { const r = rhRoot(o.key); const L = []; [[0, 'maj'], [5, 'maj'], [7, 'maj'], [0, 'maj']].forEach(([d]) => { const root = r - 24 + d; const ch = [root + 12 + 4, root + 12 + 7, root + 24].map(x => x > 64 ? x - 12 : x).sort((a, b) => a - b); L.push(one(root, 5), chord(ch, [3, 2, 1]), one(root - 5 >= 28 ? root - 5 : root + 7, 5), chord(ch, [3, 2, 1])); }); return hands(o, [], L); } }
+      gen: o => { const r = rhRoot(o.key); const L = []; [[0, 'maj'], [5, 'maj'], [7, 'maj'], [0, 'maj']].forEach(([d]) => { const root = r - 24 + d; const ch = [root + 12 + 4, root + 12 + 7, root + 24].map(x => x > 64 ? x - 12 : x).sort((a, b) => a - b); L.push(Object.assign(one(root, 5), { ch: sym(o.key, d, 'maj') }), chord(ch, [3, 2, 1]), one(root - 5 >= 28 ? root - 5 : root + 7, 5), chord(ch, [3, 2, 1])); }); return hands(o, [], L); } }
   );
   EX.forEach(e => { e.inst = 'keys'; });
+  { const e = EX.find(x => x.id === 'k-arp'); if (e) e.chordName = o => { const k = o.key || 'C'; return GH.chords.symbol(k.replace(/m$/, ''), /m$/.test(k) ? 'min' : 'maj'); }; }
   const ROUTINES = [
     { id: 'k-easy', inst: 'keys', ko: '입문 루틴', min: 10, desc: '다섯 손가락 → 하논 1번 → 전위 → 스케일 한 손씩.', steps: [['k-five', 2], ['k-hanon', 3], ['k-inv', 2], ['k-scale', 3]] },
     { id: 'k-mid', inst: 'keys', ko: '중급 루틴', min: 15, desc: '입시 기본 세트: 스케일 · 아르페지오 · 케이던스.', steps: [['k-hanon', 3], ['k-scale', 4], ['k-arp', 4], ['k-cadence', 4]] },

@@ -147,14 +147,15 @@
       /* 줄마다 보표 위아래 여백 */
       const lines = [];
       for (let li = 0; li < lineCount; li++) {
-        const ss = staffs.map(s => {
+        const ss = staffs.map((s, k) => {
           const [topL, botL] = CLEF_LINES[s.clef] || CLEF_LINES.treble;
           let hi = topL, lo = botL, hasFg = false, hasLy = false, hasSt = false;
           s.voices.forEach(v => v.slice(li * perLine, (li + 1) * perLine).forEach(m => m.forEach(n => { (n.__steps || []).forEach(st => { hi = Math.max(hi, st); lo = Math.min(lo, st); }); if (n.__fg != null && n.__fg !== '') hasFg = true; if (n.__lyric) hasLy = true; if (n.__st) hasSt = true; })));
           const above = (hi - topL) * 5, below = (botL - lo) * 5;
           const drum = s.clef === 'percussion';                  /* 드럼은 위 기둥 · 아래 기둥이 보표 밖으로 나간다 */
           const tupDown = drum && s.voices.length > 1 && s.voices[1].slice(li * perLine, (li + 1) * perLine).some(m => m.__tuplets && m.__tuplets.length) ? 24 : 0;   /* 발(아래 기둥)의 셋잇단 괄호 · 3 자리 */
-          return { padTop: Math.max(24, above + 14) + (drum ? 44 : 12) + (hasFg ? 16 : 0), padBottom: Math.max(22, below + 20) + (drum ? 34 : 6) + tupDown + (hasLy ? 18 : 0) + (hasSt ? 20 : 0), above: above + (drum ? 40 : 8), below: below + (drum ? 32 : 4) + tupDown, hasFg, hasLy, hasSt };
+          const hasCh = k === 0 && !!(spec.chords && spec.chords.length);   /* 맨 위 보표 위에 코드 이름 줄 */
+          return { hasCh, padTop: Math.max(24, above + 14) + (drum ? 44 : 12) + (hasFg ? 16 : 0) + (hasCh ? 22 : 0), padBottom: Math.max(22, below + 20) + (drum ? 34 : 6) + tupDown + (hasLy ? 18 : 0) + (hasSt ? 20 : 0), above: above + (drum ? 40 : 8), below: below + (drum ? 32 : 4) + tupDown, hasFg, hasLy, hasSt };
         });
         lines.push(ss);
       }
@@ -167,6 +168,7 @@
       const svg = div.querySelector('svg');
       const drawn = [];                                /* {n, stave, staffIdx, line} */
       const texts = [];
+      const topStave = [];
       for (let mi = 0; mi < nMeasures; mi++) {
         const line = Math.floor(mi / perLine), col = mi % perLine;
         const x = 10 + (col === 0 ? 0 : CLEF + col * MW), w = MW + (col === 0 ? CLEF : 0);
@@ -180,6 +182,7 @@
           st.setContext(ctx).draw();
           return st;
         });
+        topStave[mi] = staves[0];
         if (col === 0 && staves.length > 1) {
           try { new VF.StaveConnector(staves[0], staves[staves.length - 1]).setType(VF.StaveConnector.type.BRACE).setContext(ctx).draw(); new VF.StaveConnector(staves[0], staves[staves.length - 1]).setType(VF.StaveConnector.type.SINGLE_LEFT).setContext(ctx).draw(); } catch (e) { /* ignore */ }
         }
@@ -205,7 +208,7 @@
           av.voice.draw(ctx, av.stave);
           beams.forEach(b => b.setContext(ctx).draw());
           av.tupletObjs.forEach(t => t.setContext(ctx).draw());
-          av.notes.forEach(n => drawn.push({ n, stave: av.stave, k: av.k, line }));
+          av.notes.forEach(n => drawn.push({ n, stave: av.stave, k: av.k, line, mi }));
         });
       }
       /* 운지 (위) · 가사 (아래) · 스티킹 (아래) */
@@ -220,6 +223,16 @@
         if (n.__st && !stDone.has(k + ':' + Math.round(n.__at * 1000))) { stDone.add(k + ':' + Math.round(n.__at * 1000)); texts.push(txt(svg, cx, yb, n.__st, 'sheet-st')); }
       });
       if (spec.chordAbove) texts.forEach(t => { if (t && t.getAttribute('class') === 'sheet-ch') t.setAttribute('text-anchor', 'start'); });
+      /* 코드 이름: 코드가 바뀌는 시각의 음(맨 위 보표 먼저) 위에 */
+      const chordEls = [];
+      (spec.chords || []).forEach(c => {
+        const at = d => Math.abs(d.n.__at - c.at) < 1e-6;
+        const hit = drawn.filter(at).sort((a, b) => a.k - b.k)[0] || drawn.filter(d => d.n.__at < c.at && d.n.__at + d.n.__d > c.at + 1e-6).sort((a, b) => a.k - b.k)[0];
+        if (!hit || !svg) return;
+        const st0 = topStave[hit.mi] || hit.stave; const L0 = lines[hit.line][0];
+        const t = txt(svg, hit.n.getAbsoluteX() - 2, st0.getYForLine(0) - L0.above - 16 - (L0.hasFg ? 18 : 0), c.sym, 'sheet-chord');
+        t.setAttribute('text-anchor', 'start'); chordEls.push({ at: c.at, el: t });
+      });
       if (svg) {
         svg.setAttribute('viewBox', '0 0 ' + totalW + ' ' + (y + 4));
         svg.style.width = '100%'; svg.style.height = 'auto'; svg.style.maxWidth = Math.round(totalW * 1.25) + 'px';
@@ -242,6 +255,7 @@
           cur.forEach(e => e.classList.remove('cur')); cur = [];
           if (at == null || at < 0) return;
           cur = byAt.get(Math.round(at * 1000)) || [];
+          const c = chordEls.filter(x => x.at <= at + 1e-6).pop(); if (c) cur = cur.concat([c.el]);   /* 지금 코드 이름도 */
           cur.forEach(e => e.classList.add('cur'));
         }
       };

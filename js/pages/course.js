@@ -359,7 +359,8 @@
       let sheet = T.sheetFor(ex, B, 760, o), shownTr = 0; const view = T.viewFor(ex, B);
       const sheetBox = h('div', { class: 'tech-sheet lesson-practice-sheet' });
       const paint = () => { clear(sheetBox); sheetBox.appendChild(sheet ? sheet.el : h('p', { class: 'muted small' }, GH.render.hasVexFlow && GH.render.hasVexFlow() ? '악보를 그릴 수 없어요.' : '악보는 잠시 뒤 나타나요.')); };
-      const repaint = tr => { if (B.kind !== 'vocal' || tr === shownTr) return; shownTr = tr; sheet = T.sheetFor(ex, B, 760, o, tr); paint(); };
+      const cNow = T.chordNow(T.chordTrack(ex, B, o, 0));   /* 무슨 코드인지: 지금 코드 → 다음 */
+      const repaint = tr => { if (B.kind !== 'vocal' || tr === shownTr) return; shownTr = tr; sheet = T.sheetFor(ex, B, 760, o, tr); cNow.set(T.chordTrack(ex, B, o, tr)); paint(); };
       paint();
       let tempo = w.tempo || ex.tempo[0];
       const beats = B.seq.length ? B.seq[B.seq.length - 1].at + B.seq[B.seq.length - 1].d : 4;
@@ -369,11 +370,11 @@
       const start = () => GH.player.playSeq(B.seq, { tempo, loop: true, loopGap: gap, metronome: true, countIn: 4, sound: T.soundFor(ex, B, o),
         onCount: k => { status.textContent = ['하나', '둘', '셋', '넷'][k] || ''; },
         onPass: n => { status.textContent = ''; repaint(B.kind === 'vocal' ? B.trs[n % B.trs.length] : 0); },
-        onNote: (i, ev) => { if (sheet) sheet.highlight(i < 0 || !ev ? null : ev.at); if (view) view.highlight(i < 0 ? null : ev); },
-        onStop: () => { status.textContent = ''; repaint(0); } });
+        onNote: (i, ev) => { if (sheet) sheet.highlight(i < 0 || !ev ? null : ev.at); if (view) view.highlight(i < 0 ? null : ev); cNow.at(i < 0 || !ev ? null : ev.at); },
+        onStop: () => { status.textContent = ''; repaint(0); cNow.reset(); } });
       return h('div', { class: 'lesson-stack lesson-practice' },
         h('div', { class: 'row lesson-practice-bar' }, h('b', null, ex.ko), btn('▶ 따라 하기', start, 'primary'), stopBtn(), h('label', null, '템포 ', bpm), status),
-        sheetBox, view ? h('div', { class: 'lesson-practice-view' + (B.kind === 'drums' ? ' kit' : '') }, view.el) : null,
+        cNow.el, sheetBox, view ? h('div', { class: 'lesson-practice-view' + (B.kind === 'drums' ? ' kit' : '') }, view.el) : null,
         h('p', { class: 'muted small' }, '4박을 센 뒤 메트로놈과 함께 반복해요. ', h('a', { href: '#/technique/' + ex.inst + '/' + ex.id }, '기본기 연습에서 템포 올리기 · 다른 설정 →')));
     },
     /* 드럼 킷: 누르면 소리, 쿵 딱 쿵 딱 */

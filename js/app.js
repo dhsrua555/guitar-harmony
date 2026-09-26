@@ -121,12 +121,59 @@
     a.href = todayHref(); a.title = n ? '다음 미션: ' + n.title : '연습 도구 모음';
   }
 
+  /* ---- 내 악기(모드): 설문 · 홈 · 머리의 악기 버튼이 모두 같은 값 = 설문에서 처음 고른 세션 ---- */
+  const MODES = () => (GH.guide && GH.guide.SESSIONS) || [];
+  GH.mode = {
+    get() { const s = GH.guide && GH.guide.sessions ? GH.guide.sessions()[0] : null; return MODES().some(m => m.id === s) ? s : null; },
+    set(id, opts) {
+      const M = MODES().find(m => m.id === id); if (!M || !GH.guide) return;
+      const cur = GH.guide.sessions(); GH.guide.setProfile({ sessions: [id].concat(cur.filter(x => x !== id)) });
+      if (GH.course && GH.course.chooseSess) GH.course.chooseSess(id);
+      renderModeBtn(); closeModePop();
+      if (!opts || opts.toast !== false) toast(h('span', null, GH.icon(M.icon, { cls: 'toast-ic' }), h('b', null, '내 악기: ' + M.ko), ' · 소리 · 기초 코스 · 추천 · 백킹 트랙이 ' + M.ko + '에 맞춰졌어요'));
+      GH.events.emit('mode', id); GH.router.rerender();
+    }
+  };
+  let toastTimer = null;
+  function toast(content) {
+    let t = document.getElementById('gh-toast');
+    if (!t) { t = h('div', { id: 'gh-toast', class: 'gh-toast', role: 'status', 'aria-live': 'polite' }); document.body.appendChild(t); }
+    clear(t); t.appendChild(content); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3600);
+  }
+  GH.ui.toast = toast;
+  function renderModeBtn() {
+    const b = document.getElementById('mode-btn'); if (!b) return; clear(b);
+    const M = MODES().find(m => m.id === GH.mode.get());
+    b.appendChild(h('span', { class: 'mode-ic', 'aria-hidden': 'true' }, GH.icon(M ? M.icon : 'notes')));
+    b.appendChild(h('span', { class: 'mode-label' }, h('small', null, '내 악기'), h('b', null, M ? M.ko : '고르기')));
+    b.setAttribute('aria-label', '내 악기: ' + (M ? M.ko : '아직 안 고름') + ' (바꾸기)');
+    b.classList.toggle('unset', !M);
+  }
+  function modeChoices(onPick, cls) {
+    const cur = GH.mode.get();
+    return h('div', { class: 'mode-choices' + (cls ? ' ' + cls : '') }, MODES().map(m => h('button', { class: 'mode-choice' + (m.id === cur ? ' active' : ''), type: 'button', 'aria-pressed': m.id === cur ? 'true' : 'false', onclick: () => onPick(m.id) },
+      h('span', { class: 'mode-ic', 'aria-hidden': 'true' }, GH.icon(m.icon)), h('b', null, m.ko))));
+  }
+  function renderModePop() {
+    const pop = document.getElementById('mode-pop'); if (!pop) return; clear(pop);
+    const cur = MODES().find(m => m.id === GH.mode.get());
+    pop.appendChild(h('div', { class: 'mode-pop-head' }, h('b', null, '내 악기'), h('small', null, '고르면 사이트가 그 악기에 맞춰져요')));
+    pop.appendChild(modeChoices(id => GH.mode.set(id)));
+    if (cur) pop.appendChild(h('ul', { class: 'mode-changes' }, cur.changes.map(([k, v]) => h('li', null, h('span', null, k), v))));
+    pop.appendChild(h('p', { class: 'mode-pop-note' }, '위 메뉴(기타 · 베이스 · 키보드 · 드럼 · 보컬)는 둘러보기용이에요. 내 악기는 소리와 추천을 정해요.'));
+  }
+  function openModePop() { const pop = document.getElementById('mode-pop'), b = document.getElementById('mode-btn'); if (!pop) return; renderModePop(); pop.hidden = false; b.setAttribute('aria-expanded', 'true'); const f = pop.querySelector('.mode-choice.active') || pop.querySelector('.mode-choice'); if (f) f.focus({ preventScroll: true }); }
+  function closeModePop() { const pop = document.getElementById('mode-pop'), b = document.getElementById('mode-btn'); if (!pop || pop.hidden) return; pop.hidden = true; if (b) b.setAttribute('aria-expanded', 'false'); }
+  GH.app_modeChoices = modeChoices;
+
   /* ---- 모바일 전체 화면 메뉴 ---- */
   let menuOpen = false, menuTimer = null;
   function renderMenu() {
     const panel = document.getElementById('menu-panel'); clear(panel);
     const route = GH.router.current(); const sec = route ? sectionOf(route.path) : null;
     const inner = h('div', { class: 'menu-inner' });
+    inner.appendChild(h('div', { class: 'menu-mode' }, h('span', { class: 'menu-mode-lab' }, '내 악기'), modeChoices(id => { closeMenu(false); GH.mode.set(id); }, 'compact')));
     SECTIONS.forEach((s, i) => inner.appendChild(h('div', { class: 'menu-sec' + (sec === s.id ? ' active' : ''), style: '--i:' + i },
       h('a', { class: 'menu-big', href: '#' + s.path }, h('span', { class: 'menu-ic menu-' + s.color }, GH.icon(s.icon)), h('span', { class: 'menu-label' }, s.label), h('span', { class: 'menu-en', 'aria-hidden': 'true' }, s.en)),
       s.items.length ? h('div', { class: 'menu-items' }, s.items.map(([p, label]) => h('a', { href: '#' + p, class: route && (route.path === p || route.path.startsWith(p + '/')) ? 'active' : '' }, label))) : null)));
@@ -397,6 +444,10 @@
     const toolsBtn = document.getElementById('tools-btn');
     if (toolsBtn) toolsBtn.addEventListener('click', () => { const on = document.body.classList.toggle('tools-open'); toolsBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); if (on) document.getElementById('search-input').focus(); });
     GH.events.on('guide', renderHangTab);
+    renderModeBtn(); GH.events.on('guide', renderModeBtn);
+    const modeBtn = document.getElementById('mode-btn');
+    if (modeBtn) modeBtn.addEventListener('click', e => { e.stopPropagation(); const pop = document.getElementById('mode-pop'); if (pop.hidden) openModePop(); else closeModePop(); });
+    document.addEventListener('click', e => { const pop = document.getElementById('mode-pop'); if (pop && !pop.hidden && !pop.contains(e.target) && e.target !== modeBtn) closeModePop(); });
     document.getElementById('settings-btn').addEventListener('click', openSettings);
     document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
     const back = document.getElementById('back-btn');
@@ -415,6 +466,7 @@
       const settingsPanel = document.getElementById('settings-panel');
       if (e.key === 'Escape' && !settingsPanel.hidden) { closeSettings(); return; }
       if (e.key === 'Escape' && menuOpen) { closeMenu(); return; }
+      if (e.key === 'Escape' && !document.getElementById('mode-pop').hidden) { closeModePop(); document.getElementById('mode-btn').focus(); return; }
       if (e.key === 'Tab' && !settingsPanel.hidden) {
         const focusable = Array.from(settingsPanel.querySelectorAll('button, select, input, a[href], [tabindex]:not([tabindex="-1"])')).filter(x => !x.disabled && !x.hidden);
         if (focusable.length) {

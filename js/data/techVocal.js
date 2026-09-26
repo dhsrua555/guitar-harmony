@@ -106,7 +106,7 @@
       goal: '도-미-솔, 레-파-라, 미-솔-시, 파-라-도 … 음계 위의 3화음을 차례로. 화성 청음 · 시창의 기초예요.',
       how: ['세 음을 부르고 한 박 쉬며 다음 화음의 첫 음을 미리 떠올려요.', '메이저(1 · 4 · 5도)와 마이너(2 · 3 · 6도) 화음의 색 차이를 느껴요.'],
       tips: ['레-파-라처럼 마이너 3화음은 첫 3도가 좁아요.'],
-      gen: () => [].concat(...[1, 2, 3, 4, 5].map(n => seq([n, n + 2, n + 4], 1).concat([rest(1)]))) },
+      gen: () => [].concat(...[1, 2, 3, 4, 5].map(n => seq([n, n + 2, n + 4], 1).map((x, i) => i ? x : Object.assign(x, { chd: [sd(n), n === 2 || n === 3 ? 'min' : 'maj'] })).concat([rest(1)]))) },
     { id: 'v-sight1', cat: 'v-sight', level: 2, ko: '시창 1: 순차 진행 멜로디', tempo: [60, 100], opts: { voice: 'alto', steps: 0, syl: 'solfa', guide: 'off' },
       goal: '한 음씩 이웃한 음으로 움직이는 네 마디 멜로디를 악보만 보고 불러요. 피아노 가이드는 꺼 두고 첫 화음만 들어요.',
       how: ['시작 전 첫 음(도)을 머릿속으로 불러 봐요.', '다 부른 뒤 가이드를 켜고 맞았는지 확인해요.'],
@@ -151,6 +151,8 @@
   ];
   GH.data.techVoices = VOICES;
   GH.data.techCats = (GH.data.techCats || []).concat(CATS);
+  /* 으뜸화음 하나를 부르는 연습: 코드 이름 (반복마다 키가 바뀌면 이름도) */
+  [['v-liptrill', 'maj'], ['v-staccato', 'maj'], ['v-arp', 'maj'], ['v-arp7', 'maj7']].forEach(([id, q]) => { const e = EX.find(x => x.id === id); if (e) e.chordDeg = [0, q]; });
   GH.data.technique = (GH.data.technique || []).concat(EX);
   GH.data.techRoutines = (GH.data.techRoutines || []).concat(ROUTINES);
 })();

@@ -53,7 +53,9 @@
     }
     /* 줄 */
     for (let s = 1; s <= NS; s++) {
-      el.appendChild(S().path(S().line(mx(nutX), sy(s), mx(fretX(to)), sy(s), { passes: s > 3 ? 2 : 1, bow: 1.2, overshoot: 0.5, jitter: 0.4 }), 'string', { 'stroke-width': 0.9 + (s - 1) * 0.35 }));
+      /* 베이스(4줄 이하): 굵고 곧은 줄을 한 번만 긋는다 (두 번 그으면 줄이 꼬여 보인다) */
+      const bassLook = NS <= 4;
+      el.appendChild(S().path(S().line(mx(nutX), sy(s), mx(fretX(to)), sy(s), bassLook ? { passes: 1, bow: 0.25, overshoot: 0.3, jitter: 0 } : { passes: s > 3 ? 2 : 1, bow: 1.2, overshoot: 0.5, jitter: 0.4 }), 'string', { 'stroke-width': bassLook ? 1.4 + (s - 1) * 0.45 : 0.9 + (s - 1) * 0.35 }));
       if (opts.showStringNames !== false) el.appendChild(svg('text', { class: 'stringname', x: lefty ? W - 12 : 12, y: sy(s), 'text-anchor': lefty ? 'start' : 'end' }, N.noteName(tuning[NS - s] % 12, opts.pref || 'sharp')));
     }
     /* 윈도우 */
