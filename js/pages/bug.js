@@ -89,7 +89,7 @@
   const kindOf = v => KINDS.find(k => k.value === v);
   function reportText(r) {
     const k = kindOf(r.kind);
-    return ['[기타 & 화성학 버그 제보]',
+    return ['[밴드 & 화성학 버그 제보]',
       '문제 종류: ' + (k ? k.label : '안 고름'),
       '페이지: ' + (r.page || '안 적음'),
       '', '무엇이 이상했나요?', (r.what || '').trim() || '(비어 있음)',

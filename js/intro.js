@@ -18,7 +18,7 @@
       '<line class="intro-stem" x1="211" y1="108" x2="211" y2="48"/>' +
       '<path class="intro-flag" d="M211 48 C 214 62, 232 66, 230 86"/>' +
       '<circle class="intro-ball" cx="200" cy="110" r="15"/>' +
-      '</svg><div class="intro-wipe"></div><p class="intro-word">GUITAR &amp; HARMONY</p>';
+      '</svg><div class="intro-wipe"></div><p class="intro-word">BAND &amp; HARMONY</p>';
     return el;
   }
   function finish(el) {

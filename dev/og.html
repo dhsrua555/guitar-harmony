@@ -30,9 +30,9 @@
   <pattern id="gh-grain-pat" width="160" height="160" patternUnits="userSpaceOnUse"><rect width="160" height="160" filter="url(#gh-noise)"/></pattern>
 </defs></svg>
 <div class="copy">
-  <p class="eyebrow">GUITAR · HARMONY · EAR TRAINING</p>
-  <h1>기타 <span class="amp">&amp;</span><br>화성학</h1>
-  <p class="sub">보고, 듣고, 기타로 쳐 보는 화성학</p>
+  <p class="eyebrow">BAND · HARMONY · EAR TRAINING</p>
+  <h1>밴드 <span class="amp">&amp;</span><br>화성학</h1>
+  <p class="sub">보고, 듣고, 직접 연주해 보는 화성학</p>
   <div class="chips" id="chips"></div>
 </div>
 <svg class="art" id="art" viewBox="0 0 540 420"></svg>
@@ -67,7 +67,7 @@
   add('path', { d: `M${bx - 7} ${by - 9}C${bx - 3} ${by - 12} ${bx + 3} ${by - 12} ${bx + 7} ${by - 9}`, fill: 'none', stroke: '#fff', 'stroke-width': 2.2, 'stroke-linecap': 'round' });
   /* 손으로 그린 알약 모양 칩 */
   const chips = document.getElementById('chips');
-  ['코드', '스케일', '코드 진행', '음감 퀴즈', '백킹 트랙'].forEach((t, i) => {
+  ['기타', '베이스', '키보드', '드럼', '보컬'].forEach((t, i) => {
     const c = document.createElement('span'); c.className = 'chip'; c.textContent = t; chips.appendChild(c);
     requestAnimationFrame(() => {
       const w = c.offsetWidth, h = c.offsetHeight, s = S('svg', { viewBox: `0 0 ${w} ${h}` });

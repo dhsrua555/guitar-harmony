@@ -162,12 +162,12 @@
       el.appendChild(h('section', { class: 'home-hero' },
         h('div', { class: 'wrap hero-grid' },
           h('div', { class: 'hero-copy' },
-            h('span', { class: 'eyebrow' }, 'GUITAR · HARMONY · EAR TRAINING'),
-            h('h1', { class: 'hero-title' }, h('span', { class: 'ln' }, '기타로 치고,'), h('span', { class: 'ln' }, '귀로 이해하는'), h('span', { class: 'ln hot' }, '화성학')),
-            h('p', { class: 'hero-lead' }, '코드 하나부터 진행, 스케일, 음감 훈련까지. 쉬운 것은 앞에, 어려운 것은 안쪽에 두었습니다.'),
+            h('span', { class: 'eyebrow' }, 'BAND · HARMONY · EAR TRAINING'),
+            h('h1', { class: 'hero-title' }, h('span', { class: 'ln' }, '치고 부르며,'), h('span', { class: 'ln' }, '귀로 이해하는'), h('span', { class: 'ln hot' }, '화성학')),
+            h('p', { class: 'hero-lead' }, '기타 · 베이스 · 키보드 · 드럼 · 보컬 기본기부터 코드 진행, 스케일, 음감 훈련까지. 쉬운 것은 앞에, 어려운 것은 안쪽에 두었습니다.'),
             h('div', { class: 'home-search', role: 'search' }, h('span', { class: 'search-icon', 'aria-hidden': 'true' }, I('search')), input, results)),
           heroArt())));
-      el.appendChild(marquee(['CHORDS', 'SCALES', 'INTERVALS', 'PROGRESSIONS', 'EAR TRAINING', 'RHYTHM', 'LICKS', 'VOICINGS', 'MODES', 'REHARM']));
+      el.appendChild(marquee(['GUITAR', 'BASS', 'KEYS', 'DRUMS', 'VOCAL', 'CHORDS', 'SCALES', 'PROGRESSIONS', 'EAR TRAINING', 'RHYTHM', 'VOICINGS', 'MODES']));
 
       /* 맞춤 가이드 (처음 방문이면 설문 창) */
       if (GH.guide) {

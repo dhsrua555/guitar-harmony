@@ -61,7 +61,7 @@
     stamp(options.replace, !prev);
     try { m.page.render(app, Object.assign({}, m.params, { query })); }
     catch (e) { console.error(e); app.appendChild(GH.ui.notice('페이지를 그리는 중 오류가 났습니다: ' + e.message + ' ', GH.ui.h('a', { href: '#/bug' }, '버그 제보하기'))); }
-    document.title = (m.page.title ? m.page.title + ' · ' : '') + '기타 & 화성학';
+    document.title = (m.page.title ? m.page.title + ' · ' : '') + '밴드 & 화성학';
     /* 진입 모션: 다른 페이지로 옮길 때만 */
     if (!prev || prev.path !== path) { app.classList.remove('page-enter'); void app.offsetWidth; app.classList.add('page-enter'); }
     GH.events.emit('route', current);
