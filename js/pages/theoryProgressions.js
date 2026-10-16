@@ -34,7 +34,7 @@
     },
     h('div', { class: 'title' }, p.ko),
     h('div', { class: 'muted', style: 'font-size:.85rem' }, p.en),
-    h('div', { style: 'margin-top:6px' }, GH.ui.difficulty(p.level), (genre !== 'all' ? [genre].concat(p.genres.filter(g => g !== genre)) : p.genres).slice(0, 3).map(g => GH.ui.badge(GH.data.genres[g], g === genre ? 'accent' : ''))))));
+    h('div', { style: 'margin-top:6px' }, GH.ui.level(p.level), (genre !== 'all' ? [genre].concat(p.genres.filter(g => g !== genre)) : p.genres).slice(0, 3).map(g => GH.ui.badge(GH.data.genres[g], g === genre ? 'accent' : ''))))));
     el.appendChild(grid);
   }
 
@@ -73,7 +73,7 @@
     const chords = A.progressionChords(P, key);
     const tempo = state.tempo || P.tempo || 110, style = state.style || P.style || 'pop';
     const strip = A.chordStrip(chords, { link: true });
-    el.appendChild(h('div', { class: 'row', style: 'margin-bottom:8px' }, GH.ui.difficulty(P.level), P.genres.map(g => GH.ui.badge(GH.data.genres[g], 'accent')), GH.ui.badge('무드: ' + P.mood), P.symbols ? GH.ui.badge('오리지널 키 ' + N.pretty(P.key) + ' · 현재 ' + N.pretty(key)) : GH.ui.badge((P.mode === 'minor' ? N.pretty(key) + ' 마이너' : N.pretty(key) + ' 메이저') + ' 기준')));
+    el.appendChild(h('div', { class: 'row', style: 'margin-bottom:8px' }, GH.ui.level(P.level), P.genres.map(g => GH.ui.badge(GH.data.genres[g], 'accent')), GH.ui.badge('무드: ' + P.mood), P.symbols ? GH.ui.badge('오리지널 키 ' + N.pretty(P.key) + ' · 현재 ' + N.pretty(key)) : GH.ui.badge((P.mode === 'minor' ? N.pretty(key) + ' 마이너' : N.pretty(key) + ' 메이저') + ' 기준')));
     el.appendChild(h('p', null, P.desc));
 
     const voiceSets = state.vlKind === 'drop3' ? ['6-4-3-2', '5-3-2-1'] : ['6-5-4-3', '5-4-3-2', '4-3-2-1'];

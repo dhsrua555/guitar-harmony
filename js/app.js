@@ -165,7 +165,6 @@
   }
   function openModePop() { const pop = document.getElementById('mode-pop'), b = document.getElementById('mode-btn'); if (!pop) return; renderModePop(); pop.hidden = false; b.setAttribute('aria-expanded', 'true'); const f = pop.querySelector('.mode-choice.active') || pop.querySelector('.mode-choice'); if (f) f.focus({ preventScroll: true }); }
   function closeModePop() { const pop = document.getElementById('mode-pop'), b = document.getElementById('mode-btn'); if (!pop || pop.hidden) return; pop.hidden = true; if (b) b.setAttribute('aria-expanded', 'false'); }
-  GH.app_modeChoices = modeChoices;
 
   /* ---- 모바일 전체 화면 메뉴 ---- */
   let menuOpen = false, menuTimer = null;
@@ -177,8 +176,7 @@
     SECTIONS.forEach((s, i) => inner.appendChild(h('div', { class: 'menu-sec' + (sec === s.id ? ' active' : ''), style: '--i:' + i },
       h('a', { class: 'menu-big', href: '#' + s.path }, h('span', { class: 'menu-ic menu-' + s.color }, GH.icon(s.icon)), h('span', { class: 'menu-label' }, s.label), h('span', { class: 'menu-en', 'aria-hidden': 'true' }, s.en)),
       s.items.length ? h('div', { class: 'menu-items' }, s.items.map(([p, label]) => h('a', { href: '#' + p, class: route && (route.path === p || route.path.startsWith(p + '/')) ? 'active' : '' }, label))) : null)));
-    const cur = GH.state.get().key; const pref = GH.state.pref(cur);
-    const keySel = h('select', { 'aria-label': '전체 키', onchange: e => GH.state.set({ key: e.target.value }) }, N.rootList(pref).map(r => h('option', { value: r, selected: r === cur || N.pcOf(r) === N.pcOf(cur) }, N.pretty(r))));
+    const keySel = h('select', { 'aria-label': '전체 키', onchange: e => GH.state.set({ key: e.target.value }) }, keyOptions());
     inner.appendChild(h('div', { class: 'menu-foot', style: '--i:' + SECTIONS.length },
       h('a', { class: 'btn primary', href: todayHref() }, GH.icon('metronome'), '오늘의 연습'),
       h('label', { class: 'keysel' }, h('span', null, '키'), keySel),
@@ -240,7 +238,6 @@
     key() { return GH.state.get().key; },
     pref(root) { return GH.state.pref(root); },
     chordHref(root, qId) { return '#/chord/' + encodeURIComponent(root) + '/' + qId; },
-    chordLink(root, qId, text) { return h('a', { href: app.chordHref(root, qId) }, text || GH.chords.symbol(root, qId)); },
     scaleHref(id, root) { return '#/guitar/scales?scale=' + id + (root ? '&root=' + encodeURIComponent(root) : ''); },
     theoryScaleHref(id, root) { return GH.router.href('/theory/scales/' + encodeURIComponent(id), root ? { root } : null); },
     modeHref(id, root) {
@@ -413,12 +410,14 @@
     if (settingsReturnFocus && settingsReturnFocus.focus) settingsReturnFocus.focus({ preventScroll: true });
   }
 
-  /* ---- 전역 키 ---- */
+  /* ---- 전역 키 (머리의 선택 상자와 휴대폰 메뉴가 같은 목록) ---- */
+  function keyOptions() {
+    const cur = GH.state.get().key, pref = GH.state.pref(cur);
+    return N.rootList(pref).map(r => h('option', { value: r, selected: r === cur || N.pcOf(r) === N.pcOf(cur) }, N.pretty(r)));
+  }
   function renderKeySelect() {
     const sel = document.getElementById('global-key');
-    const cur = GH.state.get().key; const pref = GH.state.pref(cur);
-    clear(sel);
-    N.rootList(pref).forEach(r => { const o = h('option', { value: r }, N.pretty(r)); if (r === cur || N.pcOf(r) === N.pcOf(cur)) o.selected = true; sel.appendChild(o); });
+    clear(sel).append(...keyOptions());
     sel.onchange = () => GH.state.set({ key: sel.value });
   }
 

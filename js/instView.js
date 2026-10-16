@@ -20,7 +20,7 @@
     finder: { guitar: '/tools/finder', bass: '/bass/finder', keys: '/keys/finder', vocal: '/vocal/chords' }
   };
   const vstate = { voice: null, pattern: 'ascdesc', tempo: 100, hands: 'both', finder: new Set(), bassFrets: [null, null, null, null] };
-  const voiceId = () => { const V = GH.data.techVoices; if (V[vstate.voice]) return vstate.voice; try { const s = localStorage.getItem('gh.tech.voice'); if (V[s]) return s; } catch (e) { /* ignore */ } return 'alto'; };
+  const voiceId = () => { const V = GH.data.techVoices; if (V[vstate.voice]) return vstate.voice; const s = GH.voicePref.get(); return V[s] ? s : 'alto'; };
 
   /* ---- 같은 주제의 다른 세션 페이지로 ---- */
   function switcher(kind, cur, note) {
@@ -141,7 +141,7 @@
     let root = V.root + mod(chord.rootPc - mod(V.root, 12), 12); if (root > V.root + 5) root -= 12;
     const up = S.map(x => root + x).concat([root + 12]); const line = up.concat(up.slice(0, -1).reverse());
     const box = h('div');
-    box.appendChild(h('div', { class: 'toolbar' }, h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; try { localStorage.setItem('gh.tech.voice', v); } catch (e) { /* ignore */ } GH.router.rerender(); } })), solfaSelect()));
+    box.appendChild(h('div', { class: 'toolbar' }, h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; GH.voicePref.set(v); GH.router.rerender(); } })), solfaSelect()));
     const nameOf = m => { const n = chord.notes.find(x => x.pc === mod(m, 12)); return n ? n.name : N.noteName(mod(m, 12), pref); };
     const events = line.map((m, i) => ({ at: i, d: 1, m: [m], names: [nameOf(m)], lyric: lyricOf(nameOf(m), m - root) }));
     const sh = GH.render.sheet && GH.render.sheet({ kind: 'line', clef: V.clef, written: V.clef === 'treble8vb' ? 12 : 0, pref, events, width: 700 });
@@ -227,7 +227,7 @@
       h('label', null, '패턴', select({ options: pats, value: vstate.pattern, onChange: v => { vstate.pattern = v; GH.router.rerender(); } })),
       inst === 'keys' ? h('label', null, '손', select({ options: [{ value: 'rh', label: '오른손' }, { value: 'lh', label: '왼손' }, { value: 'both', label: '양손' }], value: vstate.hands, onChange: v => { vstate.hands = v; GH.router.rerender(); } })) : null,
       inst === 'vocal' ? solfaSelect() : null,
-      inst === 'vocal' ? h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; try { localStorage.setItem('gh.tech.voice', v); } catch (e) { /* ignore */ } GH.router.rerender(); } })) : null,
+      inst === 'vocal' ? h('label', null, '음역', select({ options: Object.entries(GH.data.techVoices).map(([v, x]) => ({ value: v, label: x.ko })), value: voiceId(), onChange: v => { vstate.voice = v; GH.voicePref.set(v); GH.router.rerender(); } })) : null,
       h('label', null, '템포', tempoIn));
     el.appendChild(tb);
     el.appendChild(h('div', { class: 'card' }, h('div', { class: 'row' }, h('span', { class: 'symbol-big', style: 'font-size:1.4rem' }, N.pretty(root) + ' ' + sc.ko), h('span', { class: 'muted' }, sc.en)),

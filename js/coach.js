@@ -235,14 +235,15 @@
     const route = GH.router.current();
     const mission = GH.guide && GH.guide.missionFor ? GH.guide.missionFor(route) : null;
     const next = GH.guide && GH.guide.next ? GH.guide.next() : null;
+    const todo = mission && !GH.guide.isDone(mission.id);   /* 이 페이지의 미션이 아직 안 끝났다 */
     cur.i = cur.steps.length; cur.target = null;
     ring.classList.remove('on');
     GH.ui.clear(bubble);
     bubble.appendChild(h('div', { class: 'coach-top' }, h('b', null, '잘했어요!'), h('button', { class: 'iconbtn coach-x', type: 'button', 'aria-label': '닫기', onclick: stop }, GH.icon('close'))));
-    bubble.appendChild(h('p', null, mission && !GH.guide.isDone(mission.id) ? '이 페이지에서 할 일을 모두 해 봤어요. 미션을 완료로 표시할까요?' : '이 페이지에서 할 일을 모두 해 봤어요. 한 번 더 해 보거나 다음으로 넘어가세요.'));
+    bubble.appendChild(h('p', null, todo ? '이 페이지에서 할 일을 모두 해 봤어요. 미션을 완료로 표시할까요?' : '이 페이지에서 할 일을 모두 해 봤어요. 한 번 더 해 보거나 다음으로 넘어가세요.'));
     bubble.appendChild(h('div', { class: 'coach-actions' },
-      mission && !GH.guide.isDone(mission.id) ? h('button', { class: 'btn small primary', type: 'button', onclick: () => { GH.guide.toggleDone(mission.id, true); GH.guide.decorate(GH.router.current()); finish(); } }, GH.icon('check'), '미션 완료') : null,
-      next && (!mission || next.id !== mission.id) ? h('a', { class: 'btn small' + (mission && !GH.guide.isDone(mission.id) ? '' : ' primary'), href: GH.guide.missionHref(next, { coach: 1 }), onclick: stop }, '다음: ' + next.title + ' →') : null,
+      todo ? h('button', { class: 'btn small primary', type: 'button', onclick: () => { GH.guide.toggleDone(mission.id, true); GH.guide.decorate(GH.router.current()); finish(); } }, GH.icon('check'), '미션 완료') : null,
+      next && (!mission || next.id !== mission.id) ? h('a', { class: 'btn small' + (todo ? '' : ' primary'), href: GH.guide.missionHref(next, { coach: 1 }), onclick: stop }, '다음: ' + next.title + ' →') : null,
       h('button', { class: 'btn small ghost', type: 'button', onclick: () => { cur.i = 0; show(true); } }, '처음부터 다시')));
     placeBubble(null); bubble.classList.add('on');
   }
@@ -336,11 +337,11 @@
   function clearNudge() { clearTimeout(nudgeTimer); if (nudgeTip) { nudgeTip.remove(); nudgeTip = null; } if (fab) fab.classList.remove('nudge'); }
   function nudge(route) {
     const now = GH.router.current(); if (!now || now.path !== route.path) return;
-    const seen = (() => { try { return JSON.parse(localStorage.getItem('gh.coach.v1')) || {}; } catch (e) { return {}; } })();
+    const seen = GH.store.get('gh.coach.v1', {});
     const key = keyFor(route); if (!key || seen[key] || cur) return;
     const prof = GH.guide && GH.guide.profile ? GH.guide.profile() : {};
     if (prof.level === 'player' || prof.level === 'advanced') return; /* 익숙한 사람에게는 말풍선을 띄우지 않는다 */
-    seen[key] = 1; try { localStorage.setItem('gh.coach.v1', JSON.stringify(seen)); } catch (e) { /* ignore */ }
+    seen[key] = 1; GH.store.set('gh.coach.v1', seen);
     clearNudge(); fab.classList.add('nudge');
     const tip = nudgeTip = h('div', { class: 'coach-nudge', role: 'status' }, '처음이세요? 여기를 누르면 할 일을 하나씩 짚어 드려요');
     document.body.appendChild(tip);

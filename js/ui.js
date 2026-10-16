@@ -83,7 +83,6 @@
     wrap.setValue = v => { value = multi ? new Set(v) : v; render(); };
     return wrap;
   }
-  function button(label, onClick, cls) { return h('button', { class: 'btn ' + (cls || ''), type: 'button', onclick: onClick }, label); }
   function section(title, ...content) { return h('section', { class: 'section' }, title ? h('h2', null, title) : null, content); }
   function table(headers, rows, opts) {
     const t = h('table', { class: 'table' },
@@ -104,7 +103,6 @@
   function kv(pairs) {
     return h('dl', { class: 'kv' }, pairs.filter(p => p && p[1] != null && p[1] !== '').map(p => [h('dt', null, p[0]), h('dd', null, p[1])]));
   }
-  function link(href, text, cls) { return h('a', { href, class: cls }, text); }
   function tabs(items, initial, onChange) {
     const bar = h('div', { class: 'tabs', role: 'tablist' });
     let active = initial || (items[0] && items[0].id);
@@ -128,18 +126,20 @@
     const L = LEVELS[n]; if (!L) return null;
     return h('span', { class: 'lvl lv' + n, title: '난이도 ' + L.dyn + ' · ' + L.ko + ' (5단계 중 ' + n + '단계)' }, h('i', { class: 'dyn', 'aria-hidden': 'true' }, L.dyn), L.ko);
   }
-  function difficulty(n) { return level(n); }
-  function noteDifficulty(n) { return h('span', { class: 'difficulty', title: '난이도 ' + n + '/5', 'aria-label': '난이도 ' + n + '/5' }, [1, 2, 3, 4, 5].map(i => GH.icon('note', { cls: i <= n ? 'on' : 'off' }))); }
+
+  /* ---- 저장소 (이 브라우저에만). 막혀 있어도(사생활 보호 창 등) 사이트는 그대로 돌아간다.
+     get · set 은 JSON 값, raw · setRaw 는 글자 그대로 ---- */
+  const store = {
+    get(key, fallback) { try { const v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; } catch (e) { return fallback; } },
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 저장 안 됨 */ } },
+    raw(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+    setRaw(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* 저장 안 됨 */ } },
+    remove(key) { try { localStorage.removeItem(key); } catch (e) { /* 저장 안 됨 */ } }
+  };
 
   /* ---- 유틸 ---- */
   const util = {
-    clamp: (v, a, b) => Math.max(a, Math.min(b, v)),
-    uniq: arr => [...new Set(arr)],
-    mod: (n, m) => ((n % m) + m) % m,
-    debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; },
     groupBy(arr, fn) { const o = {}; arr.forEach(x => { const k = fn(x); (o[k] = o[k] || []).push(x); }); return o; },
-    range(a, b) { const r = []; for (let i = a; i < b; i++) r.push(i); return r; },
-    shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; },
     pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; },
     qs(obj) { return Object.entries(obj).filter(([, v]) => v != null && v !== '').map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&'); }
   };
@@ -189,7 +189,8 @@
     return wrap;
   }
 
-  GH.ui = { h, svg, clear, select, chips, button, section, table, badge, empty, notice, callout, kv, link, tabs, legend, pills, difficulty, level, LEVELS, noteDifficulty, numberInput, rangeNumber };
+  GH.ui = { h, svg, clear, select, chips, section, table, badge, empty, notice, callout, kv, tabs, legend, pills, level, LEVELS, numberInput, rangeNumber };
   GH.events = events;
   GH.util = util;
+  GH.store = store;
 })();

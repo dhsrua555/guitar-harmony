@@ -5,7 +5,6 @@
   const GH = window.GH = window.GH || {};
   GH.data = GH.data || {};
   const TUN = [28, 33, 38, 43];                              /* 4번 줄(E1) → 1번 줄(G2) */
-  const midiOf = (s, f) => TUN[4 - s] + f;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const nt = (s, f, fg, extra) => Object.assign({ s, f, fg }, extra || {});
   const N = () => GH.notes;

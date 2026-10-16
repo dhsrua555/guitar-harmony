@@ -150,6 +150,8 @@
     { id: 'v-hard', inst: 'vocal', ko: '고급 루틴', min: 20, desc: '반음계 · 화음 · 블루스 · 런까지.', steps: [['v-liptrill', 2], ['v-nine', 3], ['v-chrom', 4], ['v-harmony', 4], ['v-blues', 3], ['v-run', 4]] }
   ];
   GH.data.techVoices = VOICES;
+  /* 고른 음역 (보컬 기본기 · 보컬 페이지 · 레슨의 음역 찾기가 함께 쓴다) */
+  GH.voicePref = { get: () => GH.store.raw('gh.tech.voice'), set: v => GH.store.setRaw('gh.tech.voice', v) };
   GH.data.techCats = (GH.data.techCats || []).concat(CATS);
   /* 으뜸화음 하나를 부르는 연습: 코드 이름 (반복마다 키가 바뀌면 이름도) */
   [['v-liptrill', 'maj'], ['v-staccato', 'maj'], ['v-arp', 'maj'], ['v-arp7', 'maj7']].forEach(([id, q]) => { const e = EX.find(x => x.id === id); if (e) e.chordDeg = [0, q]; });

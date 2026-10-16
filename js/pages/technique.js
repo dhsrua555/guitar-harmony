@@ -7,7 +7,6 @@
   const RH = { '2': { d: 2, ko: '2분음표', n: 0.5 }, '4': { d: 1, ko: '4분음표', n: 1 }, '8': { d: 0.5, ko: '8분음표', n: 2 }, '8t': { d: 1 / 3, ko: '셋잇단', n: 3 }, '16': { d: 0.25, ko: '16분음표', n: 4 } };
   const PPB = { 0.5: 36, 1: 36, 2: 46, 3: 60, 4: 76 };           /* TAB 박당 px: 음이 많을수록 넓게 */
   const FRET_RANGE = { 'chroma-shift': [1, 9], stretch: [4, 12], 'b-simandl': [1, 9] };
-  const VOICE_KEY = 'gh.tech.voice';
   const STD = () => GH.voicings.STD, BASS = () => GH.data.techBassTuning;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const instOf = id => GH.data.techInst.find(x => x.id === id);
@@ -19,7 +18,6 @@
   const scaleTempo = (bpm, from, to) => clamp(Math.round(bpm * nOf(from) / nOf(to)), 30, 240);
   const SOLFA = ['도', '도♯', '레', '미♭', '미', '파', '파♯', '솔', '솔♯', '라', '시♭', '시'];   /* 이동도 */
   const START_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
-  const PLUCK_KO = { d: '⊓ 다운', u: 'V 업', i: 'i 검지', m: 'm 중지' };
   const RULES = {
     guitar: ['힘을 빼요. 소리가 날 만큼만 누르면 충분해요.', '템포는 틀리지 않고 칠 수 있는 만큼만. 자꾸 틀리면 5~10 BPM 내려요.', '손이 아프거나 저리면 바로 멈추고 쉬어요. 짧게 자주가 길게 한 번보다 좋아요.'],
     bass: ['굳은살이 생길 때까지는 10분씩 나눠서 연습해요.', '오른손은 검지 · 중지 교대를 끝까지 지켜요. 한 손가락만 쓰는 습관이 가장 흔한 실수예요.', '손목이 꺾이지 않게 스트랩 높이를 맞추세요.'],
@@ -30,9 +28,6 @@
 
   /* ---- 마지막으로 쓴 템포 · 펼친 분류 (이 브라우저에만, 점수나 기록은 남기지 않는다) ---- */
   const TEMPO_KEY = 'gh.tech.tempo', OPEN_KEY = 'gh.tech.open';
-  const loadJSON = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } };
-  const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } };
-  const savedVoice = () => { try { return localStorage.getItem(VOICE_KEY); } catch (e) { return null; } };
 
   /* ---- 옵션 ---- */
   function rhOptions(ex) {
@@ -57,7 +52,7 @@
     if (o.kick != null && GH.data.techKickVariants[qy.kick]) o.kick = qy.kick;
     if (o.q != null && ['maj', 'min', 'maj7', 'm7', '7', 'm7b5'].includes(qy.q)) o.q = qy.q;
     if (ex.inst === 'vocal') {
-      const V = GH.data.techVoices; const sv = savedVoice();
+      const V = GH.data.techVoices; const sv = GH.voicePref.get();
       o.voice = V[qy.voice] ? qy.voice : V[sv] ? sv : o.voice;
       if (/^[0-8]$/.test(qy.steps || '')) o.steps = int(qy.steps);
       /* 가사: fixed 고정도 (기본) · solfa 이동도 · vowel 모음 */
@@ -325,8 +320,8 @@
       }
       /* 분류별 연습: 접었다 폈다 */
       const cats = GH.data.techCats.filter(c => c.inst === I.id && (!only || only.includes(c.id)));
-      const openAll = loadJSON(OPEN_KEY); const opened = only ? cats.map(c => c.id) : openAll[I.id] || [cats[0] && cats[0].id];
-      const remember = () => { if (only) return; openAll[I.id] = Array.from(el.querySelectorAll('details.tech-cat')).filter(d => d.open).map(d => d.dataset.cat); saveJSON(OPEN_KEY, openAll); };
+      const openAll = GH.store.get(OPEN_KEY, {}); const opened = only ? cats.map(c => c.id) : openAll[I.id] || [cats[0] && cats[0].id];
+      const remember = () => { if (only) return; openAll[I.id] = Array.from(el.querySelectorAll('details.tech-cat')).filter(d => d.open).map(d => d.dataset.cat); GH.store.set(OPEN_KEY, openAll); };
       const total = GH.data.technique.filter(e => e.inst === I.id && cats.some(c => c.id === e.cat)).length;
       el.appendChild(h('div', { class: 'tech-cats-bar' }, h('h2', null, '연습 목록 ', h('span', { class: 'muted' }, total + '가지')),
         h('div', { class: 'row', style: 'gap:6px' }, h('button', { class: 'btn small', type: 'button', onclick: () => { el.querySelectorAll('details.tech-cat').forEach(d => { d.open = true; }); remember(); } }, '모두 펼치기'), h('button', { class: 'btn small', type: 'button', onclick: () => { el.querySelectorAll('details.tech-cat').forEach(d => { d.open = false; }); remember(); } }, '모두 접기'))));
@@ -353,7 +348,7 @@
 
   /* ============ 연습 화면 ============ */
   const play = { metronome: true, loop: true, countIn: true, trainer: false, every: 2, step: 4, view: 'both' };
-  const tempos = loadJSON(TEMPO_KEY);                         /* 연습 id → { bpm, rh, max } (마지막으로 쓴 템포에서 다시 시작) */
+  const tempos = GH.store.get(TEMPO_KEY, {});                         /* 연습 id → { bpm, rh, max } (마지막으로 쓴 템포에서 다시 시작) */
   GH.pages['/technique/:inst/:id'] = {
     title: '기본기 연습',
     staff: true,
@@ -416,7 +411,7 @@
       if (o.hands != null) lab('손', select({ options: [{ value: 'rh', label: '오른손만' }, { value: 'lh', label: '왼손만' }, { value: 'both', label: '양손' }], value: o.hands, onChange: v => setQ({ hands: v }) }));
       if (o.oct != null) lab('범위', select({ options: [{ value: 1, label: '1옥타브' }, { value: 2, label: '2옥타브 (원래 하논)' }], value: o.oct, onChange: v => setQ({ oct: v }) }));
       if (ex.inst === 'vocal') {
-        lab('음역', select({ options: Object.entries(GH.data.techVoices).map(([v, V]) => ({ value: v, label: V.ko })), value: o.voice, onChange: v => { try { localStorage.setItem(VOICE_KEY, v); } catch (e) { /* ignore */ } setQ({ voice: v }); } }));
+        lab('음역', select({ options: Object.entries(GH.data.techVoices).map(([v, V]) => ({ value: v, label: V.ko })), value: o.voice, onChange: v => { GH.voicePref.set(v); setQ({ voice: v }); } }));
         lab('시작 키', select({ options: START_KEYS.map(k => ({ value: k, label: N.pretty(k) + ' 메이저' })), value: o.start, onChange: v => setQ({ start: v }) }));
         lab('반음씩 올리기', GH.ui.numberInput({ value: o.steps, min: 0, max: 8, suffix: '번', label: '반음씩 올리는 횟수', onChange: v => setQ({ steps: v }) }));
         if (o.syl != null) lab('가사', select({ options: [{ value: 'fixed', label: '계이름 · 고정도 (C = 도)' }, { value: 'solfa', label: '계이름 · 이동도 (으뜸음 = 도)' }, { value: 'vowel', label: '모음 "아"' }], value: o.syl, onChange: v => { if (v !== 'vowel') N.solfa.set(v === 'solfa' ? 'movable' : 'fixed'); setQ({ syl: v }); } }));
@@ -439,7 +434,7 @@
       const tabR = B.kind === 'fretted' ? tabRows(B.notes, o.rh, width, B.NS) : null;
       const view = viewFor(ex, B);
       const status = h('div', { class: 'tech-status', role: 'status', 'aria-live': 'polite' }, '▶ 시작을 누르면 “하나 둘 셋 넷” 뒤에 시작해요.');
-      const keepTempo = () => saveJSON(TEMPO_KEY, tempos);
+      const keepTempo = () => GH.store.set(TEMPO_KEY, tempos);
       const tempoIn = GH.ui.rangeNumber({ value: t.bpm, min: 30, max: 240, suffix: 'BPM', label: '템포', onInput: v => { t.bpm = v; keepTempo(); } });
       const gap = Math.round((Math.ceil(beats / 4 - 1e-6) * 4 - beats) * 1000) / 1000;
       const keyTxt = tr => N.pretty(B.keyOf(tr)) + ' 메이저' + (tr ? ' (반음 +' + tr + ')' : ' (처음 키)');

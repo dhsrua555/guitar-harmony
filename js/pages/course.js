@@ -7,9 +7,9 @@
   const { h, clear, select, callout } = GH.ui; const N = GH.notes;
   const KEY = 'gh.course.v1';
 
-  let store = { done: {} };
-  try { const raw = JSON.parse(localStorage.getItem(KEY)); if (raw && raw.done) store = raw; } catch (e) { /* ignore */ }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* ignore */ } };
+  let progress = GH.store.get(KEY, null);
+  if (!progress || !progress.done) progress = { done: {} };
+  const save = () => GH.store.set(KEY, progress);
 
   /* ---- 세션별 코스: 기타는 lessons.js 그대로, 다른 세션은 장 구성 + 덮어쓰기 (courseSessions.js) ---- */
   const SESS_IDS = ['guitar', 'bass', 'keys', 'drums', 'vocal'];
@@ -27,7 +27,7 @@
   }
   function indexOf(sess) { if (!IDX[sess]) { IDX[sess] = []; chaptersFor(sess).forEach(ch => ch.lessons.forEach((l, i) => IDX[sess].push({ ch, l, i }))); } return IDX[sess]; }
   const inCourse = (sess, id) => indexOf(sess).some(x => x.l.id === id);
-  const savedSess = () => { try { const v = localStorage.getItem(SESS_KEY); return SESS_IDS.includes(v) ? v : null; } catch (e) { return null; } };
+  const savedSess = () => { const v = GH.store.raw(SESS_KEY); return SESS_IDS.includes(v) ? v : null; };
   /* 지금 배우는 세션: 주소의 s → 코스에서 고른 세션 → 설문에서 처음 고른 세션 → 기타 */
   function currentSess(q) {
     if (q && SESS_IDS.includes(q.s)) return q.s;
@@ -35,9 +35,9 @@
     const p = GH.guide && GH.guide.sessions ? GH.guide.sessions()[0] : null;
     return SESS_IDS.includes(p) ? p : 'guitar';
   }
-  const chooseSess = s => { try { localStorage.setItem(SESS_KEY, s); } catch (e) { /* ignore */ } };
+  const chooseSess = s => GH.store.setRaw(SESS_KEY, s);
   const find = (id, sess) => indexOf(sess || 'guitar').findIndex(x => x.l.id === id);
-  const isDone = id => !!store.done[id];
+  const isDone = id => !!progress.done[id];
   const chapterDone = ch => ch.lessons.filter(l => isDone(l.id)).length;
   const nextLesson = sess => { const x = indexOf(sess || currentSess()).find(x => !isDone(x.l.id)); return x ? x.l : null; };
   const href = (id, sess) => '#/learn/' + id + (sess && sess !== 'guitar' ? '?s=' + sess : '');
@@ -48,8 +48,8 @@
     SESS_IDS.forEach(s => chaptersFor(s).forEach(ch => { const id = missionIdOf(s, ch); if (ch.lessons.every(l => isDone(l.id)) && !GH.guide.isDone(id)) GH.guide.toggleDone(id, true); }));
   }
   function setDone(id, on) {
-    if (on === false) delete store.done[id]; else if (!store.done[id]) store.done[id] = Date.now(); else return;
-    save(); syncGuide(); GH.events.emit('course', store);
+    if (on === false) delete progress.done[id]; else if (!progress.done[id]) progress.done[id] = Date.now(); else return;
+    save(); syncGuide(); GH.events.emit('course', progress);
   }
   const rich = text => String(text).split('**').map((part, i) => i % 2 ? h('b', null, part) : part);
   const pad = n => String(n).padStart(2, '0');
@@ -424,7 +424,7 @@
         grid.querySelectorAll('button').forEach(b => { const m = Number(b.dataset.m); b.classList.toggle('pick', m === low || m === high); b.classList.toggle('in', low != null && high != null && m > low && m < high); });
         if (low == null || high == null) { out.textContent = mode === 'low' ? '편하게 나는 가장 낮은 음을 눌러 주세요.' : '이번엔 편하게 나는 가장 높은 음을 눌러 주세요.'; return; }
         const mid = (low + high) / 2; const v = VOICE.slice().sort((a, b) => Math.abs(a[1] - mid) - Math.abs(b[1] - mid))[0];
-        try { localStorage.setItem('gh.tech.voice', v[0]); } catch (e) { /* ignore */ }
+        GH.voicePref.set(v[0]);
         out.textContent = '내 음역: ' + nm(low) + ' ~ ' + nm(high) + ' (반음 ' + (high - low) + '개). 가장 가까운 음역은 ' + v[2] + ' — 보컬 기본기 연습의 음역으로 저장했어요.';
       };
       notes.forEach(m => grid.appendChild(h('button', { class: 'pill range-note', type: 'button', 'data-m': m, onclick: () => { one(m); if (mode === 'low') { low = m; if (high != null && high < low) high = null; mode = 'high'; setMode(); } else { high = m; if (low != null && high < low) { const t = low; low = high; high = t; } } paint(); } }, N.midiName(m))));
@@ -570,7 +570,7 @@
       h('p', null, h('b', null, '처음이라면 '), '이 페이지는 전체를 모아 둔 자료실이에요. 기초 코스 ' + ch.n + '장 「' + ch.title + '」에서 한 장씩 먼저 익히면 훨씬 쉬워요.'),
       h('a', { class: 'btn small primary', href: href(l.id, sess) }, l.title.split(':')[0] + ' 레슨 →'));
   }
-  function resetCourse() { store = { done: {} }; save(); GH.events.emit('course', store); }
+  function resetCourse() { progress = { done: {} }; save(); GH.events.emit('course', progress); }
   GH.course = { overview, hint, next: nextLesson, isDone, setDone, reset: resetCourse, WIDGETS, SESSIONS: SESS_IDS, meta: META, currentSess, chooseSess, missionIdOf,
     lessons: () => Object.keys(BASE).map(id => BASE[id]), chapters: sess => chaptersFor(sess || 'guitar'), index: sess => indexOf(sess || 'guitar'),
     href: (id, sess) => href(id, sess) };

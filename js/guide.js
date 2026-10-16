@@ -175,8 +175,9 @@
 
   /* ---- 저장 ---- */
   let data = { profile: { level: null, goals: [], sessions: [], onboarded: false, skipped: false, showGuides: true }, done: {}, visits: {} };
-  try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); data = Object.assign(data, d, { profile: Object.assign(data.profile, d.profile || {}) }); } } catch (e) { /* 저장소를 못 쓰는 환경 */ }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* ignore */ } };
+  const saved = GH.store.get(KEY, null);
+  if (saved) data = Object.assign(data, saved, { profile: Object.assign(data.profile, saved.profile || {}) });
+  const save = () => GH.store.set(KEY, data);
   const profile = () => data.profile;
   function setProfile(patch) { Object.assign(data.profile, patch); save(); GH.events.emit('guide', data); }
   const levelIdx = () => Math.max(0, LEVELS.findIndex(l => l.id === data.profile.level));

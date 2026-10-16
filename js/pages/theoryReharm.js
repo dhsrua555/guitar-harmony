@@ -19,7 +19,7 @@
         h('div', { class: 'title' }, r.ko),
         h('div', { class: 'muted', style: 'font-size:.85rem' }, r.en),
         h('p', { style: 'margin:.55rem 0 0' }, r.summary),
-        h('div', { style: 'margin-top:6px' }, GH.ui.difficulty(r.level)))));
+        h('div', { style: 'margin-top:6px' }, GH.ui.level(r.level)))));
       el.appendChild(section(label, grid));
     });
   }
@@ -41,7 +41,7 @@
     el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/theory/reharm' }, '리하모니제이션'), ' › ', GH.data.reharmCategories[R.category]));
     el.appendChild(h('h1', null, R.ko));
     el.appendChild(h('p', { class: 'muted' }, R.en));
-    el.appendChild(h('div', { class: 'row' }, GH.ui.difficulty(R.level), GH.ui.badge(GH.data.reharmCategories[R.category], 'accent'), GH.ui.badge('키 ' + N.pretty(key))));
+    el.appendChild(h('div', { class: 'row' }, GH.ui.level(R.level), GH.ui.badge(GH.data.reharmCategories[R.category], 'accent'), GH.ui.badge('키 ' + N.pretty(key))));
     el.appendChild(h('p', null, h('b', null, R.summary)));
     el.appendChild(h('p', null, R.desc));
     el.appendChild(h('p', null, h('b', null, '적용 포인트: '), R.rule));

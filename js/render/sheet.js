@@ -7,11 +7,8 @@
 (function () {
   'use strict';
   const GH = window.GH = window.GH || {};
-  const N = GH.notes;
   GH.render = GH.render || {};
   const EPS = 1e-4;
-  const ACC_SEMI = { '': 0, '#': 1, '##': 2, 'b': -1, 'bb': -2 };
-  const LETTERS = 'cdefgab';
   const CODE = [[4, 'w'], [3, 'hd'], [2, 'h'], [1.5, 'qd'], [1, 'q'], [0.75, '8d'], [0.5, '8'], [0.25, '16']];
   const codeOf = d => { const c = CODE.find(([v]) => Math.abs(v - d) < EPS); return c ? c[1] : Math.abs(d - 1 / 3) < EPS ? '8' : Math.abs(d - 2 / 3) < EPS ? 'q' : '16'; };
   const isTrip = d => Math.abs(d - 1 / 3) < EPS || Math.abs(d - 2 / 3) < EPS;
@@ -26,14 +23,7 @@
     }
     return out;
   }
-  function keyOf(midi, pref, name) {
-    let letter, acc;
-    const p = name ? N.parseNote(name) : null;
-    if (p && N.mod(p.pc - midi, 12) === 0 && Math.abs(p.acc) <= 2) { letter = p.letter; acc = p.acc > 0 ? '#'.repeat(p.acc) : 'b'.repeat(-p.acc); }
-    else { const nm = N.noteName(N.mod(midi, 12), pref); letter = nm.charAt(0); acc = nm.slice(1); }
-    const oct = Math.floor((midi - ACC_SEMI[acc]) / 12) - 1;
-    return { key: letter.toLowerCase() + acc + '/' + oct, acc: acc || null, step: oct * 7 + LETTERS.indexOf(letter.toLowerCase()) };
-  }
+  const keyOf = GH.render.vfKey;   /* midi → VexFlow 키 · 임시표 · 음 높이 (staff.js) */
   const CLEF_LINES = { treble: [38, 30], bass: [26, 18], percussion: [38, 30] }; /* 맨 윗줄 · 맨 아랫줄 음 높이 */
 
   /* 선율 한 줄 → 마디별 VexFlow 음표 */

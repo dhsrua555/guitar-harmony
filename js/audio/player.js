@@ -18,6 +18,10 @@
     GH.events.emit('player-stop');
   }
   function begin(ctl) { stop(); current = ctl; A.context(); GH.events.emit('player-start'); return ctl; }
+  /* 이 재생이 아직 이어지고 있으면 at 초에 끝낸다 (그사이 다른 재생이 시작됐으면 그대로 둔다) */
+  const endAt = (ctl, at) => schedule(() => { if (current === ctl) stop(); }, at);
+  /* 멈추면 '지금 연주 중' 표시를 지우고(-1) 호출한 쪽에 알린다 */
+  const stopper = (opts, onItem) => () => { if (opts[onItem]) opts[onItem](-1); if (opts.onStop) opts.onStop(); };
 
   const STRUM = 0.024;
   const human = amount => (Math.random() * 2 - 1) * amount;
@@ -40,10 +44,10 @@
       midis.forEach((m, i) => A.pluck(m, t0 + i * 0.22 + human(.003), 1.25, { gain: .76 * (1 + human(.035)), preset: opts.preset }));
       const total = midis.length * 0.22 + 1.0;
       chordAt(midis, t0 + total, 2.2, 0.8, null, opts.preset);
-      schedule(() => { if (current === ctl) stop(); }, t0 + total + 2.3);
+      endAt(ctl, t0 + total + 2.3);
     } else {
       chordAt(midis, t0, opts.dur || 2.2, 0.85, null, opts.preset);
-      schedule(() => { if (current === ctl) stop(); }, t0 + (opts.dur || 2.2) + 0.2);
+      endAt(ctl, t0 + (opts.dur || 2.2) + 0.2);
     }
     return ctl;
   }
@@ -51,7 +55,7 @@
   /* 음 목록을 순서대로 (스케일, 아르페지오). opts.inst: 'bass' | 'piano' 면 그 악기 소리 */
   function playNotes(midis, opts) {
     opts = opts || {};
-    const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
+    const ctl = begin({ onStop: stopper(opts, 'onNote') });
     const t0 = A.now() + 0.05; const step = opts.step || 60 / (opts.tempo || 160);
     midis.forEach((m, i) => {
       const accent = i % 4 === 0 ? 1 : i % 2 === 0 ? .94 : .88;
@@ -59,7 +63,7 @@
       if (opts.inst === 'bass') A.bass(m, t, step * .92, { gain: g * 1.1 }); else A.pluck(m, t, step * .92, { gain: g, preset: opts.inst === 'piano' ? 'piano' : undefined });
       if (opts.onNote) schedule(() => opts.onNote(i, m), t0 + i * step);
     });
-    schedule(() => { if (current === ctl) stop(); }, t0 + midis.length * step + 0.3);
+    endAt(ctl, t0 + midis.length * step + 0.3);
     return ctl;
   }
 
@@ -81,7 +85,7 @@
     opts = opts || {};
     const tempo = opts.tempo || 110, beat = 60 / tempo;
     const pat = PATTERNS[opts.style] || PATTERNS.pop;
-    const ctl = begin({ onStop: () => { if (opts.onChord) opts.onChord(-1); if (opts.onStop) opts.onStop(); } });
+    const ctl = begin({ onStop: stopper(opts, 'onChord') });
     ctl.loop = !!opts.loop;
     let passStart = A.now() + 0.08;
     function pass() {
@@ -102,7 +106,7 @@
       });
       const end = t;
       if (ctl.loop) { passStart = end; schedule(pass, end - 0.4); }
-      else schedule(() => { if (current === ctl) stop(); }, end + 0.1);
+      else endAt(ctl, end + 0.1);
     }
     pass();
     return ctl;
@@ -114,7 +118,7 @@
     const feel = opts.feel || lick.feel;
     const tr = opts.transpose || 0;
     const tun = opts.tuning || GH.voicings.STD;
-    const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
+    const ctl = begin({ onStop: stopper(opts, 'onNote') });
     ctl.loop = !!opts.loop;
     let passStart = A.now() + 0.1;
     if (opts.onStart) opts.onStart(passStart, beat);
@@ -143,7 +147,7 @@
       });
       const end = passStart + swingPos(pos) * beat;
       if (ctl.loop) { passStart = end + beat; schedule(pass, end + beat - 0.4); }
-      else schedule(() => { if (current === ctl) stop(); }, end + 0.4);
+      else endAt(ctl, end + 0.4);
     }
     pass();
     return ctl;
@@ -153,7 +157,7 @@
        sound(ev, t, dur, pass, beat) 소리 내기, onNote(i, ev, pass), onPass(pass, tempo), nextTempo(pass, tempo) → 다음 반복 템포, onStop} */
   function playSeq(events, opts) {
     opts = opts || {};
-    const ctl = begin({ onStop: () => { if (opts.onNote) opts.onNote(-1); if (opts.onStop) opts.onStop(); } });
+    const ctl = begin({ onStop: stopper(opts, 'onNote') });
     ctl.loop = !!opts.loop;
     const bpb = opts.beatsPerBar || 4;
     let tempo = opts.tempo || 80, beat = 60 / tempo;
@@ -179,7 +183,7 @@
         passNo++;
         if (opts.nextTempo) { const nt = opts.nextTempo(passNo, tempo); if (nt && nt !== tempo) { tempo = nt; beat = 60 / tempo; } }
         passStart = end; schedule(pass, end - 0.35);
-      } else schedule(() => { if (current === ctl) stop(); }, end + 0.4);
+      } else endAt(ctl, end + 0.4);
     }
     pass();
     return ctl;

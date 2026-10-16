@@ -129,9 +129,9 @@
   }
 
   /* ---- 초안: 이 브라우저에만 남는다 ---- */
-  function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) { return {}; } }
-  function saveDraft(d) { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ kind: d.kind, what: d.what, steps: d.steps, page: d.page, withEnv: d.withEnv })); } catch (e) { /* ignore */ } }
-  function dropDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ } }
+  function loadDraft() { return GH.store.get(DRAFT_KEY, {}); }
+  function saveDraft(d) { GH.store.set(DRAFT_KEY, { kind: d.kind, what: d.what, steps: d.steps, page: d.page, withEnv: d.withEnv }); }
+  function dropDraft() { GH.store.remove(DRAFT_KEY); }
   let st = null, stFrom = null;
 
   GH.pages['/bug'] = {

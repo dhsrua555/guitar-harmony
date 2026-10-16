@@ -17,8 +17,8 @@
 
   let st = null;
   function fresh() { return { bars: 4, res: 2, len: 2, low: 60, notes: EXAMPLES.twinkle.notes.map(([s, l, m]) => ({ s, l, m })), key: 'auto', hr: 1, sevenths: false, pick: 0, voices: { up3: true, down3: false, down6: false, chord: false }, parts: { melody: true, harmony: true, chords: true, bass: true }, comp: 'pad', tempo: 88, loop: true, metronome: false, hints: true }; }
-  function load() { if (st) return st; st = fresh(); try { const raw = JSON.parse(localStorage.getItem(KEY)); if (raw && Array.isArray(raw.notes)) Object.assign(st, raw, { pick: 0 }); } catch (e) { /* ignore */ } return st; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* ignore */ } }
+  function load() { if (st) return st; st = fresh(); const raw = GH.store.get(KEY, null); if (raw && Array.isArray(raw.notes)) Object.assign(st, raw, { pick: 0 }); return st; }
+  function save() { GH.store.set(KEY, st); }
   const spb = () => st.res * 4;                             /* 한 마디 칸 수 */
   const total = () => st.bars * spb();
   const high = () => st.low + 24;

@@ -39,7 +39,7 @@
       list.sort((a, b) => a.difficulty - b.difficulty); /* 쉬운 것부터 */
       const wrap = h('div', { class: 'list' });
       list.forEach(l => wrap.appendChild(h('a', { class: 'list-item', href: A.lickHref(l.id), style: 'color:inherit' },
-        h('div', { style: 'min-width:70px' }, GH.ui.difficulty(l.difficulty)),
+        h('div', { style: 'min-width:70px' }, GH.ui.level(l.difficulty)),
         h('div', { style: 'flex:1' }, h('div', { class: 'title' }, l.ko), h('div', { class: 'desc' }, l.desc),
           h('div', { style: 'margin-top:4px' }, GH.ui.badge(GH.data.lickGenres[l.genre], 'accent'), GH.ui.badge(l.over), GH.ui.badge(GH.scales.get(l.scale).ko), GH.ui.badge(l.tempo + ' BPM'), GH.ui.badge(l.position))))));
       el.appendChild(wrap);
@@ -82,7 +82,7 @@
       }) });
       el.appendChild(h('div', { class: 'breadcrumb' }, h('a', { href: '#/guitar/licks' }, '릭'), ' › ', GH.data.lickGenres[lick.genre]));
       el.appendChild(h('h1', null, lick.ko));
-      el.appendChild(h('div', { class: 'row' }, GH.ui.difficulty(lick.difficulty), GH.ui.badge(GH.data.lickGenres[lick.genre], 'accent'), GH.ui.badge('코드: ' + (chordChanges.length ? chordChanges.map(c => c.symbol).join(' – ') : lick.over)), GH.ui.badge('키 ' + N.pretty(target)), GH.ui.badge(lick.tempo + ' BPM · ' + (lick.feel === 'swing' ? '스윙' : lick.feel === 'shuffle' ? '셔플' : '스트레이트')), GH.ui.badge(lick.position)));
+      el.appendChild(h('div', { class: 'row' }, GH.ui.level(lick.difficulty), GH.ui.badge(GH.data.lickGenres[lick.genre], 'accent'), GH.ui.badge('코드: ' + (chordChanges.length ? chordChanges.map(c => c.symbol).join(' – ') : lick.over)), GH.ui.badge('키 ' + N.pretty(target)), GH.ui.badge(lick.tempo + ' BPM · ' + (lick.feel === 'swing' ? '스윙' : lick.feel === 'shuffle' ? '셔플' : '스트레이트')), GH.ui.badge(lick.position)));
       el.appendChild(h('p', null, lick.desc));
       /* 컨트롤 */
       const tabR = GH.render.tab(displayLick, { transpose: tr });

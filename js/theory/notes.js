@@ -146,8 +146,8 @@
   const SOLFA_KEY = 'gh.solfa';
   const MOVABLE = ['도', '도♯', '레', '미♭', '미', '파', '파♯', '솔', '솔♯', '라', '시♭', '시'];
   const solfa = {
-    get() { try { return localStorage.getItem(SOLFA_KEY) === 'movable' ? 'movable' : 'fixed'; } catch (e) { return 'fixed'; } },
-    set(v) { try { localStorage.setItem(SOLFA_KEY, v === 'movable' ? 'movable' : 'fixed'); } catch (e) { /* ignore */ } },
+    get: () => GH.store.raw(SOLFA_KEY) === 'movable' ? 'movable' : 'fixed',
+    set: v => GH.store.setRaw(SOLFA_KEY, v === 'movable' ? 'movable' : 'fixed'),
     fixed: name => koName(name),
     movable: semis => MOVABLE[mod(semis, 12)],
     OPTIONS: [{ value: 'fixed', label: '고정도 (C = 도)' }, { value: 'movable', label: '이동도 (으뜸음 = 도)' }]
